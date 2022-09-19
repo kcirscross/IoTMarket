@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "550636790404",
+    "project_id": "iotmarket-10501",
+    "storage_bucket": "iotmarket-10501.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:550636790404:android:f29e738374cdaba35e98d1",
+        "android_client_info": {
+          "package_name": "com.iotmarket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQffhHBwQwqLa7c6Gs2pn49mSCZ7LD8HE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

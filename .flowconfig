@@ -23,6 +23,7 @@ node_modules/react-native/interface.js
 node_modules/react-native/flow/
 
 [options]
+module.name_mapper='^~/\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
 emoji=true
 
 exact_by_default=true
