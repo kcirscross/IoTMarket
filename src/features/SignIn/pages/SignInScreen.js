@@ -12,6 +12,17 @@ const SignInScreen = ({ navigation }) => {
     const [password, setPassword] = useState('')
     const [visiblePassword, setVisiblePassword] = useState(false)
 
+    //Handle User State Change
+    useEffect(() => {
+        const unsubscribe = auth().onAuthStateChanged((authUser) => {
+            if (authUser) {
+                navigation.replace('BottomNavBar')
+            }
+        })
+        return unsubscribe
+    }, []);
+
+    //Config for Google Sign In
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
@@ -49,6 +60,7 @@ const SignInScreen = ({ navigation }) => {
                 <KeyboardAvoidingView behavior='padding' style={{
                     ...styles.container,
                     width: '100%',
+                    borderTopLeftRadius
                 }}>
 
                     <Image source={require('~/assets/images/logo.jpg')} />
