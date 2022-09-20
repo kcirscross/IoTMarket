@@ -9,6 +9,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './src/features/Home';
 import { RecoverPasswordScreen } from './src/features/RecoverPassword';
+import BottomNavBar from './src/components/utils/BottomNavBar';
 
 const Stack = createNativeStackNavigator();
 const globalSreenOptions = {
@@ -28,6 +29,7 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="RecoverPassword" component={RecoverPasswordScreen} />
+        <Stack.Screen name="BottomNavBar" component={BottomNavBar} />
       </Stack.Navigator>
     </NavigationContainer>
   );
