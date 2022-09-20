@@ -1,9 +1,45 @@
-import { Image, Keyboard, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TextInput, Touchable, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-import React from 'react'
-import { globalStyles } from '../../../assets/styles/globalStyles'
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, Keyboard, KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Input } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import { globalStyles } from '../../../assets/styles/globalStyles';
 
-const SignInScreen = () => {
+const SignInScreen = ({ navigation }) => {
+
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [visiblePassword, setVisiblePassword] = useState(false)
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
+        });
+    }, []);
+
+    const handleGoogleSignUp = async () => {
+        const { idToken } = await GoogleSignin.signIn()
+        const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+        return auth().signInWithCredential(googleCredential).then(() => {
+            navigation.navigate('Home');
+        });
+    };
+
+    const handleEmailSignIn = async () => {
+
+        if (email == '' || password == '') {
+            Alert.alert('Error', 'Please fill in all field.');
+            return;
+        } else {
+            auth().signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    navigation.navigate('Home')
+                })
+                .catch((error) => alert(error))
+        }
+    };
+
     return (
         <SafeAreaView style={{
             ...globalStyles.container,
@@ -19,27 +55,39 @@ const SignInScreen = () => {
                     <Text style={globalStyles.textTitle}>Welcome to, IoTMarket</Text>
                     <Text>Enter your account to continue.</Text>
 
-                    <View style={{
-                        width: "100%",
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                        <TextInput placeholder='Email'
-                            style={globalStyles.input}
-                        />
+                    <View style={styles.textContainer}>
+                        <Input placeholder='Email'
+                            containerStyle={globalStyles.input}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0
+                            }}
+                            renderErrorMessage={false}
+                            onChangeText={(text) => setEmail(text)} />
 
-                        <TextInput placeholder='Password' secureTextEntry={true}
-                            style={globalStyles.input}
-                        />
+                        <Input placeholder='Password'
+                            secureTextEntry={!visiblePassword}
+                            containerStyle={globalStyles.input}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0
+                            }}
+                            renderErrorMessage={false}
+                            onChangeText={(text) => setPassword(text)}
+                            rightIcon={
+                                <TouchableOpacity onPress={() => setVisiblePassword(!visiblePassword)}>
+                                    {!visiblePassword ? <Icon name='eye-slash' size={20} />
+                                        : <Icon name='eye' size={20} />}
+                                </TouchableOpacity>
+                            } />
 
-                        <TouchableOpacity style={globalStyles.button}>
+                        <TouchableOpacity style={globalStyles.button} onPress={handleEmailSignIn}>
                             <Text style={globalStyles.textButton}>Sign In</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{
                         marginTop: 50,
-                        width: "100%"
+                        width: "100%",
+                        alignItems: 'center'
                     }}>
                         <View style={{
                             flexDirection: 'row',
@@ -56,7 +104,8 @@ const SignInScreen = () => {
                             backgroundColor: '#FF6060',
                             flexDirection: 'row',
                             alignSelf: 'center'
-                        }}>
+                        }}
+                            onPress={handleGoogleSignUp}>
                             <Icon name='google' size={22} style={{
                                 position: 'absolute',
                                 left: 10
@@ -74,13 +123,20 @@ const SignInScreen = () => {
                         }}>
                             <Text>Don't have an account? </Text>
 
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                                 <Text style={{
                                     ...globalStyles.textButton,
                                     color: '#63A1FF'
                                 }}>Sign Up</Text>
                             </TouchableOpacity>
                         </View>
+                        <TouchableOpacity onPress={() => navigation.navigate('RecoverPassword')}>
+                            <Text style={{
+                                ...globalStyles.textButton,
+                                color: '#FF8164',
+                                marginTop: 10
+                            }}>Forgot Password?</Text>
+                        </TouchableOpacity>
                     </View>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
@@ -102,5 +158,11 @@ const styles = StyleSheet.create({
         width: "37%",
         marginHorizontal: 20,
         borderRadius: 10
+    },
+    textContainer: {
+        width: "100%",
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20
     }
 })

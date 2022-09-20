@@ -1,0 +1,3 @@
+const PRIMARY_COLOR = '#63A1FF'
+
+export {PRIMARY_COLOR}

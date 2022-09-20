@@ -15,10 +15,7 @@ const SplashScreen = ({navigation}) => {
             ...globalStyles.container,
             ...styles.container
         }}>
-            <Image source={require('~/assets/images/logo.jpg')}
-                style={styles.logo}
-                resizeMethod='resize'
-                resizeMode='contain' />
+            <Image source={require('~/assets/images/logo.jpg')}/>
         </SafeAreaView>
     )
 }
@@ -30,8 +27,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    logo: {
-        width: 300,
-        height: 300
-    }
 })
