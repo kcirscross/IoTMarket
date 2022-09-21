@@ -2,13 +2,13 @@ import React from 'react';
 import {
   StyleSheet,
 } from 'react-native';
-import { SplashScreen } from "./src/features/Splash"
-import { SignUpScreen } from "./src/features/SignUp"
-import { SignInScreen } from "./src/features/SignIn"
+import { SplashScreen } from "./src/features/Users"
+import { SignUpScreen } from "./src/features/Users"
+import { SignInScreen } from "./src/features/Users"
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeScreen } from './src/features/Home';
-import { RecoverPasswordScreen } from './src/features/RecoverPassword';
+import { RecoverPasswordScreen } from './src/features/Users';
 import BottomNavBar from './src/components/utils/BottomNavBar';
 
 const Stack = createNativeStackNavigator();

@@ -33,7 +33,7 @@ const SignInScreen = ({ navigation }) => {
         const { idToken } = await GoogleSignin.signIn()
         const googleCredential = auth.GoogleAuthProvider.credential(idToken);
         return auth().signInWithCredential(googleCredential).then(() => {
-            navigation.navigate('Home');
+            navigation.replace('BottomNavBar');
         });
     };
 
@@ -45,7 +45,7 @@ const SignInScreen = ({ navigation }) => {
         } else {
             auth().signInWithEmailAndPassword(email, password)
                 .then(() => {
-                    navigation.navigate('Home')
+                    navigation.replace('BottomNavBar')
                 })
                 .catch((error) => alert(error))
         }
@@ -60,7 +60,6 @@ const SignInScreen = ({ navigation }) => {
                 <KeyboardAvoidingView behavior='padding' style={{
                     ...styles.container,
                     width: '100%',
-                    borderTopLeftRadius
                 }}>
 
                     <Image source={require('~/assets/images/logo.jpg')} />

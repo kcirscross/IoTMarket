@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import { HomeScreen } from '~/features/Home';
 import { PRIMARY_COLOR, SECONDARY_COLOR } from '../constants';
 import { ProductsScreen } from '~/features/Products'
-import { UploadProductScreen } from '~/features/UploadProduct'
+import { UploadProductScreen } from '~/features/Products'
 import { ChatsScreen } from '~/features/Chats'
 import { SettingScreen } from '~/features/More'
 
