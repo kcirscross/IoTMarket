@@ -1,3 +1,3 @@
-import HomeScreen from "./pages/HomeScreen"
+import HomeScreen from './pages/HomeScreen'
 
-export { HomeScreen }
+export {HomeScreen}

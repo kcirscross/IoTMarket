@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-import { PRIMARY_COLOR, SECONDARY_COLOR } from "../../components/constants";
+import {StyleSheet} from 'react-native'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../components/constants'
 
 export const globalStyles = StyleSheet.create({
     container: {
@@ -10,17 +10,17 @@ export const globalStyles = StyleSheet.create({
     },
 
     textTitle: {
-        fontWeight: "bold",
+        fontWeight: 'bold',
         fontSize: 22,
-        color: "black"
+        color: 'black',
     },
 
     input: {
         backgroundColor: SECONDARY_COLOR,
-        width: "90%",
+        width: '90%',
         borderRadius: 10,
         paddingHorizontal: 10,
-        marginTop: 10
+        marginTop: 10,
     },
 
     button: {
@@ -30,12 +30,12 @@ export const globalStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         height: 50,
-        marginTop: 10
+        marginTop: 10,
     },
 
     textButton: {
         fontWeight: 'bold',
         fontSize: 18,
-        color: 'white'
-    }
+        color: 'white',
+    },
 })

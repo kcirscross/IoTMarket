@@ -1,4 +1,4 @@
-import ProductsScreen from "./pages/ProductsScreen";
-import UploadProductScreen from "./pages/UploadProductScreen";
+import ProductsScreen from './pages/ProductsScreen'
+import UploadProductScreen from './pages/UploadProductScreen'
 
-export { ProductsScreen, UploadProductScreen };
+export {ProductsScreen, UploadProductScreen}
