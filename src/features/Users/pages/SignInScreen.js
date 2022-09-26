@@ -16,6 +16,9 @@ import {
 import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {globalStyles} from '../../../assets/styles/globalStyles'
+import axios from 'axios'
+import {API_URL} from '../../../components/constants'
+import {AsyncStorage} from 'react-native'
 
 const SignInScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
@@ -52,15 +55,25 @@ const SignInScreen = ({navigation}) => {
 
     const handleEmailSignIn = async () => {
         if (email == '' || password == '') {
-            Alert.alert('Error', 'Please fill in all field.')
-            return
+            return Alert.alert('Error', 'Please fill in all field.')
         } else {
-            auth()
-                .signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    navigation.replace('BottomNavBar')
+            axios({
+                method: 'post',
+                url: `${API_URL}/auth/signin`,
+                data: {
+                    email: email,
+                    password: password,
+                },
+            })
+                .then(res => {
+                    if ((res.data.statusCode = 200)) {
+                        navigation.replace('BottomNavBar')
+                        AsyncStorage.setItem('token', res.data.token)
+                    }
                 })
-                .catch(error => alert(error))
+                .catch(err =>
+                    Alert.alert('Wrong email or password. Please try again.'),
+                )
         }
     }
 

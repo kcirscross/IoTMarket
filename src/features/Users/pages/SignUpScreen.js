@@ -14,10 +14,12 @@ import {
 import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import firebase from '@react-native-firebase/app'
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin} from '@react-native-google-signin/google-signin'
+import axios from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const SignUpScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
@@ -59,36 +61,27 @@ const SignUpScreen = ({navigation}) => {
                 Alert.alert('Error', 'Password is not match.')
                 return
             } else {
-                firebase
-                    .auth()
-                    .createUserWithEmailAndPassword(email, password)
-                    .then(() => {
-                        console.log('User account created & signed in!')
-                        navigation.replace('BottomNavBar')
+                axios({
+                    method: 'post',
+                    url: `${API_URL}/auth/signup`,
+                    data: {
+                        email: email,
+                        password: password,
+                        fullName: fullName,
+                    },
+                })
+                    .then(res => {
+                        if (res.data.statusCode == 200) {
+                            Alert.alert('Sign up successfully.')
+                            AsyncStorage.setItem('token', res.data.token)
+                            navigation.replace('BottomNavBar')
+                        }
                     })
-                    .catch(error => {
-                        if (error.code === 'auth/email-already-in-use') {
-                            Alert.alert(
-                                'Error',
-                                'That email address is already in use!',
-                            )
-                        }
-
-                        if (error.code === 'auth/invalid-email') {
-                            Alert.alert(
-                                'Error',
-                                'That email address is invalid!',
-                            )
-                        }
-
-                        if (error.code === 'auth/weak-password') {
-                            Alert.alert(
-                                'Error',
-                                'You need a stronger password!',
-                            )
-                        }
-                        console.error(error)
-                    })
+                    .catch(err =>
+                        Alert.alert(
+                            'Have something wrong here. Please try again.',
+                        ),
+                    )
             }
         }
     }
