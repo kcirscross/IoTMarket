@@ -19,7 +19,8 @@ import firebase from '@react-native-firebase/app'
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin} from '@react-native-google-signin/google-signin'
 import axios from 'axios'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import {useSelector, useDispatch} from 'react-redux'
+import {signIn} from '../userSlice'
 
 const SignUpScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
@@ -27,6 +28,7 @@ const SignUpScreen = ({navigation}) => {
     const [password, setPassword] = useState('')
     const [rePassword, setRePassword] = useState('')
     const [visiblePassword, setVisiblePassword] = useState(false)
+    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -73,7 +75,10 @@ const SignUpScreen = ({navigation}) => {
                     .then(res => {
                         if (res.data.statusCode == 200) {
                             Alert.alert('Sign up successfully.')
-                            AsyncStorage.setItem('token', res.data.token)
+
+                            const action = signIn(res.data.data)
+                            dispatch(action)
+
                             navigation.replace('BottomNavBar')
                         }
                     })
@@ -92,7 +97,7 @@ const SignUpScreen = ({navigation}) => {
         return auth()
             .signInWithCredential(googleCredential)
             .then(() => {
-                navigation.navigate('Home')
+                navigation.navigate('BottomNavBar')
             })
     }
 

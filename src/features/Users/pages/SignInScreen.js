@@ -18,12 +18,15 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import axios from 'axios'
 import {API_URL} from '../../../components/constants'
-import {AsyncStorage} from 'react-native'
+import {useSelector, useDispatch} from 'react-redux'
+import {signIn} from '../userSlice'
 
 const SignInScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [visiblePassword, setVisiblePassword] = useState(false)
+    const currentUser = useSelector(state => state.user)
+    const dispatch = useDispatch()
 
     //Handle User State Change
     useEffect(() => {
@@ -67,13 +70,15 @@ const SignInScreen = ({navigation}) => {
             })
                 .then(res => {
                     if ((res.data.statusCode = 200)) {
+                        const action = signIn(res.data.data)
+                        dispatch(action)
                         navigation.replace('BottomNavBar')
-                        AsyncStorage.setItem('token', res.data.token)
                     }
                 })
-                .catch(err =>
-                    Alert.alert('Wrong email or password. Please try again.'),
-                )
+                .catch(err => {
+                    console.log(err.message)
+                    Alert.alert('Wrong email or password. Please try again.')
+                })
         }
     }
 
