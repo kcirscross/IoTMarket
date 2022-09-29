@@ -38,4 +38,9 @@ export const globalStyles = StyleSheet.create({
         fontSize: 18,
         color: 'white',
     },
+    cardContainer: {
+        margin: 0,
+        padding: 0,
+        borderRadius: 10,
+    },
 })

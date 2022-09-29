@@ -1,5 +1,6 @@
 import auth from '@react-native-firebase/auth'
 import {GoogleSignin} from '@react-native-google-signin/google-signin'
+import axios from 'axios'
 import React, {useEffect, useState} from 'react'
 import {
     Alert,
@@ -15,10 +16,9 @@ import {
 } from 'react-native'
 import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import axios from 'axios'
 import {API_URL} from '../../../components/constants'
-import {useSelector, useDispatch} from 'react-redux'
 import {signIn} from '../userSlice'
 
 const SignInScreen = ({navigation}) => {
