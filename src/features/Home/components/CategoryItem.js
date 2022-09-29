@@ -44,11 +44,6 @@ const CategoryItem = data => {
 export default CategoryItem
 
 const styles = StyleSheet.create({
-    cardContainer: {
-        margin: 0,
-        padding: 0,
-    },
-
     categoryItem: {
         flexDirection: 'column',
         width: 90,

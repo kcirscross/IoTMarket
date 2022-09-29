@@ -12,7 +12,8 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
 import {Button, Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {CategoryItem, ProductItem} from '../components'
+import {CategoryItem} from '../components'
+import {ProductItem} from '../../Products/components'
 
 const HomeScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -199,7 +200,11 @@ const HomeScreen = ({navigation}) => {
                             paddingVertical: 5,
                         }}>
                         {fakeProducts.map((data, index) => (
-                            <ProductItem key={index} data={data} />
+                            <ProductItem
+                                key={index}
+                                data={data}
+                                navigation={navigation}
+                            />
                         ))}
                     </ScrollView>
                 </View>

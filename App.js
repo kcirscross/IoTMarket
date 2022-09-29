@@ -10,6 +10,8 @@ import {RecoverPasswordScreen} from './src/features/Users'
 import BottomNavBar from './src/components/utils/BottomNavBar'
 import {store} from './store'
 import {Provider} from 'react-redux'
+import {ProductItem} from './src/features/Products/components'
+import {ProductDetail} from './src/features/Products'
 
 const Stack = createNativeStackNavigator()
 const globalSreenOptions = {
@@ -34,6 +36,11 @@ export default function App() {
                     <Stack.Screen
                         name="BottomNavBar"
                         component={BottomNavBar}
+                    />
+                    <Stack.Screen name="ProductItem" component={ProductItem} />
+                    <Stack.Screen
+                        name="ProductDetail"
+                        component={ProductDetail}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

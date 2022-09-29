@@ -40,7 +40,8 @@ export const globalStyles = StyleSheet.create({
     },
     cardContainer: {
         margin: 0,
-        padding: 0,
+        paddingLeft: 5,
+        paddingRight: 5,
         borderRadius: 10,
     },
 })
