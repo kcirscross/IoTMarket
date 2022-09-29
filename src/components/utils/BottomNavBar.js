@@ -2,23 +2,19 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
 import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {HomeScreen} from '~/features/Home'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../constants'
-import {ProductsScreen} from '~/features/Products'
-import {UploadProductScreen} from '~/features/Products'
 import {ChatsScreen} from '~/features/Chats'
+import {HomeScreen} from '~/features/Home'
 import {SettingScreen} from '~/features/More'
+import {ProductsScreen, UploadProductScreen} from '~/features/Products'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../constants'
 
 const Tab = createBottomTabNavigator()
 
 const screenOptions = () => ({
     tabBarStyle: {
-        position: 'absolute',
-        bottom: 10,
         backgroundColor: SECONDARY_COLOR,
         height: 50,
         justifyContent: 'center',
-        ...styles.shadow,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
     },
@@ -39,7 +35,6 @@ const CustomTabBarButton = ({children, onPress}) => (
             top: -15,
             justifyContent: 'center',
             alignItems: 'center',
-            ...styles.shadow,
         }}
         onPress={onPress}>
         <View
@@ -66,8 +61,9 @@ const BottomNavBar = () => {
                         <View style={styles.viewContainer}>
                             <Icon
                                 name="home"
-                                size={24}
-                                color={focused ? PRIMARY_COLOR : 'black'}
+                                size={focused ? 36 : 24}
+                                color={focused ? PRIMARY_COLOR : '#999999'}
+                                solid={false}
                             />
                         </View>
                     ),
@@ -81,8 +77,8 @@ const BottomNavBar = () => {
                         <View style={styles.viewContainer}>
                             <Icon
                                 name="store"
-                                size={24}
-                                color={focused ? PRIMARY_COLOR : 'black'}
+                                size={focused ? 36 : 24}
+                                color={focused ? PRIMARY_COLOR : '#999999'}
                             />
                         </View>
                     ),
@@ -96,7 +92,7 @@ const BottomNavBar = () => {
                         <Icon
                             name="plus-circle"
                             size={62}
-                            color={focused ? PRIMARY_COLOR : 'black'}
+                            color={PRIMARY_COLOR}
                         />
                     ),
                     tabBarButton: props => <CustomTabBarButton {...props} />,
@@ -109,8 +105,8 @@ const BottomNavBar = () => {
                     tabBarIcon: ({focused}) => (
                         <Icon
                             name="comment-alt"
-                            size={24}
-                            color={focused ? PRIMARY_COLOR : 'black'}
+                            size={focused ? 36 : 24}
+                            color={focused ? PRIMARY_COLOR : '#999999'}
                             solid={true}
                         />
                     ),
@@ -123,8 +119,8 @@ const BottomNavBar = () => {
                     tabBarIcon: ({focused}) => (
                         <Icon
                             name="cog"
-                            size={24}
-                            color={focused ? PRIMARY_COLOR : 'black'}
+                            size={focused ? 36 : 24}
+                            color={focused ? PRIMARY_COLOR : '#999999'}
                         />
                     ),
                 }}
@@ -136,16 +132,6 @@ const BottomNavBar = () => {
 export default BottomNavBar
 
 const styles = StyleSheet.create({
-    shadow: {
-        shadowColor: '#7F5DF0',
-        shadowOffset: {
-            width: 0,
-            height: 10,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.5,
-        elevation: 5,
-    },
     viewContainer: {
         alignItems: 'center',
         justifyContent: 'center',
