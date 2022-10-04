@@ -143,7 +143,7 @@ const HomeScreen = ({navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Ads view */}
                 <TouchableOpacity style={styles.adsView}>
                     <Text

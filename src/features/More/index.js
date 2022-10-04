@@ -1,3 +1,3 @@
-import SettingScreen from './pages/SettingScreen'
+import MoreScreen from './pages/MoreScreen'
 
-export {SettingScreen}
+export {MoreScreen}

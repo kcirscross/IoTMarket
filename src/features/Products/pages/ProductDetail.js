@@ -1,8 +1,8 @@
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
 import React, {useLayoutEffect} from 'react'
-import {PRIMARY_COLOR} from '../../../components/constants'
-import {globalStyles} from '../../../assets/styles/globalStyles'
+import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
 import {Avatar, Card} from 'react-native-elements'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {PRIMARY_COLOR} from '../../../components/constants'
 import BottomMenuBar from '../components/BottomMenuBar'
 
 const ProductDetail = ({navigation, route}) => {

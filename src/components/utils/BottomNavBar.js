@@ -4,7 +4,7 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {ChatsScreen} from '~/features/Chats'
 import {HomeScreen} from '~/features/Home'
-import {SettingScreen} from '~/features/More'
+import {MoreScreen} from '~/features/More'
 import {ProductsScreen, UploadProductScreen} from '~/features/Products'
 import {PRIMARY_COLOR, SECONDARY_COLOR} from '../constants'
 
@@ -114,7 +114,7 @@ const BottomNavBar = () => {
             />
             <Tab.Screen
                 name="More"
-                component={SettingScreen}
+                component={MoreScreen}
                 options={{
                     tabBarIcon: ({focused}) => (
                         <Icon

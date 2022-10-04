@@ -1,5 +1,8 @@
 import auth from '@react-native-firebase/auth'
-import {GoogleSignin} from '@react-native-google-signin/google-signin'
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+} from '@react-native-google-signin/google-signin'
 import axios from 'axios'
 import React, {useEffect, useState} from 'react'
 import {
@@ -28,32 +31,38 @@ const SignInScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
 
-    //Handle User State Change
-    useEffect(() => {
-        const unsubscribe = auth().onAuthStateChanged(authUser => {
-            if (authUser) {
-                navigation.replace('BottomNavBar')
-            }
-        })
-        return unsubscribe
-    }, [])
-
     //Config for Google Sign In
     useEffect(() => {
         GoogleSignin.configure({
             webClientId:
                 '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
         })
+
+        GoogleSignin.signOut()
     }, [])
 
     const handleGoogleSignUp = async () => {
-        const {idToken} = await GoogleSignin.signIn()
-        const googleCredential = auth.GoogleAuthProvider.credential(idToken)
-        return auth()
-            .signInWithCredential(googleCredential)
-            .then(() => {
-                navigation.replace('BottomNavBar')
+        const {user} = await GoogleSignin.signIn()
+
+        axios({
+            method: 'post',
+            url: `${API_URL}/auth/google`,
+            data: {
+                email: user.email,
+                fullName: user.name,
+            },
+        })
+            .then(res => {
+                if (res.data.statusCode == 200) {
+                    const action = signIn(res.data.data)
+                    dispatch(action)
+
+                    navigation.replace('BottomNavBar')
+                }
             })
+            .catch(err =>
+                Alert.alert('Have something wrong here. Please try again.'),
+            )
     }
 
     const handleEmailSignIn = async () => {
@@ -159,27 +168,24 @@ const SignInScreen = ({navigation}) => {
                             <View style={styles.horizontalLine} />
                         </View>
 
-                        <TouchableOpacity
+                        <View
                             style={{
-                                ...globalStyles.button,
-                                backgroundColor: '#FF6060',
-                                flexDirection: 'row',
-                                alignSelf: 'center',
-                            }}
-                            onPress={handleGoogleSignUp}>
-                            <Icon
-                                name="google"
-                                size={22}
+                                borderRadius: 10,
+                                width: '100%',
+                            }}>
+                            <GoogleSigninButton
                                 style={{
-                                    position: 'absolute',
-                                    left: 10,
+                                    width: '90%',
+                                    height: 60,
+                                    alignSelf: 'center',
+                                    borderRadius: 10,
+                                    marginTop: 10,
                                 }}
-                                color="white"
+                                size={GoogleSigninButton.Size.Wide}
+                                color={GoogleSigninButton.Color.Dark}
+                                onPress={handleGoogleSignUp}
                             />
-                            <Text style={globalStyles.textButton}>
-                                Continue with Google
-                            </Text>
-                        </TouchableOpacity>
+                        </View>
 
                         <View
                             style={{

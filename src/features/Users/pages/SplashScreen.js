@@ -1,5 +1,5 @@
-import {Image, SafeAreaView, StyleSheet, Text, View} from 'react-native'
 import React, {useEffect} from 'react'
+import {Image, SafeAreaView, StyleSheet} from 'react-native'
 import {globalStyles} from '~/assets/styles/globalStyles'
 
 const SplashScreen = ({navigation}) => {

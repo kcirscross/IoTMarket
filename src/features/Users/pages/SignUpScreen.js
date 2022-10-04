@@ -17,7 +17,10 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import firebase from '@react-native-firebase/app'
 import auth from '@react-native-firebase/auth'
-import {GoogleSignin} from '@react-native-google-signin/google-signin'
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+} from '@react-native-google-signin/google-signin'
 import axios from 'axios'
 import {useSelector, useDispatch} from 'react-redux'
 import {signIn} from '../userSlice'
@@ -92,13 +95,29 @@ const SignUpScreen = ({navigation}) => {
     }
 
     const handleGoogleSignUp = async () => {
-        const {idToken} = await GoogleSignin.signIn()
-        const googleCredential = auth.GoogleAuthProvider.credential(idToken)
-        return auth()
-            .signInWithCredential(googleCredential)
-            .then(() => {
-                navigation.navigate('BottomNavBar')
+        const {user} = await GoogleSignin.signIn()
+
+        axios({
+            method: 'post',
+            url: `${API_URL}/auth/google`,
+            data: {
+                email: user.email,
+                fullName: user.name,
+            },
+        })
+            .then(res => {
+                if (res.data.statusCode == 200) {
+                    Alert.alert('Sign up successfully.')
+
+                    const action = signIn(res.data.data)
+                    dispatch(action)
+
+                    navigation.replace('BottomNavBar')
+                }
             })
+            .catch(err =>
+                Alert.alert('Have something wrong here. Please try again.'),
+            )
     }
 
     return (
@@ -203,27 +222,20 @@ const SignUpScreen = ({navigation}) => {
                             <View style={styles.horizontalLine} />
                         </View>
 
-                        <TouchableOpacity
-                            style={{
-                                ...globalStyles.button,
-                                backgroundColor: '#FF6060',
-                                flexDirection: 'row',
-                                alignSelf: 'center',
-                            }}
-                            onPress={handleGoogleSignUp}>
-                            <Icon
-                                name="google"
-                                size={22}
+                        <View style={{borderRadius: 10}}>
+                            <GoogleSigninButton
                                 style={{
-                                    position: 'absolute',
-                                    left: 10,
+                                    width: '90%',
+                                    height: 60,
+                                    alignSelf: 'center',
+                                    borderRadius: 10,
+                                    marginTop: 10,
                                 }}
-                                color="white"
+                                size={GoogleSigninButton.Size.Wide}
+                                color={GoogleSigninButton.Color.Dark}
+                                onPress={handleGoogleSignUp}
                             />
-                            <Text style={globalStyles.textButton}>
-                                Continue with Google
-                            </Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>

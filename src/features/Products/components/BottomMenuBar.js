@@ -81,6 +81,7 @@ const BottomMenuBar = () => {
                     backgroundColor: PRIMARY_COLOR,
                     justifyContent: 'center',
                     alignItems: 'center',
+                    borderTopEndRadius: 10,
                 }}>
                 <Text
                     style={{
