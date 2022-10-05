@@ -1,5 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import React from 'react'
+import React, {useLayoutEffect} from 'react'
 import {
     Alert,
     Image,
@@ -13,12 +14,32 @@ import {Avatar} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useSelector, useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL} from '../../../components/constants'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import {signOut} from '../../Users/userSlice'
 
 const MoreScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
+
+    const deleteRememberAccount = async () => {
+        try {
+            await AsyncStorage.removeItem('account')
+            await AsyncStorage.removeItem('password')
+            await AsyncStorage.removeItem('accountType')
+        } catch (error) {
+            console.log('Error when delete remember account', error)
+        }
+    }
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: true,
+            headerStyle: {
+                backgroundColor: PRIMARY_COLOR,
+            },
+            headerTitle: '',
+        })
+    }, [])
 
     const handleSignOutClick = () => {
         Alert.alert('Confirm Sign Out?', '', [
@@ -34,6 +55,9 @@ const MoreScreen = ({navigation}) => {
                     }).then(res => {
                         const action = signOut()
                         res.status == 200 && dispatch(action)
+
+                        deleteRememberAccount()
+
                         navigation.navigate('SignIn')
                     })
                 },
@@ -109,7 +133,9 @@ const MoreScreen = ({navigation}) => {
                 <Text style={styles.textStyle}>Favorite Products</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('ChangeInfo')}
+                style={styles.container}>
                 <Icon
                     name="info-circle"
                     color={'#45B8FE'}

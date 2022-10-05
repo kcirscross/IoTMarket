@@ -1,3 +1,4 @@
+import React, {useLayoutEffect} from 'react'
 import {
     SafeAreaView,
     ScrollView,
@@ -6,14 +7,13 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
-import React, {useEffect, useLayoutEffect} from 'react'
+import {Input} from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
-import {Button, Input} from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import {CategoryItem} from '../components'
 import {ProductItem} from '../../Products/components'
+import {CategoryItem} from '../components'
 
 const HomeScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import auth from '@react-native-firebase/auth'
 import {
     GoogleSignin,
@@ -30,6 +31,7 @@ const SignInScreen = ({navigation}) => {
     const [visiblePassword, setVisiblePassword] = useState(false)
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
+    const [rememberCheckbox, setRememberCheckbox] = useState(false)
 
     //Config for Google Sign In
     useEffect(() => {
@@ -40,6 +42,17 @@ const SignInScreen = ({navigation}) => {
 
         GoogleSignin.signOut()
     }, [])
+
+    //Function Remember Account
+    const rememberAccount = async (storeEmail, storePassword, accountType) => {
+        try {
+            await AsyncStorage.setItem('account', storeEmail)
+            await AsyncStorage.setItem('password', storePassword)
+            await AsyncStorage.setItem('accountType', accountType)
+        } catch (error) {
+            console.log('Error when storing data', error)
+        }
+    }
 
     const handleGoogleSignUp = async () => {
         const {user} = await GoogleSignin.signIn()
@@ -56,6 +69,8 @@ const SignInScreen = ({navigation}) => {
                 if (res.data.statusCode == 200) {
                     const action = signIn(res.data.data)
                     dispatch(action)
+
+                    rememberAccount(user.email, user.name, 'Google')
 
                     navigation.replace('BottomNavBar')
                 }
@@ -81,6 +96,10 @@ const SignInScreen = ({navigation}) => {
                     if ((res.data.statusCode = 200)) {
                         const action = signIn(res.data.data)
                         dispatch(action)
+
+                        rememberCheckbox &&
+                            rememberAccount(email, password, 'Email')
+
                         navigation.replace('BottomNavBar')
                     }
                 })
@@ -143,6 +162,34 @@ const SignInScreen = ({navigation}) => {
                                 </TouchableOpacity>
                             }
                         />
+
+                        <TouchableOpacity
+                            onPress={() =>
+                                setRememberCheckbox(!rememberCheckbox)
+                            }
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            {!rememberCheckbox ? (
+                                <Icon name="square" size={24} color="black" />
+                            ) : (
+                                <Icon
+                                    name="check-square"
+                                    size={24}
+                                    color="black"
+                                />
+                            )}
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    marginLeft: 10,
+                                    marginRight: 160,
+                                    marginVertical: 10,
+                                }}>
+                                Remember Account
+                            </Text>
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             style={globalStyles.button}
