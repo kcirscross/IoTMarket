@@ -24,6 +24,7 @@ import {
 import axios from 'axios'
 import {useSelector, useDispatch} from 'react-redux'
 import {signIn} from '../userSlice'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const SignUpScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
@@ -32,6 +33,14 @@ const SignUpScreen = ({navigation}) => {
     const [rePassword, setRePassword] = useState('')
     const [visiblePassword, setVisiblePassword] = useState(false)
     const dispatch = useDispatch()
+
+    const storeToken = async token => {
+        try {
+            await AsyncStorage.setItem('token', token)
+        } catch (error) {
+            console.log('Error when store token.', error)
+        }
+    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -79,6 +88,8 @@ const SignUpScreen = ({navigation}) => {
                         if (res.data.statusCode == 200) {
                             Alert.alert('Sign up successfully.')
 
+                            storeToken(res.data.token)
+
                             const action = signIn(res.data.data)
                             dispatch(action)
 
@@ -108,6 +119,8 @@ const SignUpScreen = ({navigation}) => {
             .then(res => {
                 if (res.data.statusCode == 200) {
                     Alert.alert('Sign up successfully.')
+
+                    storeToken(res.data.token)
 
                     const action = signIn(res.data.data)
                     dispatch(action)

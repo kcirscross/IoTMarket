@@ -1,21 +1,65 @@
-import React, {useLayoutEffect} from 'react'
-import {SafeAreaView, StyleSheet, TouchableOpacity, View} from 'react-native'
-import {Avatar, Input} from 'react-native-elements'
-import {useSelector} from 'react-redux'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import {useState} from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+import React, {useLayoutEffect, useState} from 'react'
+import {useEffect} from 'react'
+import {Alert} from 'react-native'
 import {Text} from 'react-native'
-import {TextInput} from 'react-native'
-import {KeyboardAvoidingView} from 'react-native'
-import {TouchableWithoutFeedback} from 'react-native'
-import {Keyboard} from 'react-native'
+import {
+    Keyboard,
+    KeyboardAvoidingView,
+    SafeAreaView,
+    StyleSheet,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from 'react-native'
+import {Avatar, Input} from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome5'
+import {useSelector, useDispatch} from 'react-redux'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {
+    API_URL,
+    PRIMARY_COLOR,
+    REGEX_PHONE_NUMBER,
+} from '../../../components/constants'
+import {updatePhoneNumber} from '../userSlice'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
-    const [change, setChange] = useState(false)
-    const [fullName, setFullName] = useState('')
+    const dispatch = useDispatch()
+    const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
+
+    const updatePhone = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/changephone`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    phoneNumber: phoneNumber,
+                },
+            }).then(res => {
+                if (res.status == 200) {
+                    const action = updatePhoneNumber(res.data.newPhoneNumber)
+                    dispatch(action)
+                }
+            })
+        } catch (error) {
+            console.log('Error when get token.', error.message)
+        }
+    }
+
+    const handleChangePhoneNumberClick = () => {
+        //Validate Phone Number
+        if (phoneNumber == '' || !REGEX_PHONE_NUMBER.test(phoneNumber)) {
+            return Alert.alert('Phone number is invalid.')
+        } else {
+            updatePhone()
+        }
+    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -48,7 +92,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             <Avatar
                                 rounded
                                 source={{
-                                    uri: currentUser.avatar,
+                                    uri: 'https://firebasestorage.googleapis.com/v0/b/iotmarket-10501.appspot.com/o/logo.jpg?alt=media&token=ed49f7ba-f12d-469f-9467-974ddbdbaf74',
                                 }}
                                 size={64}
                             />
@@ -63,37 +107,70 @@ const ChangeInfoScreen = ({navigation}) => {
                                 }}
                             />
                         </TouchableOpacity>
-                        <View style={{flexDirection: 'row', flex: 1}}>
-                            <View
-                                style={{
-                                    marginLeft: 10,
-                                    width: '100%',
-                                }}>
-                                <Text
-                                    style={{
-                                        color: 'black',
-                                    }}>
-                                    Full Name
-                                </Text>
-                                <Input
-                                    placeholder="Full Name"
-                                    containerStyle={globalStyles.input}
-                                    defaultValue={currentUser.fullName}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
-                                    renderErrorMessage={false}
-                                    onChangeText={text => setFullName(text)}
-                                    rightIcon={
-                                        <Icon
-                                            name="pen"
-                                            size={24}
-                                            color="black"
-                                        />
-                                    }
-                                />
-                            </View>
+
+                        <View
+                            style={{
+                                marginLeft: 10,
+                                flex: 1,
+                            }}>
+                            <Input
+                                placeholder="Full Name"
+                                containerStyle={globalStyles.input}
+                                defaultValue={currentUser.fullName}
+                                label="Full Name"
+                                labelStyle={styles.labelStyle}
+                                inputContainerStyle={{
+                                    borderBottomWidth: 0,
+                                }}
+                                renderErrorMessage={false}
+                                editable={false}
+                            />
                         </View>
+                    </View>
+
+                    <View
+                        style={{
+                            marginLeft: 10,
+                            width: '100%',
+                        }}>
+                        <Input
+                            placeholder="Phone Number"
+                            containerStyle={globalStyles.input}
+                            defaultValue={currentUser.phoneNumber}
+                            label="Phone Number"
+                            labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
+                            }}
+                            keyboardType={'phone-pad'}
+                            renderErrorMessage={
+                                !REGEX_PHONE_NUMBER.test(phoneNumber)
+                            }
+                            errorMessage="This field must filled in and have valid phone number."
+                            errorStyle={{
+                                display: !REGEX_PHONE_NUMBER.test(phoneNumber)
+                                    ? 'flex'
+                                    : 'none',
+                            }}
+                            onChangeText={text => setPhoneNumber(text)}
+                            rightIcon={
+                                phoneNumber === currentUser.phoneNumber ? (
+                                    <Icon name="pen" size={20} color="black" />
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={handleChangePhoneNumberClick}
+                                        style={{
+                                            ...globalStyles.button,
+                                            width: 60,
+                                            height: 35,
+                                        }}>
+                                        <Text style={styles.textButton}>
+                                            SAVE
+                                        </Text>
+                                    </TouchableOpacity>
+                                )
+                            }
+                        />
                     </View>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
@@ -103,4 +180,14 @@ const ChangeInfoScreen = ({navigation}) => {
 
 export default ChangeInfoScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    labelStyle: {
+        color: 'black',
+        fontWeight: 'normal',
+    },
+
+    textButton: {
+        color: 'white',
+        fontSize: 16,
+    },
+})

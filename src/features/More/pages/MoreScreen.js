@@ -26,6 +26,7 @@ const MoreScreen = ({navigation}) => {
             await AsyncStorage.removeItem('account')
             await AsyncStorage.removeItem('password')
             await AsyncStorage.removeItem('accountType')
+            await AsyncStorage.removeItem('token')
         } catch (error) {
             console.log('Error when delete remember account', error)
         }

@@ -33,6 +33,14 @@ const SignInScreen = ({navigation}) => {
     const dispatch = useDispatch()
     const [rememberCheckbox, setRememberCheckbox] = useState(false)
 
+    const storeToken = async token => {
+        try {
+            await AsyncStorage.setItem('token', token)
+        } catch (error) {
+            console.log('Error when store token.', error)
+        }
+    }
+
     //Config for Google Sign In
     useEffect(() => {
         GoogleSignin.configure({
@@ -67,6 +75,8 @@ const SignInScreen = ({navigation}) => {
         })
             .then(res => {
                 if (res.data.statusCode == 200) {
+                    storeToken(res.data.token)
+
                     const action = signIn(res.data.data)
                     dispatch(action)
 
@@ -94,6 +104,8 @@ const SignInScreen = ({navigation}) => {
             })
                 .then(res => {
                     if ((res.data.statusCode = 200)) {
+                        storeToken(res.data.token)
+
                         const action = signIn(res.data.data)
                         dispatch(action)
 
