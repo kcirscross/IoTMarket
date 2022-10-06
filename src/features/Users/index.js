@@ -4,6 +4,7 @@ import RecoverPasswordScreen from './pages/RecoverPasswordScreen'
 import SignInScreen from './pages/SignInScreen'
 import SignUpScreen from './pages/SignUpScreen'
 import SplashScreen from './pages/SplashScreen'
+import ChangeAddressScreen from './pages/ChangeAddressScreen'
 
 export {
     SignInScreen,
@@ -12,4 +13,5 @@ export {
     RecoverPasswordScreen,
     ProfileScreen,
     ChangeInfoScreen,
+    ChangeAddressScreen,
 }

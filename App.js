@@ -9,6 +9,7 @@ import MoreScreen from './src/features/More/pages/MoreScreen'
 import {ProductDetail} from './src/features/Products'
 import {ProductItem} from './src/features/Products/components'
 import {
+    ChangeAddressScreen,
     ChangeInfoScreen,
     ProfileScreen,
     RecoverPasswordScreen,
@@ -52,6 +53,10 @@ export default function App() {
                     <Stack.Screen
                         name="ChangeInfo"
                         component={ChangeInfoScreen}
+                    />
+                    <Stack.Screen
+                        name="ChangeAddress"
+                        component={ChangeAddressScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
