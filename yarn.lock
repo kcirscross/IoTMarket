@@ -1307,10 +1307,10 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/eslint-plugin/-/eslint-plugin-1.2.0.tgz#7d6d789ae8edf73dc9bed1246cd48277edea8066"
   integrity sha512-o6aam+0Ug1xGK3ABYmBm0B1YuEKfM/5kaoZO0eHbZwSpw9UzDX4G5y4Nx/K20FHqUmJHkZmLvOUFYwN4N+HqKA==
 
-"@react-native-firebase/app@^15.6.0":
-  version "15.6.0"
-  resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-15.6.0.tgz#3fb00ab92fd269fe411cd1cc88f27e785e1bd0b2"
-  integrity sha512-Lae6GL79y4FVN7E8uQXUbUW+3KzJvhKdBQoVnjMZukodWDRtLifr1DDykuICFlYL1/Pjr1AWxfcZAgwt/zo5Iw==
+"@react-native-firebase/app@^15.7.0":
+  version "15.7.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/app/-/app-15.7.0.tgz#0649cf398b7675b67d75f07756b51918ae20f450"
+  integrity sha512-ZyrvewIkQC0UHDuHxXyc25/V8xYOa4xlukIHIbtJeBzVCCyVgZxF4Svyqs+CosqbHOuwWnmg+AW0rMvjrRcdmw==
   dependencies:
     "@expo/config-plugins" "^5.0.1"
     opencollective-postinstall "^2.0.1"
@@ -1320,6 +1320,11 @@
   version "15.6.0"
   resolved "https://registry.yarnpkg.com/@react-native-firebase/auth/-/auth-15.6.0.tgz#2939266453150e5ea84c6925ae64d67790f7a40d"
   integrity sha512-sw+GleRtlwsJmaQari1l6xAnoaXbfNDPWwn3FioniJe5csGLRihYcK+kvkzkQYjayN7k57x9RQP4EBhcNwLuJA==
+
+"@react-native-firebase/storage@^15.7.0":
+  version "15.7.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/storage/-/storage-15.7.0.tgz#754980c43b4c09508719a27f9a3e0a60bbb4c20c"
+  integrity sha512-9+r5KOiVuHMh5MKf2w10MfSoTtUQpGW5Nc2nZXb6AU+g6Bm47zjBuObXd2kfjfx+2WxlbjwYxurYiP8eczJNJA==
 
 "@react-native-google-signin/google-signin@^8.0.0":
   version "8.0.0"

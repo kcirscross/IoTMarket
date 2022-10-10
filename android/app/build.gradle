@@ -260,6 +260,7 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation 'com.google.firebase:firebase-auth:21.0.8'
+    implementation 'com.google.firebase:firebase-storage:20.0.2'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'

@@ -23,7 +23,8 @@ import {
     REGEX_PHONE_NUMBER,
 } from '../../../components/constants'
 import {updateGender, updatePhoneNumber} from '../userSlice'
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
+import {launchImageLibrary, launchCamera} from 'react-native-image-picker'
+import storage from '@react-native-firebase/storage'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -31,8 +32,9 @@ const ChangeInfoScreen = ({navigation}) => {
     const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
     const [modalGenderVisible, setModalGenderVisible] = useState(false)
     const [modalAvatarVisible, setModalAvatarVisible] = useState(false)
+    const [uriAvatar, setUriAvatar] = useState(currentUser.avatar)
 
-    console.log(currentUser)
+    // console.log(currentUser)
 
     const updatePhone = async () => {
         try {
@@ -107,8 +109,41 @@ const ChangeInfoScreen = ({navigation}) => {
     }, [])
 
     const pickImageFromGallery = async () => {
-        const result = await launchImageLibrary({mediaType: 'mixed'})
-        console.log(result)
+        launchImageLibrary(
+            {
+                mediaType: 'photo',
+                includeBase64: false,
+                maxHeight: 200,
+                maxWidth: 200,
+            },
+            res => {
+                console.log(res)
+            },
+        )
+    }
+
+    const pickImageFromCamera = () => {
+        storage()
+            .ref('logo.jpg')
+            .getDownloadURL(url => console.log(url))
+
+        // launchCamera(
+        //     {
+        //         mediaType: 'photo',
+        //         includeBase64: false,
+        //         maxHeight: 200,
+        //         maxWidth: 200,
+        //     },
+        //     res => {
+        //         let uploadAvatarPath = `users/${currentUser.email}/avatar/${res.assets[0].fileName}`
+        //         const task = storage()
+        //             .ref(uploadAvatarPath)
+        //             .putFile(res.assets[0].uri)
+        //         task.then(() => {
+        //             console.log('Updated Avatar.')
+        //         })
+        //     },
+        // )
     }
 
     return (
@@ -155,6 +190,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             <TouchableOpacity
                                 onPress={() => {
                                     setModalAvatarVisible(false)
+                                    pickImageFromCamera()
                                 }}
                                 style={styles.touchModalView}>
                                 <Text
@@ -179,7 +215,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             <Avatar
                                 rounded
                                 source={{
-                                    uri: 'https://firebasestorage.googleapis.com/v0/b/iotmarket-10501.appspot.com/o/logo.jpg?alt=media&token=ed49f7ba-f12d-469f-9467-974ddbdbaf74',
+                                    uri: uriAvatar,
                                 }}
                                 size={64}
                                 avatarStyle={{
