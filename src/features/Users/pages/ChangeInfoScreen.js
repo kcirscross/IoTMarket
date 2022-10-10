@@ -4,6 +4,7 @@ import React, {useLayoutEffect, useState} from 'react'
 import {useEffect} from 'react'
 import {Alert} from 'react-native'
 import {Text} from 'react-native'
+import {Modal} from 'react-native'
 import {
     Keyboard,
     KeyboardAvoidingView,
@@ -21,13 +22,17 @@ import {
     API_URL,
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
+    SECONDARY_COLOR,
 } from '../../../components/constants'
-import {updatePhoneNumber} from '../userSlice'
+import {updatePhoneNumber, updateGender} from '../userSlice'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
+    const [modalVisible, setModalVisible] = useState(false)
+
+    console.log(currentUser)
 
     const updatePhone = async () => {
         try {
@@ -61,6 +66,34 @@ const ChangeInfoScreen = ({navigation}) => {
         }
     }
 
+    const changeGender = async gender => {
+        //Validate Gender
+        if (gender != '') {
+            try {
+                const token = await AsyncStorage.getItem('token')
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/changegender`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                    data: {
+                        gender: gender,
+                    },
+                }).then(res => {
+                    if (res.status == 200) {
+                        const action = updateGender(res.data.newGender)
+                        dispatch(action)
+
+                        Alert.alert('Update successfully.')
+                    }
+                })
+            } catch (error) {
+                console.log('Error: ', error.message)
+            }
+        }
+    }
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: '',
@@ -74,7 +107,11 @@ const ChangeInfoScreen = ({navigation}) => {
     }, [])
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalVisible ? 0.5 : 1,
+            }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
                     behavior="padding"
@@ -115,7 +152,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             }}>
                             <Input
                                 placeholder="Full Name"
-                                containerStyle={globalStyles.input}
+                                containerStyle={styles.textContainer}
                                 defaultValue={currentUser.fullName}
                                 label="Full Name"
                                 labelStyle={styles.labelStyle}
@@ -128,14 +165,10 @@ const ChangeInfoScreen = ({navigation}) => {
                         </View>
                     </View>
 
-                    <View
-                        style={{
-                            marginLeft: 10,
-                            width: '100%',
-                        }}>
+                    <View>
                         <Input
                             placeholder="Phone Number"
-                            containerStyle={globalStyles.input}
+                            containerStyle={styles.textContainer}
                             defaultValue={currentUser.phoneNumber}
                             label="Phone Number"
                             labelStyle={styles.labelStyle}
@@ -179,13 +212,9 @@ const ChangeInfoScreen = ({navigation}) => {
                                 'ChangeAddress',
                                 currentUser.address,
                             )
-                        }
-                        style={{
-                            width: '100%',
-                            marginLeft: 10,
-                        }}>
+                        }>
                         <Input
-                            containerStyle={globalStyles.input}
+                            containerStyle={styles.textContainer}
                             defaultValue={
                                 currentUser.address.city === ''
                                     ? ''
@@ -193,6 +222,118 @@ const ChangeInfoScreen = ({navigation}) => {
                             }
                             label="Address"
                             labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
+                            }}
+                            multiline={true}
+                            renderErrorMessage={false}
+                            editable={false}
+                            rightIcon={
+                                <Icon name="pen" size={20} color="black" />
+                            }
+                        />
+                    </TouchableOpacity>
+
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalVisible}>
+                        <View style={styles.modalView}>
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
+                                    marginLeft: -10,
+                                }}>
+                                Choose your gender.
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setModalVisible(false)
+                                    changeGender('Male')
+                                }}
+                                style={styles.touchModalView}>
+                                {currentUser.gender == 'Male' ? (
+                                    <Icon
+                                        name="check-square"
+                                        size={20}
+                                        color="black"
+                                    />
+                                ) : (
+                                    <Icon
+                                        name="square"
+                                        size={20}
+                                        color="black"
+                                    />
+                                )}
+
+                                <Text
+                                    style={{
+                                        ...styles.labelStyle,
+                                        marginLeft: 10,
+                                        fontSize: 16,
+                                    }}>
+                                    Male
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setModalVisible(false)
+                                    changeGender('Female')
+                                }}
+                                style={styles.touchModalView}>
+                                {currentUser.gender == 'Female' ? (
+                                    <Icon
+                                        name="check-square"
+                                        size={20}
+                                        color="black"
+                                    />
+                                ) : (
+                                    <Icon
+                                        name="square"
+                                        size={20}
+                                        color="black"
+                                    />
+                                )}
+                                <Text
+                                    style={{
+                                        ...styles.labelStyle,
+                                        marginLeft: 10,
+                                        fontSize: 16,
+                                    }}>
+                                    Female
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
+
+                    <TouchableOpacity
+                        onPress={() => {
+                            setModalVisible(true)
+                            updateGender()
+                        }}>
+                        <Input
+                            containerStyle={styles.textContainer}
+                            label="Gender"
+                            defaultValue={currentUser.gender}
+                            labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
+                            }}
+                            renderErrorMessage={false}
+                            editable={false}
+                            rightIcon={
+                                <Icon name="pen" size={20} color="black" />
+                            }
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity>
+                        <Input
+                            containerStyle={styles.textContainer}
+                            label="Change Password"
+                            labelStyle={styles.labelStyle}
+                            defaultValue={'********'}
                             inputContainerStyle={{
                                 borderBottomWidth: 0,
                             }}
@@ -221,5 +362,25 @@ const styles = StyleSheet.create({
     textButton: {
         color: 'white',
         fontSize: 16,
+    },
+
+    textContainer: {
+        ...globalStyles.input,
+        width: '100%',
+    },
+    modalView: {
+        backgroundColor: 'white',
+        position: 'absolute',
+        justifyContent: 'center',
+        bottom: 0,
+        width: '100%',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        paddingHorizontal: 30,
+        paddingVertical: 10,
+    },
+    touchModalView: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 })
