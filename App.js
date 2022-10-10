@@ -11,6 +11,7 @@ import {ProductItem} from './src/features/Products/components'
 import {
     ChangeAddressScreen,
     ChangeInfoScreen,
+    ChangePasswordScreen,
     ProfileScreen,
     RecoverPasswordScreen,
     SignInScreen,
@@ -57,6 +58,10 @@ export default function App() {
                     <Stack.Screen
                         name="ChangeAddress"
                         component={ChangeAddressScreen}
+                    />
+                    <Stack.Screen
+                        name="ChangePassword"
+                        component={ChangePasswordScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

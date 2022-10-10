@@ -1,36 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import React, {useLayoutEffect, useState} from 'react'
-import {useEffect} from 'react'
-import {Alert} from 'react-native'
-import {Text} from 'react-native'
-import {Modal} from 'react-native'
 import {
+    Alert,
     Keyboard,
     KeyboardAvoidingView,
+    Modal,
     SafeAreaView,
     StyleSheet,
+    Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
     View,
 } from 'react-native'
 import {Avatar, Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {useSelector, useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
-    SECONDARY_COLOR,
 } from '../../../components/constants'
-import {updatePhoneNumber, updateGender} from '../userSlice'
+import {updateGender, updatePhoneNumber} from '../userSlice'
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
-    const [modalVisible, setModalVisible] = useState(false)
+    const [modalGenderVisible, setModalGenderVisible] = useState(false)
+    const [modalAvatarVisible, setModalAvatarVisible] = useState(false)
 
     console.log(currentUser)
 
@@ -106,11 +106,16 @@ const ChangeInfoScreen = ({navigation}) => {
         })
     }, [])
 
+    const pickImageFromGallery = async () => {
+        const result = await launchImageLibrary({mediaType: 'mixed'})
+        console.log(result)
+    }
+
     return (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
-                opacity: modalVisible ? 0.5 : 1,
+                opacity: modalAvatarVisible + modalGenderVisible ? 0.5 : 1,
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
@@ -119,19 +124,68 @@ const ChangeInfoScreen = ({navigation}) => {
                         width: '100%',
                         height: '100%',
                     }}>
+                    <Modal
+                        animationType="fade"
+                        transparent={true}
+                        visible={modalAvatarVisible}>
+                        <View style={styles.modalView}>
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
+                                    marginLeft: -10,
+                                }}>
+                                Choose your image from?
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setModalAvatarVisible(false)
+                                    pickImageFromGallery()
+                                }}
+                                style={styles.touchModalView}>
+                                <Text
+                                    style={{
+                                        ...styles.labelStyle,
+                                        marginLeft: 10,
+                                        fontSize: 16,
+                                    }}>
+                                    Gallery
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setModalAvatarVisible(false)
+                                }}
+                                style={styles.touchModalView}>
+                                <Text
+                                    style={{
+                                        ...styles.labelStyle,
+                                        marginLeft: 10,
+                                        fontSize: 16,
+                                    }}>
+                                    Camera
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Modal>
                     <View
                         style={{
                             flexDirection: 'row',
                             alignItems: 'center',
                             marginTop: 10,
                         }}>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setModalAvatarVisible(true)}>
                             <Avatar
                                 rounded
                                 source={{
                                     uri: 'https://firebasestorage.googleapis.com/v0/b/iotmarket-10501.appspot.com/o/logo.jpg?alt=media&token=ed49f7ba-f12d-469f-9467-974ddbdbaf74',
                                 }}
                                 size={64}
+                                avatarStyle={{
+                                    borderWidth: 1,
+                                    borderColor: 'gray',
+                                }}
                             />
                             <Icon
                                 name="camera"
@@ -237,7 +291,7 @@ const ChangeInfoScreen = ({navigation}) => {
                     <Modal
                         animationType="fade"
                         transparent={true}
-                        visible={modalVisible}>
+                        visible={modalGenderVisible}>
                         <View style={styles.modalView}>
                             <Text
                                 style={{
@@ -249,7 +303,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             </Text>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setModalVisible(false)
+                                    setModalGenderVisible(false)
                                     changeGender('Male')
                                 }}
                                 style={styles.touchModalView}>
@@ -278,7 +332,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setModalVisible(false)
+                                    setModalGenderVisible(false)
                                     changeGender('Female')
                                 }}
                                 style={styles.touchModalView}>
@@ -309,7 +363,7 @@ const ChangeInfoScreen = ({navigation}) => {
 
                     <TouchableOpacity
                         onPress={() => {
-                            setModalVisible(true)
+                            setModalGenderVisible(true)
                             updateGender()
                         }}>
                         <Input
@@ -328,7 +382,14 @@ const ChangeInfoScreen = ({navigation}) => {
                         />
                     </TouchableOpacity>
 
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            currentUser.fromGoogle
+                                ? Alert.alert(
+                                      'Can not change password because you are signing in with Google account.',
+                                  )
+                                : navigation.navigate('ChangePassword')
+                        }}>
                         <Input
                             containerStyle={styles.textContainer}
                             label="Change Password"
@@ -337,7 +398,6 @@ const ChangeInfoScreen = ({navigation}) => {
                             inputContainerStyle={{
                                 borderBottomWidth: 0,
                             }}
-                            multiline={true}
                             renderErrorMessage={false}
                             editable={false}
                             rightIcon={

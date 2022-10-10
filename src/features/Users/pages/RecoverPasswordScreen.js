@@ -21,16 +21,6 @@ const RecoverPasswordScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
 
     const handleRecoverPassword = async () => {
-        // await firebase
-        //     .auth()
-        //     .sendPasswordResetEmail(email)
-        //     .then(() => {
-        //         Alert.alert(
-        //             'Success',
-        //             'Please check your email to recover your password.',
-        //         )
-        //     })
-
         await axios({
             method: 'post',
             url: `${API_URL}/auth/forgotpassword`,
