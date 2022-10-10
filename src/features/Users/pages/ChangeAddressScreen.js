@@ -12,8 +12,13 @@ import {Input} from 'react-native-elements'
 import {TouchableOpacity} from 'react-native'
 import {Alert} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import {KeyboardAvoidingView} from 'react-native'
+import {TouchableWithoutFeedback} from 'react-native'
+import {Keyboard} from 'react-native'
+import {updateAddress} from '../userSlice'
+import {useDispatch} from 'react-redux'
 
-const ChangeAddressScreen = ({navigation}) => {
+const ChangeAddressScreen = ({navigation, route}) => {
     const [openCity, setOpenCity] = useState(false)
     const [valueCity, setValueCity] = useState(null)
     const [itemsCity, setItemsCity] = useState([])
@@ -30,6 +35,9 @@ const ChangeAddressScreen = ({navigation}) => {
     const [chosenDistrict, setChosenDistrict] = useState('')
     const [chosenWard, setChosenWard] = useState('')
     const [chosenStreet, setChosenStreet] = useState('')
+
+    const existAddress = route.params
+    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -109,6 +117,16 @@ const ChangeAddressScreen = ({navigation}) => {
             .catch(err => console.log(err))
     }
 
+    //Init value if exist address
+    useEffect(() => {
+        if (existAddress != undefined) {
+            setChosenCity(existAddress.city)
+            setChosenDistrict(existAddress.district)
+            setChosenWard(existAddress.ward)
+            setChosenStreet(existAddress.street)
+        }
+    }, [])
+
     useEffect(() => {
         getCity()
     }, [])
@@ -139,6 +157,9 @@ const ChangeAddressScreen = ({navigation}) => {
                     },
                 }).then(res => {
                     if (res.status == 200) {
+                        const action = updateAddress(res.data.newAddress)
+                        dispatch(action)
+
                         Alert.alert('Update successfully.', '', [
                             {
                                 text: 'OK',
@@ -157,105 +178,129 @@ const ChangeAddressScreen = ({navigation}) => {
 
     return (
         <SafeAreaView style={globalStyles.container}>
-            <View
-                style={{
-                    marginTop: 10,
-                }}>
-                <Text style={styles.textStyle}>Choose your city.</Text>
-                <DropDownPicker
-                    open={openCity}
-                    value={valueCity}
-                    items={itemsCity}
-                    labelStyle={{
-                        color: 'black',
-                    }}
-                    setOpen={setOpenCity}
-                    setValue={setValueCity}
-                    setItems={setItemsCity}
-                    onSelectItem={item => {
-                        getDistrict(item.value)
-                        setChosenCity(item.label)
-                    }}
-                    style={{marginTop: 5}}
-                    zIndex={3}
-                />
-            </View>
-            <View
-                style={{
-                    marginTop: 10,
-                }}>
-                <Text style={styles.textStyle}>Choose your district.</Text>
-                <DropDownPicker
-                    open={openDistrict}
-                    value={valueDistrict}
-                    items={itemsDistrict}
-                    labelStyle={{
-                        color: 'black',
-                    }}
-                    setOpen={setOpenDistrict}
-                    setValue={setValueDistrict}
-                    setItems={setItemsDistrict}
-                    onSelectItem={item => {
-                        getWard(item.value)
-                        setChosenDistrict(item.label)
-                    }}
-                    style={{marginTop: 5}}
-                    zIndex={2}
-                />
-            </View>
-            <View
-                style={{
-                    marginTop: 10,
-                }}>
-                <Text style={styles.textStyle}>Choose your ward.</Text>
-                <DropDownPicker
-                    open={openWard}
-                    value={valueWard}
-                    items={itemsWard}
-                    labelStyle={{
-                        color: 'black',
-                    }}
-                    setOpen={setOpenWard}
-                    setValue={setValueWard}
-                    setItems={setItemsWard}
-                    style={{marginTop: 5}}
-                    zIndex={1}
-                    onSelectItem={item => setChosenWard(item.label)}
-                />
-            </View>
-            <View>
-                <Text style={styles.textStyle}>
-                    Please fill in your detail address.
-                </Text>
-                <Input
-                    placeholder="Your detail address."
-                    containerStyle={{
-                        width: '100%',
-                        paddingHorizontal: 0,
-                    }}
-                    inputContainerStyle={{
-                        borderBottomWidth: 0,
-                    }}
-                    inputStyle={{
-                        padding: 0,
-                        fontSize: 16,
-                        ...styles.textStyle,
-                    }}
-                    renderErrorMessage={false}
-                    onChangeText={text => setChosenStreet(text)}
-                />
-            </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <KeyboardAvoidingView
+                    behavior="padding"
+                    style={{height: '100%', width: '100%'}}>
+                    <View
+                        style={{
+                            marginTop: 10,
+                        }}>
+                        <Text style={styles.textStyle}>Choose your city.</Text>
+                        <DropDownPicker
+                            open={openCity}
+                            value={valueCity}
+                            items={itemsCity}
+                            placeholder={
+                                existAddress != undefined
+                                    ? existAddress.city
+                                    : 'Select your city.'
+                            }
+                            labelStyle={{
+                                color: 'black',
+                            }}
+                            setOpen={setOpenCity}
+                            setValue={setValueCity}
+                            setItems={setItemsCity}
+                            onSelectItem={item => {
+                                getDistrict(item.value)
+                                setChosenCity(item.label)
+                            }}
+                            style={{marginTop: 5}}
+                            zIndex={3}
+                        />
+                    </View>
+                    <View
+                        style={{
+                            marginTop: 10,
+                        }}>
+                        <Text style={styles.textStyle}>
+                            Choose your district.
+                        </Text>
+                        <DropDownPicker
+                            open={openDistrict}
+                            value={valueDistrict}
+                            items={itemsDistrict}
+                            placeholder={
+                                existAddress != undefined
+                                    ? existAddress.district
+                                    : 'Select your district.'
+                            }
+                            labelStyle={{
+                                color: 'black',
+                            }}
+                            setOpen={setOpenDistrict}
+                            setValue={setValueDistrict}
+                            setItems={setItemsDistrict}
+                            onSelectItem={item => {
+                                getWard(item.value)
+                                setChosenDistrict(item.label)
+                            }}
+                            style={{marginTop: 5}}
+                            zIndex={2}
+                        />
+                    </View>
+                    <View
+                        style={{
+                            marginTop: 10,
+                        }}>
+                        <Text style={styles.textStyle}>Choose your ward.</Text>
+                        <DropDownPicker
+                            open={openWard}
+                            value={valueWard}
+                            items={itemsWard}
+                            labelStyle={{
+                                color: 'black',
+                            }}
+                            placeholder={
+                                existAddress != undefined
+                                    ? existAddress.ward
+                                    : 'Select your ward.'
+                            }
+                            setOpen={setOpenWard}
+                            setValue={setValueWard}
+                            setItems={setItemsWard}
+                            style={{marginTop: 5}}
+                            zIndex={1}
+                            onSelectItem={item => setChosenWard(item.label)}
+                        />
+                    </View>
+                    <View>
+                        <Text style={styles.textStyle}>
+                            Please fill in your detail address.
+                        </Text>
+                        <Input
+                            placeholder="Your detail address."
+                            containerStyle={{
+                                width: '100%',
+                                paddingHorizontal: 0,
+                            }}
+                            defaultValue={chosenStreet}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
+                            }}
+                            inputStyle={{
+                                padding: 0,
+                                fontSize: 16,
+                                ...styles.textStyle,
+                            }}
+                            renderErrorMessage={false}
+                            onChangeText={text => setChosenStreet(text)}
+                        />
+                    </View>
 
-            <TouchableOpacity
-                onPress={handleUpdateAddressClick}
-                style={{
-                    ...globalStyles.button,
-                    position: 'absolute',
-                    bottom: 10,
-                    alignSelf: 'center',
-                }}>
-                <Text style={globalStyles.textButton}>Update</Text>
-            </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={handleUpdateAddressClick}
+                        style={{
+                            ...globalStyles.button,
+                            position: 'absolute',
+                            bottom: 10,
+                            alignSelf: 'center',
+                        }}>
+                        <Text style={globalStyles.textButton}>Update</Text>
+                    </TouchableOpacity>
+                </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
         </SafeAreaView>
     )
 }

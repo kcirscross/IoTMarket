@@ -29,8 +29,6 @@ const ChangeInfoScreen = ({navigation}) => {
     const dispatch = useDispatch()
     const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
 
-    console.log(currentUser)
-
     const updatePhone = async () => {
         try {
             const token = await AsyncStorage.getItem('token')
@@ -176,7 +174,12 @@ const ChangeInfoScreen = ({navigation}) => {
                     </View>
 
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('ChangeAddress')}
+                        onPress={() =>
+                            navigation.navigate(
+                                'ChangeAddress',
+                                currentUser.address,
+                            )
+                        }
                         style={{
                             width: '100%',
                             marginLeft: 10,
@@ -186,13 +189,14 @@ const ChangeInfoScreen = ({navigation}) => {
                             defaultValue={
                                 currentUser.address.city === ''
                                     ? ''
-                                    : `${currentUser.address.street}, ${currentUser.address.ward}, ${currentUser.address.district}, ${currentUser.address.city}`
+                                    : `${currentUser.address.street},\n${currentUser.address.ward},\n${currentUser.address.district},\n${currentUser.address.city}.`
                             }
                             label="Address"
                             labelStyle={styles.labelStyle}
                             inputContainerStyle={{
                                 borderBottomWidth: 0,
                             }}
+                            multiline={true}
                             renderErrorMessage={false}
                             editable={false}
                             rightIcon={
