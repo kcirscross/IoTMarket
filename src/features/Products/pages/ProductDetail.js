@@ -1,20 +1,14 @@
+import axios from 'axios'
 import React, {useLayoutEffect} from 'react'
+import {useEffect} from 'react'
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
 import {Avatar, Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import BottomMenuBar from '../components/BottomMenuBar'
 
 const ProductDetail = ({navigation, route}) => {
-    const {
-        productTitle,
-        productPrice,
-        productCategory,
-        productDescription,
-        productDisplayName,
-        productImages,
-        productStatusForSell,
-    } = route.params.data
+    const {_id} = route.params.data
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -26,6 +20,16 @@ const ProductDetail = ({navigation, route}) => {
                 color: 'white',
             },
         })
+    }, [])
+
+    useEffect(() => {
+        axios({
+            method: 'get',
+            url: `${API_URL}/product`,
+            params: {
+                productId: _id,
+            },
+        }).then(res => console.log(res.data))
     }, [])
 
     return (
@@ -66,7 +70,7 @@ const ProductDetail = ({navigation, route}) => {
                     length={listImages.length}
                 />
             </View> */}
-            <Card containerStyle={globalStyles.cardContainer}>
+            {/* <Card containerStyle={globalStyles.cardContainer}>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -92,7 +96,7 @@ const ProductDetail = ({navigation, route}) => {
                     {productTitle}
                 </Text>
                 <Text>{productDescription}</Text>
-            </Card>
+            </Card> */}
 
             <BottomMenuBar />
         </SafeAreaView>

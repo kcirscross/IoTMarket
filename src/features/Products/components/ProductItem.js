@@ -12,7 +12,7 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 
 const ProductItem = ({data, navigation}) => {
-    const {productImages, productTitle, productPrice, productID} = data
+    const {price, productName, thumbnailImage} = data
 
     const handleProductItemClick = () => {
         navigation.navigate('ProductDetail', {data: data})
@@ -26,26 +26,15 @@ const ProductItem = ({data, navigation}) => {
             }}>
             <Card containerStyle={globalStyles.cardContainer}>
                 <TouchableOpacity onPress={handleProductItemClick}>
-                    <Icon
-                        name="camera"
-                        size={24}
-                        style={{
-                            position: 'absolute',
-                            top: 5,
-                            left: 10,
-                            zIndex: 1,
-                        }}
-                    />
                     <View>
                         <Image
-                            source={productImages}
+                            source={{uri: thumbnailImage}}
                             resizeMode="contain"
                             resizeMethod="resize"
                             style={{
                                 width: '100%',
-                                height: 140,
+                                height: 120,
                                 borderRadius: 10,
-                                zIndex: 0,
                                 borderWidth: 1,
                                 borderColor: '#99999',
                             }}
@@ -60,13 +49,13 @@ const ProductItem = ({data, navigation}) => {
                                 fontWeight: 'bold',
                                 color: 'black',
                             }}>
-                            {productTitle}
+                            {productName}
                         </Text>
                         <Text
                             style={{
                                 color: 'red',
                             }}>
-                            {parseInt(productPrice)} đ
+                            {parseInt(price)} đ
                         </Text>
                     </View>
                 </TouchableOpacity>

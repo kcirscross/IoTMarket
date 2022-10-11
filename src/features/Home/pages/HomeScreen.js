@@ -1,4 +1,7 @@
+import axios from 'axios'
 import React, {useLayoutEffect} from 'react'
+import {useState} from 'react'
+import {useEffect} from 'react'
 import {
     SafeAreaView,
     ScrollView,
@@ -11,12 +14,25 @@ import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import {ProductItem} from '../../Products/components'
 import {CategoryItem} from '../components'
 
 const HomeScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
+
+    const [listProducts, setListProducts] = useState([])
+
+    useEffect(() => {
+        try {
+            axios({
+                method: 'get',
+                url: `${API_URL}/product`,
+            }).then(res => {
+                setListProducts(res.data.products)
+            })
+        } catch (error) {}
+    }, [])
 
     const fakeData = [
         {
@@ -199,7 +215,7 @@ const HomeScreen = ({navigation}) => {
                         style={{
                             paddingVertical: 5,
                         }}>
-                        {fakeProducts.map((data, index) => (
+                        {listProducts.map((data, index) => (
                             <ProductItem
                                 key={index}
                                 data={data}

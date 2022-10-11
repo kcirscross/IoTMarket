@@ -35,6 +35,16 @@ const SignUpScreen = ({navigation}) => {
     const storeToken = async token => {
         try {
             await AsyncStorage.setItem('token', token)
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/changeonlinestatus`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    status: 'Online',
+                },
+            })
         } catch (error) {
             console.log('Error when store token.', error)
         }

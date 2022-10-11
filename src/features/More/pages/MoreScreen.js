@@ -27,10 +27,22 @@ const MoreScreen = ({navigation}) => {
 
     const deleteRememberAccount = async () => {
         try {
-            await AsyncStorage.removeItem('account')
-            await AsyncStorage.removeItem('password')
-            await AsyncStorage.removeItem('accountType')
-            await AsyncStorage.removeItem('token')
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/changeonlinestatus`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    status: 'Offline',
+                },
+            }).then(async () => {
+                await AsyncStorage.removeItem('account')
+                await AsyncStorage.removeItem('password')
+                await AsyncStorage.removeItem('accountType')
+                await AsyncStorage.removeItem('token')
+            })
         } catch (error) {
             console.log('Error when delete remember account', error)
         }
