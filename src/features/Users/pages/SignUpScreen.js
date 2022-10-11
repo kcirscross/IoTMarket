@@ -1,3 +1,9 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+    GoogleSignin,
+    GoogleSigninButton,
+} from '@react-native-google-signin/google-signin'
+import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Alert,
@@ -13,18 +19,10 @@ import {
 } from 'react-native'
 import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import {useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import firebase from '@react-native-firebase/app'
-import auth from '@react-native-firebase/auth'
-import {
-    GoogleSignin,
-    GoogleSigninButton,
-} from '@react-native-google-signin/google-signin'
-import axios from 'axios'
-import {useSelector, useDispatch} from 'react-redux'
 import {signIn} from '../userSlice'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const SignUpScreen = ({navigation}) => {
     const [email, setEmail] = useState('')

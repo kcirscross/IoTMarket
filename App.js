@@ -1,8 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import React from 'react'
-import {StyleSheet} from 'react-native'
-import {Provider} from 'react-redux'
+import {isAllOf} from '@reduxjs/toolkit'
+import axios from 'axios'
+import React, {useEffect} from 'react'
+import {useRef} from 'react'
+import {useState} from 'react'
+import {AppState, StyleSheet} from 'react-native'
+import {Provider, useDispatch, useSelector} from 'react-redux'
+import {API_URL} from './src/components/constants'
 import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
 import MoreScreen from './src/features/More/pages/MoreScreen'
@@ -18,6 +24,7 @@ import {
     SignUpScreen,
     SplashScreen,
 } from './src/features/Users'
+import {updateOnlineStatus} from './src/features/Users/userSlice'
 import {store} from './store'
 
 const Stack = createNativeStackNavigator()
@@ -26,6 +33,60 @@ const globalSreenOptions = {
 }
 
 export default function App() {
+    const [onlineStatus, setOnlineStatus] = useState('')
+
+    useEffect(() => {
+        AppState.addEventListener('change', _handleAppStateChange)
+
+        return () => {
+            AppState.removeEventListener('change', _handleAppStateChange)
+        }
+    }, [])
+
+    const _handleAppStateChange = async () => {
+        if (AppState.currentState == 'active') {
+            try {
+                const token = await AsyncStorage.getItem('token')
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/changeonlinestatus`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                    data: {
+                        status: 'Online',
+                    },
+                }).then(res => {
+                    if (res.status == 200) {
+                        setOnlineStatus('Online')
+                    }
+                })
+            } catch (error) {
+                console.log('Error', error.message)
+            }
+        } else {
+            try {
+                const token = await AsyncStorage.getItem('token')
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/changeonlinestatus`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                    data: {
+                        status: 'Offline',
+                    },
+                }).then(res => {
+                    if (res.status == 200) {
+                        setOnlineStatus('Offline')
+                    }
+                })
+            } catch (error) {
+                console.log('Error', error.message)
+            }
+        }
+    }
+
     return (
         <Provider store={store}>
             <NavigationContainer>

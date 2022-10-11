@@ -25,6 +25,9 @@ import {
 import {updateGender, updatePhoneNumber} from '../userSlice'
 import {launchImageLibrary, launchCamera} from 'react-native-image-picker'
 import storage from '@react-native-firebase/storage'
+import {Image} from 'react-native'
+import auth from '@react-native-firebase/auth'
+import {useEffect} from 'react'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -52,6 +55,8 @@ const ChangeInfoScreen = ({navigation}) => {
                 if (res.status == 200) {
                     const action = updatePhoneNumber(res.data.newPhoneNumber)
                     dispatch(action)
+
+                    Alert.alert('Update phone number successfully.')
                 }
             })
         } catch (error) {
@@ -109,41 +114,47 @@ const ChangeInfoScreen = ({navigation}) => {
     }, [])
 
     const pickImageFromGallery = async () => {
-        launchImageLibrary(
+        await launchImageLibrary(
             {
                 mediaType: 'photo',
-                includeBase64: false,
+                storageOptions: {
+                    skipBackup: true,
+                    path: 'images',
+                },
                 maxHeight: 200,
                 maxWidth: 200,
             },
             res => {
-                console.log(res)
+                uploadImageToFirebase(
+                    `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
+                    res.assets[0].uri,
+                )
             },
         )
     }
 
-    const pickImageFromCamera = () => {
-        storage()
-            .ref('logo.jpg')
-            .getDownloadURL(url => console.log(url))
+    const pickImageFromCamera = async () => {
+        await launchCamera(
+            {
+                mediaType: 'photo',
+                maxHeight: 200,
+                maxWidth: 200,
+            },
+            res => {
+                uploadImageToFirebase(res.assets[0].fileName, res.assets[0].uri)
+            },
+        )
+    }
 
-        // launchCamera(
-        //     {
-        //         mediaType: 'photo',
-        //         includeBase64: false,
-        //         maxHeight: 200,
-        //         maxWidth: 200,
-        //     },
-        //     res => {
-        //         let uploadAvatarPath = `users/${currentUser.email}/avatar/${res.assets[0].fileName}`
-        //         const task = storage()
-        //             .ref(uploadAvatarPath)
-        //             .putFile(res.assets[0].uri)
-        //         task.then(() => {
-        //             console.log('Updated Avatar.')
-        //         })
-        //     },
-        // )
+    const uploadImageToFirebase = async (filePath, uri) => {
+        try {
+            await storage()
+                .ref(filePath)
+                .putFile(uri)
+                .then(() => console.log('Done'))
+        } catch (error) {
+            console.log(error.message)
+        }
     }
 
     return (
@@ -160,7 +171,7 @@ const ChangeInfoScreen = ({navigation}) => {
                         height: '100%',
                     }}>
                     <Modal
-                        animationType="fade"
+                        animationType="slide"
                         transparent={true}
                         visible={modalAvatarVisible}>
                         <View style={styles.modalView}>

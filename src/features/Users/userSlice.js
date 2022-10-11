@@ -29,11 +29,30 @@ export const userSlice = createSlice({
             updatedUser.gender = action.payload
             return updatedUser
         },
+
+        updateAvatar: (state, action) => {
+            updatedUser = state
+            updatedUser.avatar = action.payload
+            return updatedUser
+        },
+
+        updateOnlineStatus: (state, action) => {
+            updatedUser = state
+            updatedUser.onlineStatus = action.payload
+            return updatedUser
+        },
     },
 })
 
 // Action creators are generated for each case reducer function
-export const {updatePhoneNumber, signIn, signOut, updateAddress, updateGender} =
-    userSlice.actions
+export const {
+    updatePhoneNumber,
+    signIn,
+    signOut,
+    updateAddress,
+    updateGender,
+    updateAvatar,
+    updateOnlineStatus,
+} = userSlice.actions
 
 export default userSlice.reducer

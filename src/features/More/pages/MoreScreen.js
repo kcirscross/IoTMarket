@@ -14,7 +14,11 @@ import {Avatar} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useSelector, useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {
+    API_URL,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR,
+} from '../../../components/constants'
 import {signOut} from '../../Users/userSlice'
 
 const MoreScreen = ({navigation}) => {
@@ -77,11 +81,16 @@ const MoreScreen = ({navigation}) => {
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center',
+                    marginTop: 10,
                 }}>
                 <Avatar
                     rounded
                     size={64}
                     source={require('~/assets/images/logo.jpg')}
+                    avatarStyle={{
+                        borderWidth: 1,
+                        borderColor: 'gray',
+                    }}
                 />
                 <View
                     style={{
