@@ -8,13 +8,15 @@ import {KeyboardAvoidingView} from 'react-native'
 import {Keyboard} from 'react-native'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {Input} from 'react-native-elements'
-import {useSelector} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import {Alert} from 'react-native'
+import ModalLoading from '~/components/utils/ModalLoading'
+import {signOut} from '../userSlice'
 
 const ChangePasswordScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -22,6 +24,8 @@ const ChangePasswordScreen = ({navigation}) => {
     const [newPassword, setNewPassword] = useState('')
     const [reNewPassword, setReNewPassword] = useState('')
     const [visiblePassword, setVisiblePassword] = useState(false)
+    const [modalLoading, setModalLoading] = useState(false)
+    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -35,6 +39,29 @@ const ChangePasswordScreen = ({navigation}) => {
         })
     }, [])
 
+    const deleteRememberAccount = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/changeonlinestatus`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    status: 'Offline',
+                },
+            }).then(async () => {
+                await AsyncStorage.removeItem('account')
+                await AsyncStorage.removeItem('password')
+                await AsyncStorage.removeItem('accountType')
+                await AsyncStorage.removeItem('token')
+            })
+        } catch (error) {
+            console.log('Error when delete remember account', error)
+        }
+    }
+
     const changePassword = async () => {
         //Validate Password
         if (currentPassword == '' || newPassword == '' || reNewPassword == '') {
@@ -42,6 +69,7 @@ const ChangePasswordScreen = ({navigation}) => {
         } else if (newPassword != reNewPassword) {
             Alert.alert('Your confirm password is not match.')
         } else {
+            setModalLoading(true)
             try {
                 const token = await AsyncStorage.getItem('token')
 
@@ -58,12 +86,36 @@ const ChangePasswordScreen = ({navigation}) => {
                 }).then(res => {
                     if (res.status == 200) {
                         if (res.status == 200) {
-                            Alert.alert('Update password successfully.', '', [
-                                {
-                                    text: 'OK',
-                                    onPress: () => navigation.goBack(),
-                                },
-                            ])
+                            setModalLoading(false)
+                            Alert.alert(
+                                'Update password successfully. Please sign in again.',
+                                '',
+                                [
+                                    {
+                                        text: 'OK',
+                                        onPress: () => {
+                                            axios({
+                                                method: 'post',
+                                                url: `${API_URL}/auth/logout`,
+                                                data: {
+                                                    email: currentUser.email,
+                                                },
+                                            }).then(res => {
+                                                const action = signOut()
+                                                res.status == 200 &&
+                                                    dispatch(action)
+
+                                                deleteRememberAccount()
+
+                                                navigation.reset({
+                                                    index: 0,
+                                                    routes: [{name: 'Splash'}],
+                                                })
+                                            })
+                                        },
+                                    },
+                                ],
+                            )
                         }
                     }
                 })
@@ -74,11 +126,16 @@ const ChangePasswordScreen = ({navigation}) => {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.5 : 1,
+            }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
                     behavior="padding"
                     style={{width: '100%', height: '100%'}}>
+                    <ModalLoading visible={modalLoading} />
                     <Input
                         containerStyle={styles.textContainer}
                         label="Current Password"

@@ -17,6 +17,7 @@ import {TouchableWithoutFeedback} from 'react-native'
 import {Keyboard} from 'react-native'
 import {updateAddress} from '../userSlice'
 import {useDispatch} from 'react-redux'
+import ModalLoading from '~/components/utils/ModalLoading'
 
 const ChangeAddressScreen = ({navigation, route}) => {
     const [openCity, setOpenCity] = useState(false)
@@ -38,6 +39,8 @@ const ChangeAddressScreen = ({navigation, route}) => {
 
     const existAddress = route.params
     const dispatch = useDispatch()
+
+    const [modalLoading, setModalLoading] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -141,6 +144,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
         ) {
             Alert.alert('Please fill in all field.')
         } else {
+            setModalLoading(true)
             try {
                 const token = await AsyncStorage.getItem('token')
                 axios({
@@ -160,6 +164,8 @@ const ChangeAddressScreen = ({navigation, route}) => {
                         const action = updateAddress(res.data.newAddress)
                         dispatch(action)
 
+                        setModalLoading(false)
+
                         Alert.alert('Update successfully.', '', [
                             {
                                 text: 'OK',
@@ -177,11 +183,16 @@ const ChangeAddressScreen = ({navigation, route}) => {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.5 : 1,
+            }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
                     behavior="padding"
                     style={{height: '100%', width: '100%'}}>
+                    <ModalLoading visible={modalLoading} />
                     <View
                         style={{
                             marginTop: 10,

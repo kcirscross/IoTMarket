@@ -67,6 +67,14 @@ const SplashScreen = ({navigation}) => {
                             console.log(err.message)
                             Alert.alert(
                                 'Wrong email or password. Please try again.',
+                                '',
+                                [
+                                    {
+                                        text: 'OK',
+                                        onPress: () =>
+                                            navigation.replace('SignIn'),
+                                    },
+                                ],
                             )
                         })
             } else {

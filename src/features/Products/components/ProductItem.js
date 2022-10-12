@@ -22,7 +22,7 @@ const ProductItem = ({data, navigation}) => {
         <View
             style={{
                 width: Dimensions.get('window').width * 0.473,
-                padding: 5,
+                padding: 2,
             }}>
             <Card containerStyle={globalStyles.cardContainer}>
                 <TouchableOpacity onPress={handleProductItemClick}>

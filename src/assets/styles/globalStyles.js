@@ -43,5 +43,6 @@ export const globalStyles = StyleSheet.create({
         paddingLeft: 5,
         paddingRight: 5,
         borderRadius: 10,
+        paddingVertical: 5
     },
 })

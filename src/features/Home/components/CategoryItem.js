@@ -5,7 +5,7 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 
 const CategoryItem = data => {
     const [{categoryName, categoryImage}] = data.data
-    const index = data.data[data.data.length - 1]
+    const index = data.data[1]
 
     const handleCategoryItemClick = () => {
         console.log('Click category: ', categoryName)
@@ -15,7 +15,9 @@ const CategoryItem = data => {
         <Card
             containerStyle={{
                 ...globalStyles.cardContainer,
-                marginLeft: index == 0 ? 0 : 5,
+                marginLeft:
+                    index == Math.round(data.data[2] / 2) || index == 0 ? 0 : 5,
+                marginTop: index >= Math.round(data.data[2] / 2) ? 5 : 0,
             }}>
             <TouchableOpacity
                 onPress={handleCategoryItemClick}

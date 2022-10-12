@@ -2,6 +2,7 @@ import axios from 'axios'
 import React, {useLayoutEffect} from 'react'
 import {useState} from 'react'
 import {useEffect} from 'react'
+import {FlatList} from 'react-native'
 import {
     SafeAreaView,
     ScrollView,
@@ -55,68 +56,37 @@ const HomeScreen = ({navigation}) => {
             categoryName: 'Item Phone',
             categoryImage: require('~/assets/images/logo.jpg'),
         },
-    ]
-
-    const fakeProducts = [
         {
-            productTitle: 'Laptop Dell Latitude 3420',
-            productPrice: '11599000',
-            productCategory: 'Latop',
-            productDescription: 'ASdfasdf',
-            productDisplayName: 'Pham Duy',
-            productID: 'asdfasdf123',
-            productImages: require('~/assets/images/logo.jpg'),
-            productOwner: 'asdfaasdf111',
-            productStatus: 1,
-            productStatusForSell: 'New',
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
         },
         {
-            productTitle: 'Laptop Dell Latitude 3420',
-            productPrice: '11599000',
-            productCategory: 'Latop',
-            productDescription: 'ASdfasdf',
-            productDisplayName: 'Pham Duy',
-            productID: 'asdfasdf1233',
-            productImages: require('~/assets/images/logo.jpg'),
-            productOwner: 'asdfaasdf1111',
-            productStatus: 1,
-            productStatusForSell: 'New',
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
         },
         {
-            productTitle: 'Laptop Dell Latitude 3420',
-            productPrice: '11599000',
-            productCategory: 'Latop',
-            productDescription: 'ASdfasdf',
-            productDisplayName: 'Pham Duy',
-            productID: 'asdfasdf1235',
-            productImages: require('~/assets/images/logo.jpg'),
-            productOwner: 'asdfaasdf1115',
-            productStatus: 1,
-            productStatusForSell: 'New',
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
         },
         {
-            productTitle: 'Laptop Dell Latitude 3420',
-            productPrice: '11599000',
-            productCategory: 'Latop',
-            productDescription: 'ASdfasdf',
-            productDisplayName: 'Pham Duy',
-            productID: 'asdfasdf1236',
-            productImages: require('~/assets/images/logo.jpg'),
-            productOwner: 'asdfaasdf1116',
-            productStatus: 1,
-            productStatusForSell: 'New',
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
         },
         {
-            productTitle: 'Laptop Dell Latitude 3420',
-            productPrice: '11599000',
-            productCategory: 'Latop',
-            productDescription: 'ASdfasdf',
-            productDisplayName: 'Pham Duy',
-            productID: 'asdfasdf127',
-            productImages: require('~/assets/images/logo.jpg'),
-            productOwner: 'asdfaasdf1117',
-            productStatus: 1,
-            productStatusForSell: 'New',
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
+        },
+        {
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
+        },
+        {
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
+        },
+        {
+            categoryName: 'Item Phone',
+            categoryImage: require('~/assets/images/logo.jpg'),
         },
     ]
 
@@ -186,15 +156,26 @@ const HomeScreen = ({navigation}) => {
                         marginTop: 5,
                     }}>
                     <Text style={globalStyles.textTitle}>Categories</Text>
+
                     <ScrollView
                         horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        style={{
-                            paddingVertical: 5,
-                        }}>
-                        {fakeData.map((data, index) => (
-                            <CategoryItem key={index} data={[data, index]} />
-                        ))}
+                        showsHorizontalScrollIndicator={false}>
+                        <FlatList
+                            numColumns={Math.ceil(fakeData.length / 2)}
+                            scrollEnabled={false}
+                            contentContainerStyle={{
+                                alignSelf: 'flex-start',
+                            }}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            data={fakeData}
+                            renderItem={({item, index}) => (
+                                <CategoryItem
+                                    data={[item, index, fakeData.length]}
+                                    key={index}
+                                />
+                            )}
+                        />
                     </ScrollView>
                 </View>
 

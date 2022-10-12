@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import storage from '@react-native-firebase/storage'
 import axios from 'axios'
 import React, {useLayoutEffect, useState} from 'react'
 import {
@@ -14,20 +15,17 @@ import {
     View,
 } from 'react-native'
 import {Avatar, Input} from 'react-native-elements'
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch, useSelector} from 'react-redux'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
 } from '../../../components/constants'
-import {updateGender, updatePhoneNumber} from '../userSlice'
-import {launchImageLibrary, launchCamera} from 'react-native-image-picker'
-import storage from '@react-native-firebase/storage'
-import {Image} from 'react-native'
-import auth from '@react-native-firebase/auth'
-import {useEffect} from 'react'
+import {updateAvatar, updateGender, updatePhoneNumber} from '../userSlice'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -35,11 +33,14 @@ const ChangeInfoScreen = ({navigation}) => {
     const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
     const [modalGenderVisible, setModalGenderVisible] = useState(false)
     const [modalAvatarVisible, setModalAvatarVisible] = useState(false)
-    const [uriAvatar, setUriAvatar] = useState(currentUser.avatar)
+    const [modalLoading, setModalLoading] = useState(false)
+
+    const {street, ward, district, city} = currentUser.address || ''
 
     // console.log(currentUser)
 
     const updatePhone = async () => {
+        setModalLoading(true)
         try {
             const token = await AsyncStorage.getItem('token')
             axios({
@@ -55,6 +56,8 @@ const ChangeInfoScreen = ({navigation}) => {
                 if (res.status == 200) {
                     const action = updatePhoneNumber(res.data.newPhoneNumber)
                     dispatch(action)
+
+                    setModalLoading(false)
 
                     Alert.alert('Update phone number successfully.')
                 }
@@ -76,6 +79,7 @@ const ChangeInfoScreen = ({navigation}) => {
     const changeGender = async gender => {
         //Validate Gender
         if (gender != '') {
+            setModalLoading(true)
             try {
                 const token = await AsyncStorage.getItem('token')
                 axios({
@@ -91,6 +95,8 @@ const ChangeInfoScreen = ({navigation}) => {
                     if (res.status == 200) {
                         const action = updateGender(res.data.newGender)
                         dispatch(action)
+
+                        setModalLoading(false)
 
                         Alert.alert('Update successfully.')
                     }
@@ -125,10 +131,13 @@ const ChangeInfoScreen = ({navigation}) => {
                 maxWidth: 200,
             },
             res => {
-                uploadImageToFirebase(
-                    `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
-                    res.assets[0].uri,
-                )
+                if (res.didCancel != true) {
+                    setModalLoading(true)
+                    uploadImageToFirebase(
+                        `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
+                        res.assets[0].uri,
+                    )
+                }
             },
         )
     }
@@ -141,7 +150,13 @@ const ChangeInfoScreen = ({navigation}) => {
                 maxWidth: 200,
             },
             res => {
-                uploadImageToFirebase(res.assets[0].fileName, res.assets[0].uri)
+                if (res.didCancel != true) {
+                    setModalLoading(true)
+                    uploadImageToFirebase(
+                        `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
+                        res.assets[0].uri,
+                    )
+                }
             },
         )
     }
@@ -151,7 +166,43 @@ const ChangeInfoScreen = ({navigation}) => {
             await storage()
                 .ref(filePath)
                 .putFile(uri)
-                .then(() => console.log('Done'))
+                .then(async () => {
+                    await storage()
+                        .ref(filePath)
+                        .getDownloadURL()
+                        .then(async url => {
+                            try {
+                                const token = await AsyncStorage.getItem(
+                                    'token',
+                                )
+                                axios({
+                                    method: 'patch',
+                                    url: `${API_URL}/user/changeavatar`,
+                                    headers: {
+                                        authorization: `Bearer ${token}`,
+                                    },
+                                    data: {
+                                        avatarLink: url,
+                                    },
+                                }).then(res => {
+                                    if (res.status == 200) {
+                                        const action = updateAvatar(
+                                            res.data.newAvatarLink,
+                                        )
+                                        dispatch(action)
+
+                                        setModalLoading(false)
+
+                                        Alert.alert(
+                                            'Update avatar successfully.',
+                                        )
+                                    }
+                                })
+                            } catch (error) {
+                                console.log('Error ', error.message)
+                            }
+                        })
+                })
         } catch (error) {
             console.log(error.message)
         }
@@ -161,7 +212,10 @@ const ChangeInfoScreen = ({navigation}) => {
         <SafeAreaView
             style={{
                 ...globalStyles.container,
-                opacity: modalAvatarVisible + modalGenderVisible ? 0.5 : 1,
+                opacity:
+                    modalAvatarVisible + modalGenderVisible + modalLoading
+                        ? 0.5
+                        : 1,
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
@@ -170,65 +224,73 @@ const ChangeInfoScreen = ({navigation}) => {
                         width: '100%',
                         height: '100%',
                     }}>
+                    <ModalLoading visible={modalLoading} />
                     <Modal
                         animationType="slide"
                         transparent={true}
                         visible={modalAvatarVisible}>
-                        <View style={styles.modalView}>
-                            <Text
-                                style={{
-                                    ...styles.labelStyle,
-                                    fontSize: 18,
-                                    marginLeft: -10,
-                                }}>
-                                Choose your image from?
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setModalAvatarVisible(false)
-                                    pickImageFromGallery()
-                                }}
-                                style={styles.touchModalView}>
+                        <SafeAreaView
+                            onTouchStart={() => setModalAvatarVisible(false)}
+                            style={{
+                                flex: 1,
+                            }}>
+                            <View style={styles.modalView}>
                                 <Text
                                     style={{
                                         ...styles.labelStyle,
-                                        marginLeft: 10,
-                                        fontSize: 16,
+                                        fontSize: 18,
+                                        marginLeft: -10,
                                     }}>
-                                    Gallery
+                                    Choose your image from?
                                 </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setModalAvatarVisible(false)
-                                    pickImageFromCamera()
-                                }}
-                                style={styles.touchModalView}>
-                                <Text
-                                    style={{
-                                        ...styles.labelStyle,
-                                        marginLeft: 10,
-                                        fontSize: 16,
-                                    }}>
-                                    Camera
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setModalAvatarVisible(false)
+                                        pickImageFromGallery()
+                                    }}
+                                    style={styles.touchModalView}>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            marginLeft: 10,
+                                            fontSize: 16,
+                                        }}>
+                                        Gallery
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setModalAvatarVisible(false)
+                                        pickImageFromCamera()
+                                    }}
+                                    style={styles.touchModalView}>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            marginLeft: 10,
+                                            fontSize: 16,
+                                        }}>
+                                        Camera
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </SafeAreaView>
                     </Modal>
                     <View
                         style={{
                             flexDirection: 'row',
                             alignItems: 'center',
                             marginTop: 10,
+                            justifyContent: 'center',
                         }}>
                         <TouchableOpacity
                             onPress={() => setModalAvatarVisible(true)}>
                             <Avatar
                                 rounded
                                 source={{
-                                    uri: uriAvatar,
+                                    uri: currentUser.avatar,
                                 }}
-                                size={64}
+                                size={80}
                                 avatarStyle={{
                                     borderWidth: 1,
                                     borderColor: 'gray',
@@ -241,7 +303,7 @@ const ChangeInfoScreen = ({navigation}) => {
                                 style={{
                                     position: 'absolute',
                                     bottom: 0,
-                                    right: 0,
+                                    right: 5,
                                 }}
                             />
                         </TouchableOpacity>
@@ -297,6 +359,9 @@ const ChangeInfoScreen = ({navigation}) => {
                                             ...globalStyles.button,
                                             width: 60,
                                             height: 35,
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginBottom: 20,
                                         }}>
                                         <Text style={styles.textButton}>
                                             SAVE
@@ -317,9 +382,9 @@ const ChangeInfoScreen = ({navigation}) => {
                         <Input
                             containerStyle={styles.textContainer}
                             defaultValue={
-                                currentUser.address.city === ''
+                                currentUser.address == ''
                                     ? ''
-                                    : `${currentUser.address.street},\n${currentUser.address.ward},\n${currentUser.address.district},\n${currentUser.address.city}.`
+                                    : `${street},\n${ward},\n${district},\n${city}.`
                             }
                             label="Address"
                             labelStyle={styles.labelStyle}
@@ -339,73 +404,79 @@ const ChangeInfoScreen = ({navigation}) => {
                         animationType="fade"
                         transparent={true}
                         visible={modalGenderVisible}>
-                        <View style={styles.modalView}>
-                            <Text
-                                style={{
-                                    ...styles.labelStyle,
-                                    fontSize: 18,
-                                    marginLeft: -10,
-                                }}>
-                                Choose your gender.
-                            </Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setModalGenderVisible(false)
-                                    changeGender('Male')
-                                }}
-                                style={styles.touchModalView}>
-                                {currentUser.gender == 'Male' ? (
-                                    <Icon
-                                        name="check-square"
-                                        size={20}
-                                        color="black"
-                                    />
-                                ) : (
-                                    <Icon
-                                        name="square"
-                                        size={20}
-                                        color="black"
-                                    />
-                                )}
+                        <SafeAreaView
+                            onTouchStart={() => setModalGenderVisible(false)}
+                            style={{
+                                flex: 1,
+                            }}>
+                            <View style={styles.modalView}>
+                                <Text
+                                    style={{
+                                        ...styles.labelStyle,
+                                        fontSize: 18,
+                                        marginLeft: -10,
+                                    }}>
+                                    Choose your gender.
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setModalGenderVisible(false)
+                                        changeGender('Male')
+                                    }}
+                                    style={styles.touchModalView}>
+                                    {currentUser.gender == 'Male' ? (
+                                        <Icon
+                                            name="check-square"
+                                            size={20}
+                                            color="black"
+                                        />
+                                    ) : (
+                                        <Icon
+                                            name="square"
+                                            size={20}
+                                            color="black"
+                                        />
+                                    )}
 
-                                <Text
-                                    style={{
-                                        ...styles.labelStyle,
-                                        marginLeft: 10,
-                                        fontSize: 16,
-                                    }}>
-                                    Male
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setModalGenderVisible(false)
-                                    changeGender('Female')
-                                }}
-                                style={styles.touchModalView}>
-                                {currentUser.gender == 'Female' ? (
-                                    <Icon
-                                        name="check-square"
-                                        size={20}
-                                        color="black"
-                                    />
-                                ) : (
-                                    <Icon
-                                        name="square"
-                                        size={20}
-                                        color="black"
-                                    />
-                                )}
-                                <Text
-                                    style={{
-                                        ...styles.labelStyle,
-                                        marginLeft: 10,
-                                        fontSize: 16,
-                                    }}>
-                                    Female
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            marginLeft: 10,
+                                            fontSize: 16,
+                                        }}>
+                                        Male
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setModalGenderVisible(false)
+                                        changeGender('Female')
+                                    }}
+                                    style={styles.touchModalView}>
+                                    {currentUser.gender == 'Female' ? (
+                                        <Icon
+                                            name="check-square"
+                                            size={20}
+                                            color="black"
+                                        />
+                                    ) : (
+                                        <Icon
+                                            name="square"
+                                            size={20}
+                                            color="black"
+                                        />
+                                    )}
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            marginLeft: 10,
+                                            fontSize: 16,
+                                        }}>
+                                        Female
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </SafeAreaView>
                     </Modal>
 
                     <TouchableOpacity

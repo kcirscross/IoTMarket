@@ -98,7 +98,7 @@ const MoreScreen = ({navigation}) => {
                 <Avatar
                     rounded
                     size={64}
-                    source={require('~/assets/images/logo.jpg')}
+                    source={{uri: currentUser.avatar}}
                     avatarStyle={{
                         borderWidth: 1,
                         borderColor: 'gray',
