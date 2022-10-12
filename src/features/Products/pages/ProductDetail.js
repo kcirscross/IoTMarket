@@ -20,6 +20,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import { TouchableOpacity } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useSelector } from 'react-redux'
+import { Alert } from 'react-native'
 
 const ProductDetail = ({ navigation, route }) => {
 
@@ -83,11 +84,20 @@ const ProductDetail = ({ navigation, route }) => {
         setCurrentIndex(index)
     }
 
-    const handleAddCartClick = () => {
-        axios({
-            method: '',
-            url: `${API_URL}/`,
-        })
+    const handleAddCartClick = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/addcart/${_id}`,
+                headers: {
+                    authorization: `Bearer ${token} `
+                }
+            }).then(res => res.status == 200 && Alert.alert('Added to cart.'))
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 
     const handleFavoriteClick = async () => {
