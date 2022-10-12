@@ -44,6 +44,13 @@ const ProductDetail = ({ navigation, route }) => {
             headerBackTitleStyle: {
                 color: 'white',
             },
+            headerRight: () => (
+                <View>
+                    <TouchableOpacity>
+                        <Icon name='cart-plus' size={24} color='white' />
+                    </TouchableOpacity>
+                </View>
+            )
         })
     }, [])
 
