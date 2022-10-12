@@ -1,10 +1,10 @@
 import axios from 'axios'
-import React, {useLayoutEffect} from 'react'
-import {useState} from 'react'
-import {useEffect} from 'react'
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
-import {Avatar, Card} from 'react-native-elements'
-import {globalStyles} from '../../../assets/styles/globalStyles'
+import React, { useLayoutEffect } from 'react'
+import { useState } from 'react'
+import { useEffect } from 'react'
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { Avatar, Card } from 'react-native-elements'
+import { globalStyles } from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     PRIMARY_COLOR,
@@ -12,25 +12,28 @@ import {
 } from '../../../components/constants'
 import BottomMenuBar from '../components/BottomMenuBar'
 import ModalLoading from '~/components/utils/ModalLoading'
-import {Dimensions} from 'react-native'
-import {Image} from 'react-native'
-import {SimplePaginationDot} from '../components'
+import { Dimensions } from 'react-native'
+import { Image } from 'react-native'
+import { SimplePaginationDot } from '../components'
 import Carousel from 'react-native-anchor-carousel'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {TouchableOpacity} from 'react-native'
+import { TouchableOpacity } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const ProductDetail = ({navigation, route}) => {
-    const {_id} = route.params.data
+const ProductDetail = ({ navigation, route }) => {
+    const { _id } = route.params.data
     const [product, setProduct] = useState([])
     const [productOwner, setProductOwner] = useState([])
     const [modalLoading, setModalLoading] = useState(false)
     const [listImages, setListImages] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
+    const [favorite, setFavorite] = useState(false)
+    const [ratingValue, setRatingValue] = useState(0)
 
     useLayoutEffect(() => {
         navigation.setOptions({
             title: '',
-            headerStyle: {backgroundColor: PRIMARY_COLOR},
+            headerStyle: { backgroundColor: PRIMARY_COLOR },
             headerTintColor: 'white',
             headerShown: true,
             headerBackTitleStyle: {
@@ -50,6 +53,7 @@ const ProductDetail = ({navigation, route}) => {
                     setProduct(res.data.product)
                     setListImages(res.data.product.detailImages)
                     setModalLoading(false)
+                    setRatingValue(res.data.product.rating.ratingValue)
 
                     console.log(res.data.product)
 
@@ -69,6 +73,51 @@ const ProductDetail = ({navigation, route}) => {
 
     function handleCarouselScrollEnd(item, index) {
         setCurrentIndex(index)
+    }
+
+    const handleAddCartClick = () => {
+        axios({
+            method: '',
+            url: `${API_URL}/`,
+        })
+    }
+
+    const handleFavoriteClick = async () => {
+        const token = await AsyncStorage.getItem('token')
+
+        if (!favorite) {
+            try {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/favorite/${_id}`,
+                    headers: {
+                        authorization: `Bearer ${token} `
+                    }
+                }).then(res => {
+                    setFavorite(true)
+                    console.log(res.data)
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        } else {
+            try {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/unfavorite/${_id}`,
+                    headers: {
+                        authorization: `Bearer ${token} `
+                    }
+                }).then(res => {
+                    setFavorite(false)
+                    console.log(res.data)
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+
     }
 
     return (
@@ -95,7 +144,7 @@ const ProductDetail = ({navigation, route}) => {
                     separatorWidth={2}
                     inActiveOpacity={0.5}
                     onSnapToItem={index => setIndex(index)}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                         <Image
                             source={{
                                 uri: item,
@@ -139,42 +188,57 @@ const ProductDetail = ({navigation, route}) => {
                 </View>
             </Card> */}
             <Card containerStyle={globalStyles.cardContainer}>
-                <View
+                <Text
                     style={{
-                        flexDirection: 'row',
-                        marginRight: 5,
+                        fontWeight: 'bold',
+                        color: 'black',
+                        fontSize: 20,
                     }}>
-                    <Text
-                        style={{
-                            fontWeight: 'bold',
-                            color: 'black',
-                            fontSize: 18,
-                        }}>
-                        {product.productName}
-                    </Text>
-                    <View style={{flex: 1, justifyContent: 'center'}} />
-                    <TouchableOpacity style={styles.touchStyle}>
+                    {product.productName}
+                </Text>
+
+                <Text
+                    style={{
+                        color: 'red',
+                        fontSize: 18,
+                    }}>
+                    Price: {Intl.NumberFormat('en-US').format(product.price)} đ
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Icon name='star' size={15} color='#FA8128' solid={1 <= ratingValue} />
+                    <Icon name='star' size={15} color='#FA8128' solid={2 <= ratingValue} />
+                    <Icon name='star' size={15} color='#FA8128' solid={3 <= ratingValue} />
+                    <Icon name='star' size={15} color='#FA8128' solid={4 <= ratingValue} />
+                    <Icon name='star' size={15} color='#FA8128' solid={5 <= ratingValue} />
+                    <Text style={{
+                        color: 'black',
+                        fontSize: 16,
+                        marginLeft: 5
+                    }}>{ratingValue}   |   Sold: {Intl.NumberFormat('en-US').format(product.soldCount)}</Text>
+                    <View style={{ flex: 1 }} />
+                    <TouchableOpacity
+                        onPress={handleFavoriteClick}
+                        style={{ ...styles.touchStyle, }}>
+                        <Icon name="heart" size={24} color={favorite ? 'red' : PRIMARY_COLOR} solid={favorite} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={handleAddCartClick}
+                        style={styles.touchStyle}>
                         <Icon
                             name="cart-plus"
                             size={24}
                             color={PRIMARY_COLOR}
                         />
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{...styles.touchStyle, marginLeft: 10}}>
-                        <Icon name="heart" size={24} color={PRIMARY_COLOR} />
-                    </TouchableOpacity>
-                </View>
-                <Text>{product.description}</Text>
-                <Text
-                    style={{
-                        color: 'red',
-                        fontSize: 16,
-                    }}>
-                    Price: {Intl.NumberFormat('en-US').format(product.price)} đ
-                </Text>
-            </Card>
 
+                </View>
+            </Card>
+            <Card containerStyle={{
+                ...globalStyles.cardContainer,
+                marginTop: 5
+            }}>
+                <Text>{product.description}</Text>
+            </Card>
             <BottomMenuBar />
         </SafeAreaView>
     )
@@ -185,8 +249,6 @@ export default ProductDetail
 const styles = StyleSheet.create({
     touchStyle: {
         borderRadius: 10,
-        borderColor: '#FDA172',
-        borderWidth: 1,
         padding: 5,
     },
 })

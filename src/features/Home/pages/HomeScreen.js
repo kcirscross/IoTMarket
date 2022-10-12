@@ -120,7 +120,7 @@ const HomeScreen = ({navigation}) => {
                         }}
                     />
                     <TouchableOpacity onPress={handleNotificationClick}>
-                        <Icon name="bell" size={24} color="white" />
+                        <Icon name="bell" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
             ),

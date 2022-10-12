@@ -1,21 +1,20 @@
+import React from 'react'
 import {
     Dimensions,
     Image,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native'
-import React from 'react'
-import {Card} from 'react-native-elements'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import Icon from 'react-native-vector-icons/FontAwesome5'
+import { Card } from 'react-native-elements'
+import { globalStyles } from '../../../assets/styles/globalStyles'
 
-const ProductItem = ({data, navigation}) => {
-    const {price, productName, thumbnailImage} = data
+const ProductItem = ({ data, navigation }) => {
+    const { price, productName, thumbnailImage } = data
 
     const handleProductItemClick = () => {
-        navigation.navigate('ProductDetail', {data: data})
+        navigation.navigate('ProductDetail', { data: data })
     }
 
     return (
@@ -28,7 +27,7 @@ const ProductItem = ({data, navigation}) => {
                 <TouchableOpacity onPress={handleProductItemClick}>
                     <View>
                         <Image
-                            source={{uri: thumbnailImage}}
+                            source={{ uri: thumbnailImage }}
                             resizeMode="contain"
                             resizeMethod="resize"
                             style={{
@@ -55,7 +54,7 @@ const ProductItem = ({data, navigation}) => {
                             style={{
                                 color: 'red',
                             }}>
-                            {parseInt(price)} đ
+                            {Intl.NumberFormat('en-US').format(price)} đ
                         </Text>
                     </View>
                 </TouchableOpacity>
