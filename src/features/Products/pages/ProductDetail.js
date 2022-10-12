@@ -19,8 +19,12 @@ import Carousel from 'react-native-anchor-carousel'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { TouchableOpacity } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useSelector } from 'react-redux'
 
 const ProductDetail = ({ navigation, route }) => {
+
+    const currentUser = useSelector(state => state.user)
+
     const { _id } = route.params.data
     const [product, setProduct] = useState([])
     const [productOwner, setProductOwner] = useState([])
@@ -54,6 +58,10 @@ const ProductDetail = ({ navigation, route }) => {
                     setListImages(res.data.product.detailImages)
                     setModalLoading(false)
                     setRatingValue(res.data.product.rating.ratingValue)
+
+                    res.data.product.peopleFavoriteThisProduct.forEach(id => {
+                        id == currentUser._id && setFavorite(true)
+                    });
 
                     console.log(res.data.product)
 
@@ -116,8 +124,6 @@ const ProductDetail = ({ navigation, route }) => {
                 console.log(error)
             }
         }
-
-
     }
 
     return (
