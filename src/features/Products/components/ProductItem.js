@@ -5,16 +5,16 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native'
-import { Card } from 'react-native-elements'
-import { globalStyles } from '../../../assets/styles/globalStyles'
+import {Card} from 'react-native-elements'
+import {globalStyles} from '../../../assets/styles/globalStyles'
 
-const ProductItem = ({ data, navigation }) => {
-    const { price, productName, thumbnailImage } = data
+const ProductItem = ({data, navigation}) => {
+    const {price, productName, thumbnailImage, soldCount} = data
 
     const handleProductItemClick = () => {
-        navigation.navigate('ProductDetail', { data: data })
+        navigation.navigate('ProductDetail', {_id: data._id})
     }
 
     return (
@@ -27,7 +27,7 @@ const ProductItem = ({ data, navigation }) => {
                 <TouchableOpacity onPress={handleProductItemClick}>
                     <View>
                         <Image
-                            source={{ uri: thumbnailImage }}
+                            source={{uri: thumbnailImage}}
                             resizeMode="contain"
                             resizeMethod="resize"
                             style={{
@@ -50,12 +50,22 @@ const ProductItem = ({ data, navigation }) => {
                             }}>
                             {productName}
                         </Text>
-                        <Text
+                        <View
                             style={{
-                                color: 'red',
+                                flexDirection: 'row',
                             }}>
-                            {Intl.NumberFormat('en-US').format(price)} đ
-                        </Text>
+                            <Text
+                                style={{
+                                    color: 'red',
+                                }}>
+                                {Intl.NumberFormat('en-US').format(price)} đ
+                            </Text>
+                            <View style={{flex: 1}} />
+                            <Text>
+                                Sold:{' '}
+                                {Intl.NumberFormat('en-US').format(soldCount)}
+                            </Text>
+                        </View>
                     </View>
                 </TouchableOpacity>
             </Card>

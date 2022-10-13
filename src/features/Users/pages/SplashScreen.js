@@ -7,6 +7,8 @@ import {globalStyles} from '~/assets/styles/globalStyles'
 import {API_URL} from '../../../components/constants'
 import {signIn} from '../userSlice'
 import {useDispatch} from 'react-redux'
+import {getCart} from '../../Products/cartSlice'
+import {getFavorite} from '../../Products/favoriteSlice'
 
 const SplashScreen = ({navigation}) => {
     const dispatch = useDispatch()
@@ -60,6 +62,10 @@ const SplashScreen = ({navigation}) => {
                                 const action = signIn(res.data.data)
                                 dispatch(action)
 
+                                getCartAfterSignIn()
+
+                                getFavoriteAfterSignIn()
+
                                 navigation.replace('BottomNavBar')
                             }
                         })
@@ -84,6 +90,38 @@ const SplashScreen = ({navigation}) => {
             }
         } catch (error) {
             console.log('Error when get data', error)
+        }
+    }
+
+    const getCartAfterSignIn = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+
+            axios({
+                method: 'get',
+                url: `${API_URL}/user/cart`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+            }).then(res => dispatch(getCart(res.data.cart)))
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getFavoriteAfterSignIn = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+
+            axios({
+                method: 'get',
+                url: `${API_URL}/user/favorite`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+            }).then(res => dispatch(getFavorite(res.data.favorites)))
+        } catch (error) {
+            console.log(error)
         }
     }
 

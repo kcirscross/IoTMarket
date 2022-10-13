@@ -1,3 +1,4 @@
 import CategoryItem from './CategoryItem'
+import CategoryItemHorizontal from './CategoryItemHorizontal'
 
-export {CategoryItem}
+export {CategoryItem, CategoryItemHorizontal}

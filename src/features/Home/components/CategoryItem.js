@@ -4,7 +4,7 @@ import {Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 
 const CategoryItem = data => {
-    const [{categoryName, categoryImage}] = data.data
+    const [{categoryName, image}] = data.data
     const index = data.data[1]
 
     const handleCategoryItemClick = () => {
@@ -16,18 +16,29 @@ const CategoryItem = data => {
             containerStyle={{
                 ...globalStyles.cardContainer,
                 marginLeft:
-                    index == Math.round(data.data[2] / 2) || index == 0 ? 0 : 5,
-                marginTop: index >= Math.round(data.data[2] / 2) ? 5 : 0,
+                    data.data[2] > 4
+                        ? index == Math.round(data.data[2] / 2) || index == 0
+                            ? 0
+                            : 5
+                        : index == 0
+                        ? 0
+                        : 5,
+                marginTop:
+                    index >= Math.round(data.data[2] / 2) && data.data[2] > 4
+                        ? 5
+                        : 0,
             }}>
             <TouchableOpacity
                 onPress={handleCategoryItemClick}
                 style={styles.categoryItem}>
                 <Image
-                    source={categoryImage}
+                    source={{uri: image}}
                     style={{
-                        width: 70,
+                        width: 90,
                         height: 50,
                     }}
+                    resizeMethod="scale"
+                    resizeMode="contain"
                 />
                 <Text
                     style={{

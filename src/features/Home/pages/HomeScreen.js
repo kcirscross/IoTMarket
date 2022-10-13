@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import {Input} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
@@ -23,72 +24,31 @@ const HomeScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
 
     const [listProducts, setListProducts] = useState([])
+    const [listCategories, setListCategories] = useState([])
 
     useEffect(() => {
-        try {
-            axios({
-                method: 'get',
-                url: `${API_URL}/product`,
-            }).then(res => {
+        axios({
+            method: 'get',
+            url: `${API_URL}/product`,
+        })
+            .then(res => {
                 setListProducts(res.data.products)
             })
-        } catch (error) {}
+            .catch(error => console.log(error))
     }, [])
 
-    const fakeData = [
-        {
-            categoryName: 'PC',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Laptop',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item PC',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-        {
-            categoryName: 'Item Phone',
-            categoryImage: require('~/assets/images/logo.jpg'),
-        },
-    ]
+    useEffect(() => {
+        axios({
+            method: 'get',
+            url: `${API_URL}/category`,
+        })
+            .then(res => {
+                if (res.status == 200) {
+                    setListCategories(res.data.categories)
+                }
+            })
+            .catch(error => console.log(error))
+    }, [])
 
     const handleNotificationClick = () => {
         console.log('Click Notification')
@@ -103,7 +63,7 @@ const HomeScreen = ({navigation}) => {
             headerTitle: () => (
                 <View
                     style={{
-                        width: 350,
+                        width: 315,
                         alignItems: 'center',
                         justifyContent: 'center',
                         flexDirection: 'row',
@@ -119,8 +79,21 @@ const HomeScreen = ({navigation}) => {
                             marginTop: 25,
                         }}
                     />
-                    <TouchableOpacity onPress={handleNotificationClick}>
-                        <Icon name="bell" size={30} color="white" />
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Cart')}
+                        style={{
+                            marginLeft: 5,
+                        }}>
+                        <Ion name="cart-outline" size={30} color="white" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{marginLeft: 10}}
+                        onPress={handleNotificationClick}>
+                        <Ion
+                            name="notifications-outline"
+                            size={26}
+                            color="white"
+                        />
                     </TouchableOpacity>
                 </View>
             ),
@@ -161,17 +134,27 @@ const HomeScreen = ({navigation}) => {
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}>
                         <FlatList
-                            numColumns={Math.ceil(fakeData.length / 2)}
+                            numColumns={
+                                listCategories.length > 4
+                                    ? Math.ceil(listCategories.length / 2)
+                                    : listCategories.length
+                            }
+                            key={
+                                listCategories.length > 4
+                                    ? Math.ceil(listCategories.length / 2)
+                                    : listCategories.length
+                            }
                             scrollEnabled={false}
                             contentContainerStyle={{
-                                alignSelf: 'flex-start',
+                                justifyContent: 'center',
+                                alignItems: 'center',
                             }}
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
-                            data={fakeData}
+                            data={listCategories}
                             renderItem={({item, index}) => (
                                 <CategoryItem
-                                    data={[item, index, fakeData.length]}
+                                    data={[item, index, listCategories.length]}
                                     key={index}
                                 />
                             )}

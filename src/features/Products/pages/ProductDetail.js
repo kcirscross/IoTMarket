@@ -1,10 +1,10 @@
 import axios from 'axios'
-import React, { useLayoutEffect } from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
-import { Avatar, Card } from 'react-native-elements'
-import { globalStyles } from '../../../assets/styles/globalStyles'
+import React, {useLayoutEffect} from 'react'
+import {useState} from 'react'
+import {useEffect} from 'react'
+import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
+import {Avatar, Card} from 'react-native-elements'
+import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     PRIMARY_COLOR,
@@ -12,21 +12,23 @@ import {
 } from '../../../components/constants'
 import BottomMenuBar from '../components/BottomMenuBar'
 import ModalLoading from '~/components/utils/ModalLoading'
-import { Dimensions } from 'react-native'
-import { Image } from 'react-native'
-import { SimplePaginationDot } from '../components'
+import {Dimensions} from 'react-native'
+import {Image} from 'react-native'
+import {SimplePaginationDot} from '../components'
 import Carousel from 'react-native-anchor-carousel'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import { TouchableOpacity } from 'react-native'
+import Ion from 'react-native-vector-icons/Ionicons'
+import {TouchableOpacity} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useSelector } from 'react-redux'
-import { Alert } from 'react-native'
+import {useDispatch, useSelector} from 'react-redux'
+import {Alert} from 'react-native'
+import {addFavorite, removeFavorite} from '../favoriteSlice'
 
-const ProductDetail = ({ navigation, route }) => {
-
+const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
+    const dispatch = useDispatch()
 
-    const { _id } = route.params.data
+    const _id = route.params._id
     const [product, setProduct] = useState([])
     const [productOwner, setProductOwner] = useState([])
     const [modalLoading, setModalLoading] = useState(false)
@@ -38,19 +40,32 @@ const ProductDetail = ({ navigation, route }) => {
     useLayoutEffect(() => {
         navigation.setOptions({
             title: '',
-            headerStyle: { backgroundColor: PRIMARY_COLOR },
+            headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
             headerBackTitleStyle: {
                 color: 'white',
             },
             headerRight: () => (
-                <View>
-                    <TouchableOpacity>
-                        <Icon name='cart-plus' size={24} color='white' />
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Favorite')}
+                        style={{
+                            marginRight: 5,
+                        }}>
+                        <Icon
+                            name="heart"
+                            size={24}
+                            color="white"
+                            solid={true}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Cart')}>
+                        <Ion name="cart-outline" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
-            )
+            ),
         })
     }, [])
 
@@ -69,7 +84,7 @@ const ProductDetail = ({ navigation, route }) => {
 
                     res.data.product.peopleFavoriteThisProduct.forEach(id => {
                         id == currentUser._id && setFavorite(true)
-                    });
+                    })
 
                     console.log(res.data.product)
 
@@ -98,13 +113,12 @@ const ProductDetail = ({ navigation, route }) => {
                 method: 'patch',
                 url: `${API_URL}/user/addcart/${_id}`,
                 headers: {
-                    authorization: `Bearer ${token} `
-                }
+                    authorization: `Bearer ${token} `,
+                },
             }).then(res => res.status == 200 && Alert.alert('Added to cart.'))
         } catch (error) {
             console.log(error)
         }
-
     }
 
     const handleFavoriteClick = async () => {
@@ -116,11 +130,11 @@ const ProductDetail = ({ navigation, route }) => {
                     method: 'patch',
                     url: `${API_URL}/user/favorite/${_id}`,
                     headers: {
-                        authorization: `Bearer ${token} `
-                    }
+                        authorization: `Bearer ${token} `,
+                    },
                 }).then(res => {
                     setFavorite(true)
-                    console.log(res.data)
+                    dispatch(addFavorite(product))
                 })
             } catch (error) {
                 console.log(error)
@@ -131,11 +145,11 @@ const ProductDetail = ({ navigation, route }) => {
                     method: 'patch',
                     url: `${API_URL}/user/unfavorite/${_id}`,
                     headers: {
-                        authorization: `Bearer ${token} `
-                    }
+                        authorization: `Bearer ${token} `,
+                    },
                 }).then(res => {
                     setFavorite(false)
-                    console.log(res.data)
+                    dispatch(removeFavorite(product._id))
                 })
             } catch (error) {
                 console.log(error)
@@ -167,7 +181,7 @@ const ProductDetail = ({ navigation, route }) => {
                     separatorWidth={2}
                     inActiveOpacity={0.5}
                     onSnapToItem={index => setIndex(index)}
-                    renderItem={({ item }) => (
+                    renderItem={({item}) => (
                         <Image
                             source={{
                                 uri: item,
@@ -227,39 +241,73 @@ const ProductDetail = ({ navigation, route }) => {
                     }}>
                     Price: {Intl.NumberFormat('en-US').format(product.price)} đ
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Icon name='star' size={15} color='#FA8128' solid={1 <= ratingValue} />
-                    <Icon name='star' size={15} color='#FA8128' solid={2 <= ratingValue} />
-                    <Icon name='star' size={15} color='#FA8128' solid={3 <= ratingValue} />
-                    <Icon name='star' size={15} color='#FA8128' solid={4 <= ratingValue} />
-                    <Icon name='star' size={15} color='#FA8128' solid={5 <= ratingValue} />
-                    <Text style={{
-                        color: 'black',
-                        fontSize: 16,
-                        marginLeft: 5
-                    }}>{ratingValue}   |   Sold: {Intl.NumberFormat('en-US').format(product.soldCount)}</Text>
-                    <View style={{ flex: 1 }} />
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Icon
+                        name="star"
+                        size={15}
+                        color="#FA8128"
+                        solid={1 <= ratingValue}
+                    />
+                    <Icon
+                        name="star"
+                        size={15}
+                        color="#FA8128"
+                        solid={2 <= ratingValue}
+                    />
+                    <Icon
+                        name="star"
+                        size={15}
+                        color="#FA8128"
+                        solid={3 <= ratingValue}
+                    />
+                    <Icon
+                        name="star"
+                        size={15}
+                        color="#FA8128"
+                        solid={4 <= ratingValue}
+                    />
+                    <Icon
+                        name="star"
+                        size={15}
+                        color="#FA8128"
+                        solid={5 <= ratingValue}
+                    />
+                    <Text
+                        style={{
+                            color: 'black',
+                            fontSize: 16,
+                            marginLeft: 5,
+                        }}>
+                        {ratingValue} | Sold:{' '}
+                        {Intl.NumberFormat('en-US').format(product.soldCount)}
+                    </Text>
+                    <View style={{flex: 1}} />
                     <TouchableOpacity
                         onPress={handleFavoriteClick}
-                        style={{ ...styles.touchStyle, }}>
-                        <Icon name="heart" size={24} color={favorite ? 'red' : PRIMARY_COLOR} solid={favorite} />
+                        style={{...styles.touchStyle}}>
+                        <Icon
+                            name="heart"
+                            size={24}
+                            color={favorite ? 'red' : PRIMARY_COLOR}
+                            solid={favorite}
+                        />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleAddCartClick}
                         style={styles.touchStyle}>
-                        <Icon
-                            name="cart-plus"
-                            size={24}
+                        <Ion
+                            name="cart-outline"
+                            size={30}
                             color={PRIMARY_COLOR}
                         />
                     </TouchableOpacity>
-
                 </View>
             </Card>
-            <Card containerStyle={{
-                ...globalStyles.cardContainer,
-                marginTop: 5
-            }}>
+            <Card
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <Text>{product.description}</Text>
             </Card>
             <BottomMenuBar />

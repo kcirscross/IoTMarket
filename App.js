@@ -1,18 +1,16 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {isAllOf} from '@reduxjs/toolkit'
 import axios from 'axios'
-import React, {useEffect} from 'react'
-import {useRef} from 'react'
-import {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
-import {Provider, useDispatch, useSelector} from 'react-redux'
+import {Provider} from 'react-redux'
 import {API_URL} from './src/components/constants'
 import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
+import FavoriteScreen from './src/features/More/pages/FavoriteScreen'
 import MoreScreen from './src/features/More/pages/MoreScreen'
-import {ProductDetail} from './src/features/Products'
+import {CartScreen, ProductDetail} from './src/features/Products'
 import {ProductItem} from './src/features/Products/components'
 import {
     ChangeAddressScreen,
@@ -24,7 +22,6 @@ import {
     SignUpScreen,
     SplashScreen,
 } from './src/features/Users'
-import {updateOnlineStatus} from './src/features/Users/userSlice'
 import {store} from './store'
 
 const Stack = createNativeStackNavigator()
@@ -124,6 +121,8 @@ export default function App() {
                         name="ChangePassword"
                         component={ChangePasswordScreen}
                     />
+                    <Stack.Screen name="Cart" component={CartScreen} />
+                    <Stack.Screen name="Favorite" component={FavoriteScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </Provider>

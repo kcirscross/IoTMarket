@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 import {Avatar} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector, useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
@@ -121,12 +122,7 @@ const MoreScreen = ({navigation}) => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.container}>
-                <Image
-                    source={require('~/assets/images/follow.png')}
-                    style={{
-                        tintColor: 'red',
-                    }}
-                />
+                <Ion name="people-outline" size={30} color={'blue'} />
                 <Text style={styles.textStyle}>Follow</Text>
             </TouchableOpacity>
 
@@ -150,7 +146,9 @@ const MoreScreen = ({navigation}) => {
                 <Text style={styles.textStyle}>Sold Products</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.container}>
+            <TouchableOpacity
+                style={styles.container}
+                onPress={() => navigation.navigate('Favorite')}>
                 <Icon name="heart" color={'#FF4122'} solid={true} size={24} />
                 <Text style={styles.textStyle}>Favorite Products</Text>
             </TouchableOpacity>
