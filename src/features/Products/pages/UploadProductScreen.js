@@ -10,9 +10,11 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import {ScrollView} from 'react-native'
 import {TouchableOpacity} from 'react-native'
 import {CategoryItemHorizontal} from '../../Home/components'
+import ModalLoading from '~/components/utils/ModalLoading'
 
 const UploadProductScreen = ({navigation}) => {
     const [listCategories, setListCategories] = useState([])
+    const [modalLoading, setModalLoading] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -25,6 +27,7 @@ const UploadProductScreen = ({navigation}) => {
     }, [])
 
     useEffect(() => {
+        setModalLoading(true)
         axios({
             method: 'get',
             url: `${API_URL}/category`,
@@ -32,10 +35,12 @@ const UploadProductScreen = ({navigation}) => {
             .then(res => {
                 if (res.status == 200) {
                     setListCategories(res.data.categories)
+                    setModalLoading(false)
                 }
             })
             .catch(error => console.log(error))
     }, [])
+
     return (
         <SafeAreaView style={globalStyles.container}>
             <Text
@@ -47,6 +52,7 @@ const UploadProductScreen = ({navigation}) => {
                 }}>
                 Choose Category
             </Text>
+            <ModalLoading visible={modalLoading} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 {listCategories.map((category, index) => (
                     <CategoryItemHorizontal key={index} category={category} />

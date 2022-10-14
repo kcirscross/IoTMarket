@@ -1,7 +1,10 @@
+import {transform} from '@babel/core'
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
+import {Animated} from 'react-native'
 import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {ChatsScreen} from '~/features/Chats'
 import {HomeScreen} from '~/features/Home'
 import {MoreScreen} from '~/features/More'
@@ -12,8 +15,8 @@ const Tab = createBottomTabNavigator()
 
 const screenOptions = () => ({
     tabBarStyle: {
-        backgroundColor: SECONDARY_COLOR,
-        height: 50,
+        backgroundColor: 'white',
+        height: 65,
         justifyContent: 'center',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
@@ -59,11 +62,10 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Icon
-                                name="home"
-                                size={focused ? 36 : 24}
+                            <Ion
+                                name={focused ? 'home' : 'home-outline'}
+                                size={focused ? 36 : 30}
                                 color={focused ? PRIMARY_COLOR : '#999999'}
-                                solid={false}
                             />
                         </View>
                     ),
@@ -75,10 +77,11 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Icon
-                                name="store"
+                            <Ion
+                                name={focused ? 'store-slash' : 'store-alt'}
                                 size={focused ? 36 : 24}
                                 color={focused ? PRIMARY_COLOR : '#999999'}
+                                light={true}
                             />
                         </View>
                     ),
