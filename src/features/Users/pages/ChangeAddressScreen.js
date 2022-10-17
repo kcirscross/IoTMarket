@@ -1,23 +1,24 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {useLayoutEffect} from 'react'
-import {API_URL, PRIMARY_COLOR, TOKEN} from '../../../components/constants'
-import DropDownPicker from 'react-native-dropdown-picker'
-import {useState} from 'react'
-import {SafeAreaView} from 'react-native'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {useEffect} from 'react'
-import axios from 'axios'
-import {Input} from 'react-native-elements'
-import {TouchableOpacity} from 'react-native'
-import {Alert} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {KeyboardAvoidingView} from 'react-native'
-import {TouchableWithoutFeedback} from 'react-native'
-import {Keyboard} from 'react-native'
-import {updateAddress} from '../userSlice'
+import axios from 'axios'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from 'react-native'
+import DropDownPicker from 'react-native-dropdown-picker'
+import {Input} from 'react-native-elements'
 import {useDispatch} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {updateAddress} from '../userSlice'
 
 const ChangeAddressScreen = ({navigation, route}) => {
     const [openCity, setOpenCity] = useState(false)

@@ -62,9 +62,9 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Ion
-                                name={focused ? 'home' : 'home-outline'}
-                                size={focused ? 36 : 30}
+                            <Icon
+                                name={'home'}
+                                size={focused ? 36 : 24}
                                 color={focused ? PRIMARY_COLOR : '#999999'}
                             />
                         </View>
@@ -77,8 +77,8 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Ion
-                                name={focused ? 'store-slash' : 'store-alt'}
+                            <Icon
+                                name={'store'}
                                 size={focused ? 36 : 24}
                                 color={focused ? PRIMARY_COLOR : '#999999'}
                                 light={true}

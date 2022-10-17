@@ -55,7 +55,11 @@ const UploadProductScreen = ({navigation}) => {
             <ModalLoading visible={modalLoading} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 {listCategories.map((category, index) => (
-                    <CategoryItemHorizontal key={index} category={category} />
+                    <CategoryItemHorizontal
+                        key={index}
+                        category={category}
+                        navigation={navigation}
+                    />
                 ))}
             </ScrollView>
         </SafeAreaView>

@@ -10,7 +10,11 @@ import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
 import FavoriteScreen from './src/features/More/pages/FavoriteScreen'
 import MoreScreen from './src/features/More/pages/MoreScreen'
-import {CartScreen, ProductDetail} from './src/features/Products'
+import {
+    CartScreen,
+    ProductDetail,
+    UploadDetailScreen,
+} from './src/features/Products'
 import {ProductItem} from './src/features/Products/components'
 import {
     ChangeAddressScreen,
@@ -123,6 +127,10 @@ export default function App() {
                     />
                     <Stack.Screen name="Cart" component={CartScreen} />
                     <Stack.Screen name="Favorite" component={FavoriteScreen} />
+                    <Stack.Screen
+                        name="UploadDetail"
+                        component={UploadDetailScreen}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </Provider>

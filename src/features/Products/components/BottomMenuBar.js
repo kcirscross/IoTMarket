@@ -1,7 +1,7 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import React from 'react'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
 
 const BottomMenuBar = () => {
     return (
@@ -14,6 +14,9 @@ const BottomMenuBar = () => {
                 width: '100%',
                 justifyContent: 'space-between',
                 borderTopEndRadius: 10,
+                borderTopLeftRadius: 10,
+                borderTopColor: SECONDARY_COLOR,
+                borderTopWidth: 3,
             }}>
             <TouchableOpacity
                 style={{

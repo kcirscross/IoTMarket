@@ -1,21 +1,22 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import {useLayoutEffect} from 'react'
-import {SafeAreaView} from 'react-native'
-import {TouchableWithoutFeedback} from 'react-native'
-import {KeyboardAvoidingView} from 'react-native'
-import {Keyboard} from 'react-native'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {Input} from 'react-native-elements'
-import {useDispatch, useSelector} from 'react-redux'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import {useState} from 'react'
-import {TouchableOpacity} from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import {Alert} from 'react-native'
+import React, {useLayoutEffect, useState} from 'react'
+import {
+    Alert,
+    Keyboard,
+    KeyboardAvoidingView,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+} from 'react-native'
+import {Input} from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome5'
+import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import {signOut} from '../userSlice'
 
 const ChangePasswordScreen = ({navigation}) => {

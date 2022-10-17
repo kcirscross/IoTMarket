@@ -3,7 +3,7 @@ import React, {useLayoutEffect} from 'react'
 import {useState} from 'react'
 import {useEffect} from 'react'
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
-import {Avatar, Card} from 'react-native-elements'
+import {Avatar, Badge, Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
@@ -86,17 +86,16 @@ const ProductDetail = ({navigation, route}) => {
                         id == currentUser._id && setFavorite(true)
                     })
 
-                    console.log(res.data.product)
+                    // console.log(res.data.product)
 
-                    // axios({
-                    //     method: 'get',
-                    //     url: `${API_URL}/user/${res.data.product.ownerId}`,
-                    // }).then(res => {
-                    //     if (res.status == 200) {
-                    //         // setProductOwner(res.data)
-                    //         console.log(res.data)
-                    //     }
-                    // })
+                    axios({
+                        method: 'get',
+                        url: `${API_URL}/user/${res.data.product.ownerId}`,
+                    }).then(res => {
+                        if (res.status == 200) {
+                            setProductOwner(res.data.userInfo)
+                        }
+                    })
                 }
             })
             .catch(error => console.log(error.message))
@@ -157,6 +156,44 @@ const ProductDetail = ({navigation, route}) => {
         }
     }
 
+    const convertTime = ms => {
+        let temp = (Date.now() - ms) / 1000
+        if (temp < 120) {
+            return 'Just now'
+        } else if (temp >= 120 && temp / 60 / 60 < 1) {
+            return (temp / 60).toFixed(0) + ' minutes ago'
+        } else if (temp / 60 / 60 >= 1 && temp / 60 / 60 < 2) {
+            return '1 hour ago'
+        } else if (temp / 60 / 60 >= 2 && temp / 60 / 60 / 24 < 1) {
+            return (temp / 60 / 60).toFixed(0) + ' hours ago'
+        } else if (temp / 60 / 60 / 24 >= 1 && temp / 60 / 60 / 24 < 2) {
+            return '1 day ago'
+        } else {
+            return (temp / 60 / 60 / 24).toFixed(0) + ' days ago'
+        }
+    }
+
+    const handleFollowClick = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/follow/${productOwner._id}`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+            })
+                .then(res => {
+                    if (res == 200) {
+                        Alert.alert('Followed')
+                    }
+                })
+                .catch(error => console.log(error))
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+
     return (
         <SafeAreaView
             style={{
@@ -203,28 +240,68 @@ const ProductDetail = ({navigation, route}) => {
                 />
             </View>
 
-            {/* <Card containerStyle={globalStyles.cardContainer}>
+            <Card containerStyle={globalStyles.cardContainer}>
                 <View
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                     }}>
-                    <Avatar
-                        rounded
-                        size={64}
-                        source={require('~/assets/images/logo.jpg')}
-                    />
-                    <Text
+                    <View>
+                        <Avatar
+                            rounded
+                            size={'large'}
+                            source={{uri: productOwner.avatar}}
+                            avatarStyle={{
+                                borderWidth: 1,
+                                borderColor: SECONDARY_COLOR,
+                            }}
+                        />
+                        <Badge
+                            value=" "
+                            status={
+                                productOwner.onlineStatus == 'Online'
+                                    ? 'success'
+                                    : 'warning'
+                            }
+                            containerStyle={{
+                                position: 'absolute',
+                                bottom: 2,
+                                right: 5,
+                            }}
+                        />
+                    </View>
+                    <View>
+                        <Text
+                            style={{
+                                fontWeight: 'bold',
+                                color: 'black',
+                                marginLeft: 10,
+                                fontSize: 18,
+                            }}>
+                            {productOwner.fullName}
+                        </Text>
+                        <Text style={{color: 'black', marginLeft: 10}}>
+                            {productOwner.onlineStatus == 'Online'
+                                ? 'Online'
+                                : convertTime(
+                                      Date.parse(productOwner.updatedAt),
+                                  )}
+                        </Text>
+                    </View>
+                    <View style={{flex: 1}} />
+                    <TouchableOpacity
+                        onPress={handleFollowClick}
                         style={{
-                            fontWeight: 'bold',
-                            color: 'black',
-                            marginLeft: 10,
+                            ...styles.touchStyle,
+                            backgroundColor: PRIMARY_COLOR,
+                            marginRight: 5,
                         }}>
-                        {productDisplayName}
-                    </Text>
+                        <Text style={{color: 'white'}}>Follow</Text>
+                    </TouchableOpacity>
                 </View>
-            </Card> */}
-            <Card containerStyle={globalStyles.cardContainer}>
+            </Card>
+            <Card
+                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
                 <Text
                     style={{
                         fontWeight: 'bold',

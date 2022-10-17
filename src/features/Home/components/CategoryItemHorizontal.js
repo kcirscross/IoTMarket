@@ -4,9 +4,10 @@ import {TouchableOpacity} from 'react-native'
 import {Image} from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 
-const CategoryItemHorizontal = ({category}) => {
+const CategoryItemHorizontal = ({category, navigation}) => {
     return (
         <TouchableOpacity
+            onPress={() => navigation.navigate('UploadDetail', category)}
             style={{
                 flexDirection: 'row',
                 alignItems: 'center',

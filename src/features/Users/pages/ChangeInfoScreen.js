@@ -230,7 +230,7 @@ const ChangeInfoScreen = ({navigation}) => {
                         transparent={true}
                         visible={modalAvatarVisible}>
                         <SafeAreaView
-                            onTouchStart={() => setModalAvatarVisible(false)}
+                            // onTouchStart={() => setModalAvatarVisible(false)}
                             style={{
                                 flex: 1,
                             }}>
