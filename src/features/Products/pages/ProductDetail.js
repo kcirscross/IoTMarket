@@ -289,15 +289,36 @@ const ProductDetail = ({navigation, route}) => {
                         </Text>
                     </View>
                     <View style={{flex: 1}} />
-                    <TouchableOpacity
-                        onPress={handleFollowClick}
+                    <View
                         style={{
-                            ...styles.touchStyle,
-                            backgroundColor: PRIMARY_COLOR,
-                            marginRight: 5,
+                            justifyContent: 'center',
+                            alignItems: 'center',
                         }}>
-                        <Text style={{color: 'white'}}>Follow</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleFollowClick}
+                            style={{
+                                ...styles.touchStyle,
+                                backgroundColor: PRIMARY_COLOR,
+                                marginRight: 5,
+                            }}>
+                            <Text style={{color: 'white'}}>+ Follow</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                ...styles.touchStyle,
+                                backgroundColor: PRIMARY_COLOR,
+                                marginRight: 5,
+                                flexDirection: 'row',
+                                marginTop: 5,
+                            }}>
+                            <Ion
+                                name="chatbubble-ellipses-outline"
+                                size={18}
+                                color="white"
+                            />
+                            <Text style={{color: 'white'}}> Chat</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </Card>
             <Card
