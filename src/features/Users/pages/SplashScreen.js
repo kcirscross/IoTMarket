@@ -38,6 +38,10 @@ const SplashScreen = ({navigation}) => {
                                 const action = signIn(res.data.data)
                                 dispatch(action)
 
+                                getCartAfterSignIn()
+
+                                getFavoriteAfterSignIn()
+
                                 navigation.replace('BottomNavBar')
                             }
                         })
@@ -103,7 +107,9 @@ const SplashScreen = ({navigation}) => {
                 headers: {
                     authorization: `Bearer ${token}`,
                 },
-            }).then(res => dispatch(getCart(res.data.cart)))
+            })
+                .then(res => dispatch(getCart(res.data.cart)))
+                .catch(err => console.log(err))
         } catch (error) {
             console.log(error)
         }

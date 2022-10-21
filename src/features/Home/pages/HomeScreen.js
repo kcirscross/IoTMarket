@@ -2,6 +2,7 @@ import axios from 'axios'
 import React, {useLayoutEffect} from 'react'
 import {useState} from 'react'
 import {useEffect} from 'react'
+import {RefreshControl} from 'react-native'
 import {FlatList} from 'react-native'
 import {
     SafeAreaView,
@@ -25,8 +26,9 @@ const HomeScreen = ({navigation}) => {
 
     const [listProducts, setListProducts] = useState([])
     const [listCategories, setListCategories] = useState([])
+    const [refreshing, setRefreshing] = useState(false)
 
-    useEffect(() => {
+    const getProducts = () => {
         axios({
             method: 'get',
             url: `${API_URL}/product`,
@@ -35,6 +37,10 @@ const HomeScreen = ({navigation}) => {
                 setListProducts(res.data.products)
             })
             .catch(error => console.log(error))
+    }
+
+    useEffect(() => {
+        getProducts()
     }, [])
 
     useEffect(() => {
@@ -52,6 +58,14 @@ const HomeScreen = ({navigation}) => {
 
     const handleNotificationClick = () => {
         console.log('Click Notification')
+    }
+
+    const onRefresh = () => {
+        getProducts()
+
+        setTimeout(() => {
+            setRefreshing(false)
+        }, 2000)
     }
 
     useLayoutEffect(() => {
@@ -102,7 +116,14 @@ const HomeScreen = ({navigation}) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }>
                 {/* Ads view */}
                 <TouchableOpacity style={styles.adsView}>
                     <Text
@@ -124,12 +145,13 @@ const HomeScreen = ({navigation}) => {
                 </TouchableOpacity>
 
                 {/* List Categories */}
+                <Text style={globalStyles.textTitle}>Categories</Text>
+
                 <View
                     style={{
+                        alignItems: 'center',
                         marginTop: 5,
                     }}>
-                    <Text style={globalStyles.textTitle}>Categories</Text>
-
                     <ScrollView
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}>

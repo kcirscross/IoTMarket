@@ -1,9 +1,17 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import React from 'react'
+import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
 
-const BottomMenuBar = () => {
+const BottomMenuBar = ({productOwner}) => {
+    const handleCallClick = () => {
+        Linking.openURL(`tel:${productOwner.phoneNumber}`)
+    }
+
+    const handleSmsClick = () => {
+        Linking.openURL(`sms:${productOwner.phoneNumber}`)
+    }
+    
     return (
         <View
             style={{
@@ -19,6 +27,7 @@ const BottomMenuBar = () => {
                 borderTopWidth: 3,
             }}>
             <TouchableOpacity
+                onPress={handleCallClick}
                 style={{
                     flexDirection: 'row',
                     width: '25%',
@@ -37,6 +46,7 @@ const BottomMenuBar = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
+                onPress={handleSmsClick}
                 style={{
                     flexDirection: 'row',
                     width: '30%',
