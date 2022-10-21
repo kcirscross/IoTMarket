@@ -27,7 +27,7 @@ import {SimplePaginationDot} from '../components'
 import BottomMenuBar from '../components/BottomMenuBar'
 import {addFavorite, removeFavorite} from '../favoriteSlice'
 import Toast from 'react-native-toast-message'
-import { addFollow, removeFollow } from '../../Users/userSlice'
+import {addFollow, removeFollow} from '../../Users/userSlice'
 
 const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -42,6 +42,7 @@ const ProductDetail = ({navigation, route}) => {
     const [favorite, setFavorite] = useState(false)
     const [ratingValue, setRatingValue] = useState(0)
     const [isFollow, setIsFollow] = useState(false)
+    const [isOwner, setIsOwner] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -75,6 +76,7 @@ const ProductDetail = ({navigation, route}) => {
         })
     }, [])
 
+    //Get Product Detail
     useEffect(() => {
         setModalLoading(true)
         axios({
@@ -91,6 +93,10 @@ const ProductDetail = ({navigation, route}) => {
                     res.data.product.peopleFavoriteThisProduct.forEach(id => {
                         id == currentUser._id && setFavorite(true)
                     })
+
+                    res.data.product.ownerId == currentUser._id
+                        ? setIsOwner(true)
+                        : setIsOwner(false)
 
                     axios({
                         method: 'get',
@@ -214,7 +220,6 @@ const ProductDetail = ({navigation, route}) => {
                 })
                     .then(res => {
                         if (res.status == 200) {
-
                             dispatch(addFollow(productOwner.storeId))
 
                             Toast.show({
@@ -237,7 +242,6 @@ const ProductDetail = ({navigation, route}) => {
                 })
                     .then(res => {
                         if (res.status == 200) {
-
                             dispatch(removeFollow(productOwner.storeId))
 
                             Toast.show({
@@ -375,48 +379,50 @@ const ProductDetail = ({navigation, route}) => {
                             </Text>
                         </View>
                         <View style={{flex: 1}} />
-                        <View
-                            style={{
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}>
-                            {productOwner.storeId != '' && (
+                        {!isOwner && (
+                            <View
+                                style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                {productOwner.storeId != '' && (
+                                    <TouchableOpacity
+                                        onPress={handleFollowClick}
+                                        style={{
+                                            ...styles.touchStyle,
+                                            backgroundColor: isFollow
+                                                ? 'red'
+                                                : PRIMARY_COLOR,
+                                            marginRight: 5,
+                                        }}>
+                                        {isFollow ? (
+                                            <Text style={{color: 'white'}}>
+                                                - Follow
+                                            </Text>
+                                        ) : (
+                                            <Text style={{color: 'white'}}>
+                                                + Follow
+                                            </Text>
+                                        )}
+                                    </TouchableOpacity>
+                                )}
                                 <TouchableOpacity
-                                    onPress={handleFollowClick}
                                     style={{
                                         ...styles.touchStyle,
-                                        backgroundColor: isFollow
-                                            ? 'red'
-                                            : PRIMARY_COLOR,
+                                        backgroundColor: PRIMARY_COLOR,
                                         marginRight: 5,
+                                        flexDirection: 'row',
+                                        marginTop: 5,
                                     }}>
-                                    {isFollow ? (
-                                        <Text style={{color: 'white'}}>
-                                            - Follow
-                                        </Text>
-                                    ) : (
-                                        <Text style={{color: 'white'}}>
-                                            + Follow
-                                        </Text>
-                                    )}
+                                    <Ion
+                                        name="chatbubble-ellipses-outline"
+                                        size={18}
+                                        color="white"
+                                    />
+                                    <Text style={{color: 'white'}}> Chat</Text>
                                 </TouchableOpacity>
-                            )}
-                            <TouchableOpacity
-                                style={{
-                                    ...styles.touchStyle,
-                                    backgroundColor: PRIMARY_COLOR,
-                                    marginRight: 5,
-                                    flexDirection: 'row',
-                                    marginTop: 5,
-                                }}>
-                                <Ion
-                                    name="chatbubble-ellipses-outline"
-                                    size={18}
-                                    color="white"
-                                />
-                                <Text style={{color: 'white'}}> Chat</Text>
-                            </TouchableOpacity>
-                        </View>
+                            </View>
+                        )}
                     </View>
                 </TouchableOpacity>
             </Card>
@@ -479,25 +485,31 @@ const ProductDetail = ({navigation, route}) => {
                         {Intl.NumberFormat('en-US').format(product.soldCount)}
                     </Text>
                     <View style={{flex: 1}} />
-                    <TouchableOpacity
-                        onPress={handleFavoriteClick}
-                        style={{...styles.touchStyle}}>
-                        <Icon
-                            name="heart"
-                            size={24}
-                            color={favorite ? 'red' : PRIMARY_COLOR}
-                            solid={favorite}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={handleAddCartClick}
-                        style={styles.touchStyle}>
-                        <Ion
-                            name="cart-outline"
-                            size={30}
-                            color={PRIMARY_COLOR}
-                        />
-                    </TouchableOpacity>
+
+                    {!isOwner && (
+                        <TouchableOpacity
+                            onPress={handleFavoriteClick}
+                            style={{...styles.touchStyle}}>
+                            <Icon
+                                name="heart"
+                                size={24}
+                                color={favorite ? 'red' : PRIMARY_COLOR}
+                                solid={favorite}
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {!isOwner && (
+                        <TouchableOpacity
+                            onPress={handleAddCartClick}
+                            style={styles.touchStyle}>
+                            <Ion
+                                name="cart-outline"
+                                size={30}
+                                color={PRIMARY_COLOR}
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </Card>
             <Card
@@ -514,7 +526,7 @@ const ProductDetail = ({navigation, route}) => {
                     <Text>{product.description}</Text>
                 </View>
             </Card>
-            <BottomMenuBar productOwner={productOwner} />
+            {!isOwner && <BottomMenuBar productOwner={productOwner} />}
         </SafeAreaView>
     )
 }

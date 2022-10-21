@@ -1,5 +1,9 @@
-import React, {useLayoutEffect, useState} from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import firebase from '@react-native-firebase/app'
+import axios from 'axios'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Alert,
     Keyboard,
     KeyboardAvoidingView,
     Modal,
@@ -11,26 +15,21 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native'
+import DropDownPicker from 'react-native-dropdown-picker'
+import {Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import UploadImageItem from '../components/UploadImageItem'
-import DropDownPicker from 'react-native-dropdown-picker'
-import {Button, Input} from 'react-native-elements'
-import {Alert} from 'react-native'
-import axios from 'axios'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import firebase from '@react-native-firebase/app'
-import {useSelector} from 'react-redux'
 
 const UploadDetailScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
     const [listImages, setListImages] = useState([])
     const [modalLoading, setModalLoading] = useState(false)
     const [modalPhotos, setModalPhotos] = useState(false)
-    const [downloadImage, setDownloadImage] = useState([])
 
     const [productName, setProductName] = useState('')
     const [productDescription, setProductDescription] = useState('')
@@ -45,6 +44,33 @@ const UploadDetailScreen = ({navigation, route}) => {
     const [widthAfterBoxed, setWidthAfterBoxed] = useState('')
     const [lengthAfterBoxed, setLengthAfterBoxed] = useState('')
 
+    const [openCondition, setOpenCondition] = useState(false)
+    const [valueCondition, setValueCondition] = useState(null)
+    const [itemsCondition, setItemsCondition] = useState([
+        {
+            label: 'New',
+            value: 'New',
+        },
+        {
+            label: 'Used - Like New',
+            value: 'Used - Like New',
+        },
+        {
+            label: 'Used - Good',
+            value: 'Used - Good',
+        },
+        {
+            label: 'Used - Fair',
+            value: 'Used - Fair',
+        },
+    ])
+    const [chosenCondition, setChosenCondition] = useState('')
+
+    const [listSubCategory, setListSubCategory] = useState([])
+    const [openSubCategory, setOpenSubCategory] = useState(false)
+    const [valueSubCategory, setValueSubCategory] = useState(null)
+    const [chosenSubCategory, setChosenSubCategory] = useState('')
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: '',
@@ -55,7 +81,28 @@ const UploadDetailScreen = ({navigation, route}) => {
                 color: 'white',
             },
         })
-    })
+    }, [])
+
+    //Loading SubCategory
+    useEffect(() => {
+        let listSub = []
+        axios({
+            method: 'get',
+            url: `${API_URL}/subcategory/${route.params._id}`,
+        })
+            .then(res => {
+                if (res.status == 200) {
+                    res.data.subcategories.forEach(sub =>
+                        listSub.push({
+                            label: sub.subcategoryName,
+                            value: sub._id,
+                        }),
+                    )
+                    setListSubCategory(listSub)
+                }
+            })
+            .catch(error => console.log('SubCategory: ', error))
+    }, [])
 
     let getData = childData => {
         const new_arr = listImages.filter(item => item !== childData)
@@ -137,6 +184,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 data: {
                                     thumbnailImage: list[0],
                                     productName: productName,
+                                    subcategoryId: chosenSubCategory,
                                     description: productDescription,
                                     categoryId: route.params._id,
                                     detailImages: list,
@@ -155,6 +203,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         parseFloat(lengthAfterBoxed),
                                     price: productPrice,
                                     numberInStock: parseFloat(productAmount),
+                                    condition: chosenCondition,
                                 },
                             })
                                 .then(res => {
@@ -167,14 +216,17 @@ const UploadDetailScreen = ({navigation, route}) => {
                                                 {
                                                     text: 'OK',
                                                     onPress: () =>
-                                                        navigation.goBack(),
+                                                        navigation.replace(
+                                                            'Profile',
+                                                            currentUser._id,
+                                                        ),
                                                 },
                                             ],
                                         )
                                     }
                                 })
                                 .catch(err => {
-                                    console.log(err.message)
+                                    console.log(err)
                                     setModalLoading(false)
                                 })
                         }
@@ -198,7 +250,8 @@ const UploadDetailScreen = ({navigation, route}) => {
             heightAfterBoxed == '' ||
             weightAfterBoxed == '' ||
             widthAfterBoxed == '' ||
-            lengthAfterBoxed == ''
+            lengthAfterBoxed == '' ||
+            chosenCondition == ''
         ) {
             Alert.alert('Please fill in all field.')
         } else {
@@ -207,7 +260,11 @@ const UploadDetailScreen = ({navigation, route}) => {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.5 : 1,
+            }}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <KeyboardAvoidingView
@@ -219,7 +276,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                             transparent={true}
                             visible={modalPhotos}>
                             <SafeAreaView
-                                // onTouchStart={() => setModalPhotos(false)}
                                 style={{
                                     flex: 1,
                                 }}>
@@ -265,9 +321,35 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 </View>
                             </SafeAreaView>
                         </Modal>
+
                         <View>
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
+                                }}>
+                                Please choose a sub category
+                            </Text>
+
+                            <DropDownPicker
+                                open={openSubCategory}
+                                value={valueSubCategory}
+                                items={listSubCategory}
+                                setOpen={setOpenSubCategory}
+                                setValue={setValueSubCategory}
+                                setItems={setListSubCategory}
+                                listMode={'SCROLLVIEW'}
+                                placeholder="Select a sub category"
+                                onSelectItem={item =>
+                                    setChosenSubCategory(item.value)
+                                }
+                            />
+
                             <TouchableOpacity
-                                style={styles.touch}
+                                style={{
+                                    ...styles.touch,
+                                    marginTop: 10,
+                                }}
                                 disabled={listImages.length == 5 ? true : false}
                                 onPress={() => setModalPhotos(true)}>
                                 <Icon name="camera" size={64} color="black" />
@@ -292,113 +374,14 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     ))}
                                 </ScrollView>
                             )}
-                        </View>
 
-                        <Input
-                            placeholder="Product Name"
-                            label="Product Name"
-                            containerStyle={{
-                                ...globalStyles.input,
-                                marginTop: 10,
-                                width: '100%',
-                            }}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
-                            inputStyle={{
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                ...styles.textStyle,
-                            }}
-                            renderErrorMessage={false}
-                            onChangeText={text => setProductName(text)}
-                        />
-
-                        <Input
-                            placeholder="Product Description"
-                            label="Product Description"
-                            multiline={true}
-                            numberOfLines={10}
-                            containerStyle={{
-                                ...globalStyles.input,
-                                marginTop: 5,
-                                width: '100%',
-                            }}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
-                            inputStyle={{
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                ...styles.textStyle,
-                                textAlignVertical: 'top',
-                            }}
-                            renderErrorMessage={false}
-                            onChangeText={text => setProductDescription(text)}
-                        />
-
-                        <Input
-                            placeholder="Price"
-                            label="Price"
-                            keyboardType="number-pad"
-                            containerStyle={{
-                                ...globalStyles.input,
-                                marginTop: 5,
-                                width: '100%',
-                            }}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
-                            inputStyle={{
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                ...styles.textStyle,
-                            }}
-                            renderErrorMessage={false}
-                            onChangeText={text => setProductPrice(text)}
-                        />
-
-                        <Input
-                            placeholder="Number in Stock"
-                            label="Number in Stock"
-                            keyboardType="number-pad"
-                            containerStyle={{
-                                ...globalStyles.input,
-                                marginTop: 5,
-                                width: '100%',
-                            }}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
-                            inputStyle={{
-                                paddingVertical: 0,
-                                fontSize: 16,
-                                ...styles.textStyle,
-                            }}
-                            renderErrorMessage={false}
-                            onChangeText={text => setProductAmount(text)}
-                        />
-                        <Text
-                            style={{
-                                ...styles.labelStyle,
-                                fontSize: 18,
-                                marginTop: 5,
-                            }}>
-                            Size Of Product Before Boxed
-                        </Text>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}>
                             <Input
-                                placeholder="Weight"
-                                label="Weight"
-                                keyboardType="number-pad"
+                                placeholder="Product Name"
+                                label="Product Name"
                                 containerStyle={{
                                     ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '40%',
+                                    marginTop: 10,
+                                    width: '100%',
                                 }}
                                 inputContainerStyle={{
                                     borderBottomWidth: 0,
@@ -407,21 +390,44 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     paddingVertical: 0,
                                     fontSize: 16,
                                     ...styles.textStyle,
+                                }}
+                                renderErrorMessage={false}
+                                onChangeText={text => setProductName(text)}
+                            />
+
+                            <Input
+                                placeholder="Product Description"
+                                label="Product Description"
+                                multiline={true}
+                                numberOfLines={10}
+                                containerStyle={{
+                                    ...globalStyles.input,
+                                    marginTop: 5,
+                                    width: '100%',
+                                }}
+                                inputContainerStyle={{
+                                    borderBottomWidth: 0,
+                                }}
+                                inputStyle={{
+                                    paddingVertical: 0,
+                                    fontSize: 16,
+                                    ...styles.textStyle,
+                                    textAlignVertical: 'top',
                                 }}
                                 renderErrorMessage={false}
                                 onChangeText={text =>
-                                    setWeightBeforeBoxed(text)
+                                    setProductDescription(text)
                                 }
                             />
+
                             <Input
-                                placeholder="Height"
-                                label="Height"
+                                placeholder="Price"
+                                label="Price (VND)"
                                 keyboardType="number-pad"
                                 containerStyle={{
                                     ...globalStyles.input,
                                     marginTop: 5,
-                                    width: '40%',
-                                    marginLeft: 20,
+                                    width: '100%',
                                 }}
                                 inputContainerStyle={{
                                     borderBottomWidth: 0,
@@ -432,164 +438,274 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     ...styles.textStyle,
                                 }}
                                 renderErrorMessage={false}
-                                onChangeText={text =>
-                                    setHeightBeforeBoxed(text)
+                                onChangeText={text => setProductPrice(text)}
+                            />
+
+                            <Input
+                                placeholder="Number in Stock"
+                                label="Number in Stock"
+                                keyboardType="number-pad"
+                                containerStyle={{
+                                    ...globalStyles.input,
+                                    marginTop: 5,
+                                    width: '100%',
+                                }}
+                                inputContainerStyle={{
+                                    borderBottomWidth: 0,
+                                }}
+                                inputStyle={{
+                                    paddingVertical: 0,
+                                    fontSize: 16,
+                                    ...styles.textStyle,
+                                }}
+                                renderErrorMessage={false}
+                                onChangeText={text => setProductAmount(text)}
+                            />
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
+                                    marginTop: 5,
+                                }}>
+                                Condition of Product
+                            </Text>
+                            <DropDownPicker
+                                open={openCondition}
+                                value={valueCondition}
+                                items={itemsCondition}
+                                setOpen={setOpenCondition}
+                                setValue={setValueCondition}
+                                setItems={setItemsCondition}
+                                listMode={'SCROLLVIEW'}
+                                placeholder="Select a condition"
+                                onSelectItem={item =>
+                                    setChosenCondition(item.value)
                                 }
                             />
-                        </View>
 
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}>
-                            <Input
-                                placeholder="Width"
-                                label="Width"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
                                     marginTop: 5,
-                                    width: '40%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text => setWidthBeforeBoxed(text)}
-                            />
-                            <Input
-                                placeholder="Length"
-                                label="Length"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '40%',
-                                    marginLeft: 20,
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text =>
-                                    setLengthBeforeBoxed(text)
-                                }
-                            />
-                        </View>
+                                }}>
+                                Size of Product Before Boxed
+                            </Text>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                }}>
+                                <Input
+                                    placeholder="Weight"
+                                    label="Weight (gram)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setWeightBeforeBoxed(text)
+                                    }
+                                />
+                                <Input
+                                    placeholder="Height"
+                                    label="Height  (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                        marginLeft: 20,
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setHeightBeforeBoxed(text)
+                                    }
+                                />
+                            </View>
 
-                        <Text
-                            style={{
-                                ...styles.labelStyle,
-                                fontSize: 18,
-                                marginTop: 5,
-                            }}>
-                            Size Of Product After Boxed
-                        </Text>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}>
-                            <Input
-                                placeholder="Weight"
-                                label="Weight"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '40%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text => setWeightAfterBoxed(text)}
-                            />
-                            <Input
-                                placeholder="Height"
-                                label="Height"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '40%',
-                                    marginLeft: 20,
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text => setHeightAfterBoxed(text)}
-                            />
-                        </View>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                }}>
+                                <Input
+                                    placeholder="Width"
+                                    label="Width (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setWidthBeforeBoxed(text)
+                                    }
+                                />
+                                <Input
+                                    placeholder="Length"
+                                    label="Length  (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                        marginLeft: 20,
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setLengthBeforeBoxed(text)
+                                    }
+                                />
+                            </View>
 
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                            }}>
-                            <Input
-                                placeholder="Width"
-                                label="Width"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
+                            <Text
+                                style={{
+                                    ...styles.labelStyle,
+                                    fontSize: 18,
                                     marginTop: 5,
-                                    width: '40%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text => setWidthAfterBoxed(text)}
-                            />
-                            <Input
-                                placeholder="Length"
-                                label="Length"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '40%',
-                                    marginLeft: 20,
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                renderErrorMessage={false}
-                                onChangeText={text => setLengthAfterBoxed(text)}
-                            />
+                                }}>
+                                Size of Product After Boxed
+                            </Text>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                }}>
+                                <Input
+                                    placeholder="Weight"
+                                    label="Weight  (gram)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setWeightAfterBoxed(text)
+                                    }
+                                />
+                                <Input
+                                    placeholder="Height"
+                                    label="Height  (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                        marginLeft: 20,
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setHeightAfterBoxed(text)
+                                    }
+                                />
+                            </View>
+
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'center',
+                                }}>
+                                <Input
+                                    placeholder="Width"
+                                    label="Width (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setWidthAfterBoxed(text)
+                                    }
+                                />
+                                <Input
+                                    placeholder="Length"
+                                    label="Length (cm)"
+                                    keyboardType="number-pad"
+                                    containerStyle={{
+                                        ...globalStyles.input,
+                                        marginTop: 5,
+                                        width: '40%',
+                                        marginLeft: 20,
+                                    }}
+                                    inputContainerStyle={{
+                                        borderBottomWidth: 0,
+                                    }}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setLengthAfterBoxed(text)
+                                    }
+                                />
+                            </View>
                         </View>
 
                         <TouchableOpacity
