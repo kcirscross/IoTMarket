@@ -1,7 +1,4 @@
-import {createSlice} from '@reduxjs/toolkit'
-import axios from 'axios'
-import {useState} from 'react'
-import {API_URL} from '../../components/constants'
+import { createSlice } from '@reduxjs/toolkit'
 
 export const favoriteSlice = createSlice({
     name: 'favorite',

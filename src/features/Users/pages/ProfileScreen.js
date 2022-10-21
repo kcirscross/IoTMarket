@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import {Avatar, Badge, Card, Tab, TabView} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
-import {useSelector} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
@@ -20,14 +20,30 @@ import {
     SECONDARY_COLOR,
 } from '../../../components/constants'
 import {ProductItem} from '../../Products/components'
+import {addFollow, removeFollow} from '../userSlice'
+import Toast from 'react-native-toast-message'
 
-const ProfileScreen = ({navigation}) => {
+const ProfileScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
+    const dispatch = useDispatch()
+
     const [myProductsList, setMyProductsList] = useState([])
+    const [myProductListNew, setMyProductListNew] = useState([])
+    const [myProductListSale, setMyProductListSale] = useState([])
+    const [myProductLisPriceDesc, setMyProductLisPriceDesc] = useState([])
+    const [myProductLisPriceAsc, setMyProductLisPriceAsc] = useState([])
     const [modalLoading, setModalLoading] = useState(false)
     const [index, setIndex] = useState(0)
+    const [filter, setFilter] = useState(true)
+    const isCurrentUser = route.params == currentUser._id
+    const [userInfo, setUserInfo] = useState([])
+    const [isFollow, setIsFollow] = useState(false)
 
-    console.log(currentUser)
+    const [userProductsList, setUserProductsList] = useState([])
+    const [userProductListNew, setUserProductListNew] = useState([])
+    const [userProductListSale, setUserProductListSale] = useState([])
+    const [userProductLisPriceDesc, setUserProductLisPriceDesc] = useState([])
+    const [userProductLisPriceAsc, setUserProductLisPriceAsc] = useState([])
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -64,23 +80,34 @@ const ProfileScreen = ({navigation}) => {
             const token = await AsyncStorage.getItem('token')
             axios({
                 method: 'get',
-                url: `${API_URL}/product/me/${
-                    index == 0
-                        ? ''
-                        : index == 1
-                        ? 'new'
-                        : index == 2
-                        ? 'sale'
-                        : index == 3
-                        ? 'pricedesc'
-                        : 'priceacs'
-                }`,
+                url: `${API_URL}/product/me`,
+                params: {
+                    sortBy: `${
+                        index == 0
+                            ? 'pop'
+                            : index == 1
+                            ? 'new'
+                            : index == 2
+                            ? 'sale'
+                            : index == 3
+                            ? filter && 'pricedesc'
+                            : 'priceacs'
+                    }`,
+                },
                 headers: {
                     authorization: `Bearer ${token}`,
                 },
             }).then(res => {
                 if (res.status == 200) {
-                    setMyProductsList(res.data.products)
+                    index == 0
+                        ? setMyProductsList(res.data.products)
+                        : index == 1
+                        ? setMyProductListNew(res.data.products)
+                        : index == 2
+                        ? setMyProductListSale(res.data.products)
+                        : index == 3
+                        ? filter && setMyProductLisPriceDesc(res.data.products)
+                        : setMyProductLisPriceAsc(res.data.products)
                     setModalLoading(false)
                 }
             })
@@ -90,12 +117,131 @@ const ProfileScreen = ({navigation}) => {
         }
     }
 
+    const getUserInfo = () => {
+        setModalLoading(true)
+        try {
+            axios({
+                method: 'get',
+                url: `${API_URL}/user/${route.params}`,
+            })
+                .then(res => {
+                    if (res.status == 200) {
+                        setUserInfo(res.data.userInfo)
+
+                        currentUser.follows == res.data.userInfo.storeId &&
+                            setIsFollow(true)
+
+                        setModalLoading(false)
+                    }
+                })
+                .catch(err => console.log('UserProfile: ', err))
+        } catch (error) {
+            console.log(error)
+            setModalLoading(false)
+        }
+    }
+
+    const getUserItems = () => {
+        setModalLoading(true)
+        axios({
+            method: 'get',
+            url: `${API_URL}/product/user/${route.params}`,
+            params: {
+                sortBy: `${
+                    index == 0
+                        ? 'pop'
+                        : index == 1
+                        ? 'new'
+                        : index == 2
+                        ? 'sale'
+                        : index == 3
+                        ? filter && 'pricedesc'
+                        : 'priceacs'
+                }`,
+            },
+        }).then(res => {
+            if (res.status == 200) {
+                index == 0
+                    ? setUserProductsList(res.data.products)
+                    : index == 1
+                    ? setUserProductListNew(res.data.products)
+                    : index == 2
+                    ? setUserProductListSale(res.data.products)
+                    : index == 3
+                    ? filter
+                        ? setUserProductLisPriceDesc(res.data.products)
+                        : setUserProductLisPriceAsc(res.data.products)
+                    : setUserProductLisPriceAsc(res.data.products)
+                setModalLoading(false)
+            }
+        })
+    }
+
+    const handleFollowClick = async () => {
+        try {
+            setModalLoading(true)
+            const token = await AsyncStorage.getItem('token')
+            if (!isFollow) {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/follow/${userInfo.storeId}`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(res => {
+                        if (res.status == 200) {
+                            dispatch(addFollow(userInfo.storeId))
+
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Followed',
+                            })
+
+                            setIsFollow(true)
+                            setModalLoading(false)
+                        }
+                    })
+                    .catch(error => console.log(error))
+            } else {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/unfollow/${userInfo.storeId}`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(res => {
+                        if (res.status == 200) {
+                            dispatch(removeFollow(userInfo.storeId))
+
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Unfollowed',
+                            })
+                            setModalLoading(false)
+                            setIsFollow(false)
+                        }
+                    })
+                    .catch(error => console.log(error))
+            }
+        } catch (error) {
+            console.log(error)
+            setModalLoading(false)
+        }
+    }
+
     useEffect(() => {
-        getMyItems()
+        isCurrentUser ? getMyItems() : getUserItems()
     }, [index])
+
+    useEffect(() => {
+        !isCurrentUser && getUserInfo()
+    }, [])
 
     return (
         <SafeAreaView style={globalStyles.container}>
+            <Toast position="bottom" bottomOffset={70} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <ModalLoading visible={modalLoading} />
                 <Card
@@ -112,7 +258,11 @@ const ProfileScreen = ({navigation}) => {
                             <Avatar
                                 rounded
                                 size={'large'}
-                                source={{uri: currentUser.avatar}}
+                                source={{
+                                    uri: isCurrentUser
+                                        ? currentUser.avatar
+                                        : userInfo.avatar,
+                                }}
                                 avatarStyle={{
                                     borderWidth: 1,
                                     borderColor: SECONDARY_COLOR,
@@ -121,7 +271,11 @@ const ProfileScreen = ({navigation}) => {
                             <Badge
                                 value=" "
                                 status={
-                                    currentUser.onlineStatus == 'Online'
+                                    isCurrentUser
+                                        ? currentUser.onlineStatus == 'Online'
+                                            ? 'success'
+                                            : 'warning'
+                                        : userInfo.onlineStatus == 'Online'
                                         ? 'success'
                                         : 'warning'
                                 }
@@ -140,47 +294,69 @@ const ProfileScreen = ({navigation}) => {
                                     marginLeft: 10,
                                     fontSize: 18,
                                 }}>
-                                {currentUser.fullName}
+                                {isCurrentUser
+                                    ? currentUser.fullName
+                                    : userInfo.fullName}
                             </Text>
                             <Text style={{color: 'black', marginLeft: 10}}>
-                                {currentUser.onlineStatus == 'Online'
+                                {isCurrentUser
+                                    ? currentUser.onlineStatus == 'Online'
+                                        ? 'Online'
+                                        : convertTime(
+                                              Date.parse(currentUser.updatedAt),
+                                          )
+                                    : currentUser.onlineStatus == 'Online'
                                     ? 'Online'
                                     : convertTime(
-                                          Date.parse(currentUser.updatedAt),
-                                      )}{' '}
-                                | {currentUser.follows.length} Followers
+                                          Date.parse(userInfo.updatedAt),
+                                      )}
                             </Text>
                         </View>
                         <View style={{flex: 1}} />
-                        <View
-                            style={{
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}>
-                            <TouchableOpacity
-                                style={{
-                                    ...styles.touchStyle,
-                                    backgroundColor: PRIMARY_COLOR,
-                                    marginRight: 5,
-                                }}>
-                                <Text style={{color: 'white'}}>+ Follow</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={{
-                                    ...styles.touchStyle,
-                                    backgroundColor: PRIMARY_COLOR,
-                                    marginRight: 5,
-                                    flexDirection: 'row',
-                                    marginTop: 5,
-                                }}>
-                                <Ion
-                                    name="chatbubble-ellipses-outline"
-                                    size={18}
-                                    color="white"
-                                />
-                                <Text style={{color: 'white'}}> Chat</Text>
-                            </TouchableOpacity>
-                        </View>
+                        {!isCurrentUser
+                            ? userInfo.storeId != '' && (
+                                  <View
+                                      style={{
+                                          justifyContent: 'center',
+                                          alignItems: 'center',
+                                      }}>
+                                      <TouchableOpacity
+                                          onPress={handleFollowClick}
+                                          style={{
+                                              ...styles.touchStyle,
+                                              backgroundColor: isFollow
+                                                  ? 'red'
+                                                  : PRIMARY_COLOR,
+                                              marginRight: 5,
+                                          }}>
+                                          <Text style={{color: 'white'}}>
+                                              {isFollow
+                                                  ? '- Follow'
+                                                  : '+ Follow'}
+                                          </Text>
+                                      </TouchableOpacity>
+
+                                      <TouchableOpacity
+                                          style={{
+                                              ...styles.touchStyle,
+                                              backgroundColor: PRIMARY_COLOR,
+                                              marginRight: 5,
+                                              flexDirection: 'row',
+                                              marginTop: 5,
+                                          }}>
+                                          <Ion
+                                              name="chatbubble-ellipses-outline"
+                                              size={18}
+                                              color="white"
+                                          />
+                                          <Text style={{color: 'white'}}>
+                                              {' '}
+                                              Chat
+                                          </Text>
+                                      </TouchableOpacity>
+                                  </View>
+                              )
+                            : ''}
                     </View>
                 </Card>
                 <View
@@ -262,6 +438,29 @@ const ProfileScreen = ({navigation}) => {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}
+                            onPressIn={() => {
+                                setFilter(!filter)
+                            }}
+                            iconRight={true}
+                            icon={
+                                filter ? (
+                                    <Ion
+                                        name="arrow-down-outline"
+                                        size={16}
+                                        color={
+                                            index == 3 ? PRIMARY_COLOR : 'black'
+                                        }
+                                    />
+                                ) : (
+                                    <Ion
+                                        name="arrow-up-outline"
+                                        size={16}
+                                        color={
+                                            index == 3 ? PRIMARY_COLOR : 'black'
+                                        }
+                                    />
+                                )
+                            }
                         />
                     </Tab>
                 </View>
@@ -277,14 +476,21 @@ const ProfileScreen = ({navigation}) => {
                             style={{
                                 paddingVertical: 5,
                             }}>
-                            {modalLoading == false &&
-                                myProductsList.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
+                            {isCurrentUser
+                                ? myProductsList.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))
+                                : userProductsList.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))}
                         </ScrollView>
                     </TabView.Item>
                     <TabView.Item style={{width: '100%'}}>
@@ -297,14 +503,21 @@ const ProfileScreen = ({navigation}) => {
                             style={{
                                 paddingVertical: 5,
                             }}>
-                            {modalLoading == false &&
-                                myProductsList.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
+                            {isCurrentUser
+                                ? myProductListNew.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))
+                                : userProductListNew.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))}
                         </ScrollView>
                     </TabView.Item>
                     <TabView.Item style={{width: '100%'}}>
@@ -317,14 +530,21 @@ const ProfileScreen = ({navigation}) => {
                             style={{
                                 paddingVertical: 5,
                             }}>
-                            {modalLoading == false &&
-                                myProductsList.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
+                            {isCurrentUser
+                                ? myProductListSale.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))
+                                : userProductListSale.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))}
                         </ScrollView>
                     </TabView.Item>
                     <TabView.Item style={{width: '100%'}}>
@@ -337,14 +557,37 @@ const ProfileScreen = ({navigation}) => {
                             style={{
                                 paddingVertical: 5,
                             }}>
-                            {modalLoading == false &&
-                                myProductsList.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
+                            {isCurrentUser && filter
+                                ? myProductLisPriceDesc.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))
+                                : myProductLisPriceAsc.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))}
+
+                            {!isCurrentUser && filter
+                                ? userProductLisPriceDesc.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))
+                                : userProductLisPriceAsc.map((data, index) => (
+                                      <ProductItem
+                                          key={index}
+                                          data={data}
+                                          navigation={navigation}
+                                      />
+                                  ))}
                         </ScrollView>
                     </TabView.Item>
                 </TabView>

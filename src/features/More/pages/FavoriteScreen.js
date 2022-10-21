@@ -1,24 +1,12 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {useLayoutEffect} from 'react'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import {useEffect} from 'react'
-import {useState} from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
-import {SafeAreaView} from 'react-native'
-import {ScrollView} from 'react-native'
-import ProductItemHorizontal from '../../Products/components/ProductItemHorizontal'
+import React, {useLayoutEffect} from 'react'
+import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native'
+import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import ModalLoading from '~/components/utils/ModalLoading'
-import {useDispatch, useSelector} from 'react-redux'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import ProductItemHorizontal from '../../Products/components/ProductItemHorizontal'
 
 const FavoriteScreen = ({navigation}) => {
-    const [listFavoriteProducts, setListFavoriteProducts] = useState([])
-    const [modalLoading, setModalLoading] = useState(false)
-
     const currentFavorite = useSelector(state => state.favorite)
-    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -36,10 +24,8 @@ const FavoriteScreen = ({navigation}) => {
             style={{
                 ...globalStyles.container,
                 paddingTop: 5,
-                opacity: modalLoading ? 0.5 : 1,
                 flex: 1,
             }}>
-            <ModalLoading visible={modalLoading} />
             {currentFavorite.length != 0 ? (
                 <ScrollView
                     style={{flex: 1}}

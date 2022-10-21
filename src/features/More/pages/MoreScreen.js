@@ -90,7 +90,7 @@ const MoreScreen = ({navigation}) => {
     return (
         <SafeAreaView style={globalStyles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('Profile')}
+                onPress={() => navigation.navigate('Profile', currentUser._id)}
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center',

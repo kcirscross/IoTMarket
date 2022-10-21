@@ -1,28 +1,33 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import React, {useLayoutEffect} from 'react'
-import {useState} from 'react'
-import {useEffect} from 'react'
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {
+    Alert,
+    Dimensions,
+    Image,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
+import Carousel from 'react-native-anchor-carousel'
 import {Avatar, Badge, Card} from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
+import {useDispatch, useSelector} from 'react-redux'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
 } from '../../../components/constants'
-import BottomMenuBar from '../components/BottomMenuBar'
-import ModalLoading from '~/components/utils/ModalLoading'
-import {Dimensions} from 'react-native'
-import {Image} from 'react-native'
 import {SimplePaginationDot} from '../components'
-import Carousel from 'react-native-anchor-carousel'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import Ion from 'react-native-vector-icons/Ionicons'
-import {TouchableOpacity} from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import {useDispatch, useSelector} from 'react-redux'
-import {Alert} from 'react-native'
+import BottomMenuBar from '../components/BottomMenuBar'
 import {addFavorite, removeFavorite} from '../favoriteSlice'
+import Toast from 'react-native-toast-message'
+import { addFollow, removeFollow } from '../../Users/userSlice'
 
 const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -36,6 +41,7 @@ const ProductDetail = ({navigation, route}) => {
     const [currentIndex, setCurrentIndex] = useState(0)
     const [favorite, setFavorite] = useState(false)
     const [ratingValue, setRatingValue] = useState(0)
+    const [isFollow, setIsFollow] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -86,14 +92,17 @@ const ProductDetail = ({navigation, route}) => {
                         id == currentUser._id && setFavorite(true)
                     })
 
-                    // console.log(res.data.product)
-
                     axios({
                         method: 'get',
                         url: `${API_URL}/user/${res.data.product.ownerId}`,
                     }).then(res => {
                         if (res.status == 200) {
                             setProductOwner(res.data.userInfo)
+                            currentUser.follows.forEach(
+                                id =>
+                                    id == res.data.userInfo.storeId &&
+                                    setIsFollow(true),
+                            )
                         }
                     })
                 }
@@ -110,11 +119,15 @@ const ProductDetail = ({navigation, route}) => {
             const token = await AsyncStorage.getItem('token')
             axios({
                 method: 'patch',
-                url: `${API_URL}/user/addcart/${_id}`,
+                url: `${API_URL}/user/addcart`,
                 headers: {
                     authorization: `Bearer ${token} `,
                 },
-            }).then(res => res.status == 200 && Alert.alert('Added to cart.'))
+                data: {
+                    productId: _id,
+                    quantity: 1,
+                },
+            }).then(res => res.status == 200 && console.log(res.data))
         } catch (error) {
             console.log(error)
         }
@@ -132,8 +145,15 @@ const ProductDetail = ({navigation, route}) => {
                         authorization: `Bearer ${token} `,
                     },
                 }).then(res => {
-                    setFavorite(true)
-                    dispatch(addFavorite(product))
+                    if (res.status == 200) {
+                        setFavorite(!favorite)
+                        dispatch(addFavorite(product))
+
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Added to your favorite.',
+                        })
+                    }
                 })
             } catch (error) {
                 console.log(error)
@@ -147,8 +167,15 @@ const ProductDetail = ({navigation, route}) => {
                         authorization: `Bearer ${token} `,
                     },
                 }).then(res => {
-                    setFavorite(false)
-                    dispatch(removeFavorite(product._id))
+                    if (res.status == 200) {
+                        setFavorite(false)
+                        dispatch(removeFavorite(product._id))
+
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Removed from your favorite.',
+                        })
+                    }
                 })
             } catch (error) {
                 console.log(error)
@@ -175,22 +202,57 @@ const ProductDetail = ({navigation, route}) => {
 
     const handleFollowClick = async () => {
         try {
+            setModalLoading(true)
             const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/follow/${productOwner._id}`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            })
-                .then(res => {
-                    if (res == 200) {
-                        Alert.alert('Followed')
-                    }
+            if (!isFollow) {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/follow/${productOwner.storeId}`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
                 })
-                .catch(error => console.log(error))
+                    .then(res => {
+                        if (res.status == 200) {
+
+                            dispatch(addFollow(productOwner.storeId))
+
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Followed',
+                            })
+
+                            setIsFollow(true)
+                            setModalLoading(false)
+                        }
+                    })
+                    .catch(error => console.log(error))
+            } else {
+                axios({
+                    method: 'patch',
+                    url: `${API_URL}/user/unfollow/${productOwner.storeId}`,
+                    headers: {
+                        authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(res => {
+                        if (res.status == 200) {
+
+                            dispatch(removeFollow(productOwner.storeId))
+
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Unfollowed',
+                            })
+                            setModalLoading(false)
+                            setIsFollow(false)
+                        }
+                    })
+                    .catch(error => console.log(error))
+            }
         } catch (error) {
-            console.log(error.message)
+            console.log(error)
+            setModalLoading(false)
         }
     }
 
@@ -206,23 +268,10 @@ const ProductDetail = ({navigation, route}) => {
                     height: 300,
                     marginBottom: 10,
                 }}>
-                <Carousel
-                    data={listImages}
-                    style={{
-                        marginBottom: 10,
-                    }}
-                    initialIndex={0}
-                    onScrollEnd={handleCarouselScrollEnd}
-                    itemWidth={Dimensions.get('window').width * 0.88}
-                    containerWidth={Dimensions.get('window').width * 0.95}
-                    separatorWidth={2}
-                    inActiveOpacity={0.5}
-                    onSnapToItem={index => setIndex(index)}
-                    renderItem={({item}) => (
+                {listImages.length == 1 ? (
+                    <View>
                         <Image
-                            source={{
-                                uri: item,
-                            }}
+                            source={{uri: listImages[0]}}
                             resizeMethod="scale"
                             resizeMode="contain"
                             style={{
@@ -230,96 +279,146 @@ const ProductDetail = ({navigation, route}) => {
                                 height: 250,
                                 borderRadius: 10,
                                 elevation: 3,
+                                marginVertical: 10,
                             }}
                         />
-                    )}
-                />
+                    </View>
+                ) : (
+                    <Carousel
+                        autoplay={true}
+                        lockScrollWhileSnapping={true}
+                        autoplayInterval={1000}
+                        data={listImages}
+                        style={{
+                            marginBottom: 10,
+                        }}
+                        initialIndex={0}
+                        onScrollEnd={handleCarouselScrollEnd}
+                        itemWidth={Dimensions.get('window').width * 0.95}
+                        containerWidth={Dimensions.get('window').width * 0.95}
+                        separatorWidth={2}
+                        inActiveOpacity={0.5}
+                        onSnapToItem={index => setIndex(index)}
+                        renderItem={({item}) => (
+                            <Image
+                                source={{
+                                    uri: item,
+                                }}
+                                resizeMethod="scale"
+                                resizeMode="contain"
+                                style={{
+                                    width: '100%',
+                                    height: 250,
+                                    borderRadius: 10,
+                                    elevation: 3,
+                                }}
+                            />
+                        )}
+                    />
+                )}
                 <SimplePaginationDot
                     currentIndex={currentIndex}
                     length={listImages.length}
                 />
             </View>
-
+            <Toast position="bottom" bottomOffset={70} />
             <Card containerStyle={globalStyles.cardContainer}>
-                <View
-                    style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                    }}>
-                    <View>
-                        <Avatar
-                            rounded
-                            size={'large'}
-                            source={{uri: productOwner.avatar}}
-                            avatarStyle={{
-                                borderWidth: 1,
-                                borderColor: SECONDARY_COLOR,
-                            }}
-                        />
-                        <Badge
-                            value=" "
-                            status={
-                                productOwner.onlineStatus == 'Online'
-                                    ? 'success'
-                                    : 'warning'
-                            }
-                            containerStyle={{
-                                position: 'absolute',
-                                bottom: 2,
-                                right: 5,
-                            }}
-                        />
-                    </View>
-                    <View>
-                        <Text
-                            style={{
-                                fontWeight: 'bold',
-                                color: 'black',
-                                marginLeft: 10,
-                                fontSize: 18,
-                            }}>
-                            {productOwner.fullName}
-                        </Text>
-                        <Text style={{color: 'black', marginLeft: 10}}>
-                            {productOwner.onlineStatus == 'Online'
-                                ? 'Online'
-                                : convertTime(
-                                      Date.parse(productOwner.updatedAt),
-                                  )}
-                        </Text>
-                    </View>
-                    <View style={{flex: 1}} />
+                <TouchableOpacity
+                    onPress={() =>
+                        navigation.navigate('Profile', productOwner._id)
+                    }>
                     <View
                         style={{
-                            justifyContent: 'center',
+                            flexDirection: 'row',
                             alignItems: 'center',
                         }}>
-                        <TouchableOpacity
-                            onPress={handleFollowClick}
-                            style={{
-                                ...styles.touchStyle,
-                                backgroundColor: PRIMARY_COLOR,
-                                marginRight: 5,
-                            }}>
-                            <Text style={{color: 'white'}}>+ Follow</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                ...styles.touchStyle,
-                                backgroundColor: PRIMARY_COLOR,
-                                marginRight: 5,
-                                flexDirection: 'row',
-                                marginTop: 5,
-                            }}>
-                            <Ion
-                                name="chatbubble-ellipses-outline"
-                                size={18}
-                                color="white"
+                        <View>
+                            <Avatar
+                                rounded
+                                size={'large'}
+                                source={{uri: productOwner.avatar}}
+                                avatarStyle={{
+                                    borderWidth: 1,
+                                    borderColor: SECONDARY_COLOR,
+                                }}
                             />
-                            <Text style={{color: 'white'}}> Chat</Text>
-                        </TouchableOpacity>
+                            <Badge
+                                value=" "
+                                status={
+                                    productOwner.onlineStatus == 'Online'
+                                        ? 'success'
+                                        : 'warning'
+                                }
+                                containerStyle={{
+                                    position: 'absolute',
+                                    bottom: 2,
+                                    right: 5,
+                                }}
+                            />
+                        </View>
+                        <View>
+                            <Text
+                                style={{
+                                    fontWeight: 'bold',
+                                    color: 'black',
+                                    marginLeft: 10,
+                                    fontSize: 18,
+                                }}>
+                                {productOwner.fullName}
+                            </Text>
+                            <Text style={{color: 'black', marginLeft: 10}}>
+                                {productOwner.onlineStatus == 'Online'
+                                    ? 'Online'
+                                    : convertTime(
+                                          Date.parse(productOwner.updatedAt),
+                                      )}
+                            </Text>
+                        </View>
+                        <View style={{flex: 1}} />
+                        <View
+                            style={{
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                            {productOwner.storeId != '' && (
+                                <TouchableOpacity
+                                    onPress={handleFollowClick}
+                                    style={{
+                                        ...styles.touchStyle,
+                                        backgroundColor: isFollow
+                                            ? 'red'
+                                            : PRIMARY_COLOR,
+                                        marginRight: 5,
+                                    }}>
+                                    {isFollow ? (
+                                        <Text style={{color: 'white'}}>
+                                            - Follow
+                                        </Text>
+                                    ) : (
+                                        <Text style={{color: 'white'}}>
+                                            + Follow
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                                style={{
+                                    ...styles.touchStyle,
+                                    backgroundColor: PRIMARY_COLOR,
+                                    marginRight: 5,
+                                    flexDirection: 'row',
+                                    marginTop: 5,
+                                }}>
+                                <Ion
+                                    name="chatbubble-ellipses-outline"
+                                    size={18}
+                                    color="white"
+                                />
+                                <Text style={{color: 'white'}}> Chat</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             </Card>
             <Card
                 containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
@@ -334,7 +433,7 @@ const ProductDetail = ({navigation, route}) => {
 
                 <Text
                     style={{
-                        color: 'red',
+                        color: 'blue',
                         fontSize: 18,
                     }}>
                     Price: {Intl.NumberFormat('en-US').format(product.price)} đ
@@ -406,9 +505,16 @@ const ProductDetail = ({navigation, route}) => {
                     ...globalStyles.cardContainer,
                     marginTop: 5,
                 }}>
-                <Text>{product.description}</Text>
+                <View style={styles.viewStyle}>
+                    <Text style={styles.textStyle}>Condition: </Text>
+                    <Text>{product.condition}</Text>
+                </View>
+                <View style={styles.viewStyle}>
+                    <Text style={styles.textStyle}>Description: </Text>
+                    <Text>{product.description}</Text>
+                </View>
             </Card>
-            <BottomMenuBar />
+            <BottomMenuBar productOwner={productOwner} />
         </SafeAreaView>
     )
 }
@@ -419,5 +525,10 @@ const styles = StyleSheet.create({
     touchStyle: {
         borderRadius: 10,
         padding: 5,
+    },
+    textStyle: {color: 'black', fontSize: 16},
+    viewStyle: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 })
