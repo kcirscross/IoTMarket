@@ -41,6 +41,19 @@ export const userSlice = createSlice({
             updatedUser.onlineStatus = action.payload
             return updatedUser
         },
+
+        addFollow: (state, action) => {
+            updatedUser = state
+            updatedUser.follows.push(action.payload)
+            return updatedUser
+        },
+
+        removeFollow: (state, action) => {
+            updatedUser = state
+            listFollow = updatedUser.follows
+            updatedUser.follows = listFollow.filter(id => id !== action.payload)
+            return updatedUser
+        },
     },
 })
 
@@ -53,6 +66,8 @@ export const {
     updateGender,
     updateAvatar,
     updateOnlineStatus,
+    addFollow,
+    removeFollow,
 } = userSlice.actions
 
 export default userSlice.reducer
