@@ -1,18 +1,27 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {Card} from 'react-native-elements'
-import {TouchableOpacity} from 'react-native'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {Image} from 'react-native'
-import Icon from 'react-native-vector-icons/FontAwesome5'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import {API_URL} from '../../../components/constants'
+import React, {useState} from 'react'
+import {
+    Alert,
+    Image,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native'
+import {Card} from 'react-native-elements'
+import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch} from 'react-redux'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {API_URL} from '../../../components/constants'
 import {removeFavorite} from '../favoriteSlice'
 
 const ProductItemHorizontal = ({navigation, product, type}) => {
     const dispatch = useDispatch()
+    const [quantity, setQuantity] = useState(product.quantity)
+
+    console.log(product)
 
     const handleRemoveFavoriteClick = async () => {
         try {
@@ -34,6 +43,80 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
         }
     }
 
+    const removeCart = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/removecart`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    productId: product.productId._id,
+                    quantity: 1,
+                },
+            })
+                .then(res => {
+                    if (res.status == 200) {
+                        setQuantity((parseInt(quantity) - 1).toString())
+                        dispatch(removeCart(product.productId._id))
+                    }
+                })
+                .catch(error => {
+                    Alert.alert('Run out of product.')
+                    console.log('Cart: ', error)
+                })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const addCart = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token')
+            axios({
+                method: 'patch',
+                url: `${API_URL}/user/addcart`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+                data: {
+                    productId: product.productId._id,
+                    quantity: 1,
+                },
+            })
+                .then(res => {
+                    if (res.status == 200) {
+                        setQuantity((parseInt(quantity) + 1).toString())
+                        dispatch(addCart(product.productId._id))
+                    }
+                })
+                .catch(error => {
+                    Alert.alert('Run out of product.')
+                    console.log('Cart: ', error)
+                })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const subQuantity = () => {
+        if (quantity > 1) {
+            removeCart()
+        } else {
+            Alert.alert(
+                'Do you want to remove this product from your cart?',
+                '',
+                [{text: 'Yes', onPress: removeCart}, {text: 'No'}],
+            )
+        }
+    }
+
+    // const addQuantity = () => {
+    //     addCart()
+    // }
+
     return (
         <Card
             containerStyle={{
@@ -42,11 +125,21 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
             }}>
             <TouchableOpacity
                 onPress={() =>
-                    navigation.navigate('ProductDetail', {_id: product._id})
+                    navigation.navigate('ProductDetail', {
+                        _id:
+                            type == 'favorite'
+                                ? product._id
+                                : product.productId._id,
+                    })
                 }
                 style={{flexDirection: 'row'}}>
                 <Image
-                    source={{uri: product.thumbnailImage}}
+                    source={{
+                        uri:
+                            type == 'favorite'
+                                ? product.thumbnailImage
+                                : product.productId.thumbnailImage,
+                    }}
                     style={{
                         width: 100,
                         height: 80,
@@ -62,15 +155,50 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                             fontSize: 18,
                             fontWeight: 'bold',
                         }}>
-                        {product.productName}
+                        {type == 'favorite'
+                            ? product.productName
+                            : product.productId.productName}
                     </Text>
                     <Text
                         style={{
-                            color: 'red',
+                            color: 'blue',
                             fontSize: 16,
                         }}>
-                        {Intl.NumberFormat('en-US').format(product.price)} đ
+                        {type == 'favorite'
+                            ? Intl.NumberFormat('en-US').format(product.price)
+                            : Intl.NumberFormat('en-US').format(
+                                  product.productId.price,
+                              )}{' '}
+                        đ
                     </Text>
+
+                    {type == 'cart' && (
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <TouchableOpacity
+                                onPress={subQuantity}
+                                style={styles.touchStyle}>
+                                <Text style={styles.textStyle}>-</Text>
+                            </TouchableOpacity>
+                            <TextInput
+                                style={{
+                                    paddingHorizontal: 5,
+                                    fontSize: 20,
+                                }}
+                                value={quantity}
+                                textAlign="center"
+                                onChangeText={text => setQuantity(text)}
+                            />
+                            <TouchableOpacity
+                                onPress={addCart}
+                                style={styles.touchStyle}>
+                                <Text style={styles.textStyle}>+</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
                 <View style={{flex: 1}} />
                 {type == 'cart' && (
@@ -104,4 +232,16 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
 
 export default ProductItemHorizontal
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    textStyle: {
+        fontSize: 20,
+        color: 'black',
+    },
+    touchStyle: {
+        borderRadius: 5,
+        borderColor: 'black',
+        borderRadius: 5,
+        borderWidth: 0.7,
+        paddingHorizontal: 15,
+    },
+})
