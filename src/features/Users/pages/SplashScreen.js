@@ -43,6 +43,11 @@ const SplashScreen = ({navigation}) => {
                                 getFavoriteAfterSignIn()
 
                                 navigation.replace('BottomNavBar')
+
+                                await AsyncStorage.setItem(
+                                    'token',
+                                    res.data.data.deviceToken,
+                                )
                             }
                         })
                         .catch(err => {
@@ -64,6 +69,7 @@ const SplashScreen = ({navigation}) => {
                         .then(async res => {
                             if ((res.data.statusCode = 200)) {
                                 const action = signIn(res.data.data)
+
                                 dispatch(action)
 
                                 getCartAfterSignIn()
@@ -71,6 +77,11 @@ const SplashScreen = ({navigation}) => {
                                 getFavoriteAfterSignIn()
 
                                 navigation.replace('BottomNavBar')
+
+                                await AsyncStorage.setItem(
+                                    'token',
+                                    res.data.data.deviceToken,
+                                )
                             }
                         })
                         .catch(err => {

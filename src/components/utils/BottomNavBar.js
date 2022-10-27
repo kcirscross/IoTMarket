@@ -1,15 +1,14 @@
-import {transform} from '@babel/core'
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
-import {Animated} from 'react-native'
 import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import Ion from 'react-native-vector-icons/Ionicons'
+import {useSelector} from 'react-redux'
 import {ChatsScreen} from '~/features/Chats'
 import {HomeScreen} from '~/features/Home'
 import {MoreScreen} from '~/features/More'
 import {ProductsScreen, UploadProductScreen} from '~/features/Products'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../constants'
+import ProfileScreen from '../../features/Users/pages/ProfileScreen'
+import {PRIMARY_COLOR} from '../constants'
 
 const Tab = createBottomTabNavigator()
 
@@ -54,6 +53,8 @@ const CustomTabBarButton = ({children, onPress}) => (
 )
 
 const BottomNavBar = () => {
+    const currentUser = useSelector(state => state.user)
+
     return (
         <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
             <Tab.Screen
@@ -72,8 +73,13 @@ const BottomNavBar = () => {
                 }}
             />
             <Tab.Screen
-                name="Products"
-                component={ProductsScreen}
+                name="Profile"
+                component={ProfileScreen}
+                initialParams={[
+                    currentUser.storeId != undefined
+                        ? currentUser.storeId
+                        : currentUser._id,
+                ]}
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>

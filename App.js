@@ -8,8 +8,10 @@ import {Provider} from 'react-redux'
 import {API_URL} from './src/components/constants'
 import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
+import {SettingStoreScreen, UpdateStoreScreen} from './src/features/More'
 import FavoriteScreen from './src/features/More/pages/FavoriteScreen'
 import MoreScreen from './src/features/More/pages/MoreScreen'
+import StoreScreen from './src/features/More/pages/StoreScreen'
 import {
     CartScreen,
     ProductDetail,
@@ -130,6 +132,15 @@ export default function App() {
                     <Stack.Screen
                         name="UploadDetail"
                         component={UploadDetailScreen}
+                    />
+                    <Stack.Screen name="Store" component={StoreScreen} />
+                    <Stack.Screen
+                        name="UpdateStore"
+                        component={UpdateStoreScreen}
+                    />
+                    <Stack.Screen
+                        name="SettingStore"
+                        component={SettingStoreScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

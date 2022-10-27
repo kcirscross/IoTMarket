@@ -10,6 +10,7 @@ import {
     View,
 } from 'react-native'
 import {Avatar, Badge, Card, Tab, TabView} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
@@ -21,7 +22,6 @@ import {
 } from '../../../components/constants'
 import {ProductItem} from '../../Products/components'
 import {addFollow, removeFollow} from '../userSlice'
-import Toast from 'react-native-toast-message'
 
 const ProfileScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -35,7 +35,16 @@ const ProfileScreen = ({navigation, route}) => {
     const [modalLoading, setModalLoading] = useState(false)
     const [index, setIndex] = useState(0)
     const [filter, setFilter] = useState(true)
-    const isCurrentUser = route.params == currentUser._id
+    const isCurrentUser =
+        route.params[0] == currentUser._id ||
+        route.params[0] == currentUser.storeId ||
+        route.params._id == currentUser._id ||
+        route.params.storeId == currentUser.storeId
+
+    const isCurrentStore =
+        route.params[0] == currentUser.storeId ||
+        route.params.storeId == currentUser.storeId
+
     const [userInfo, setUserInfo] = useState([])
     const [isFollow, setIsFollow] = useState(false)
 
@@ -44,6 +53,9 @@ const ProfileScreen = ({navigation, route}) => {
     const [userProductListSale, setUserProductListSale] = useState([])
     const [userProductLisPriceDesc, setUserProductLisPriceDesc] = useState([])
     const [userProductLisPriceAsc, setUserProductLisPriceAsc] = useState([])
+
+    const [isStore, setIsStore] = useState(false)
+    const [storeInfo, setStoreInfo] = useState([])
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -90,8 +102,10 @@ const ProfileScreen = ({navigation, route}) => {
                             : index == 2
                             ? 'sale'
                             : index == 3
-                            ? filter && 'pricedesc'
-                            : 'priceacs'
+                            ? filter
+                                ? 'pricedesc'
+                                : 'priceacs'
+                            : ''
                     }`,
                 },
                 headers: {
@@ -106,7 +120,9 @@ const ProfileScreen = ({navigation, route}) => {
                         : index == 2
                         ? setMyProductListSale(res.data.products)
                         : index == 3
-                        ? filter && setMyProductLisPriceDesc(res.data.products)
+                        ? filter
+                            ? setMyProductLisPriceDesc(res.data.products)
+                            : setMyProductLisPriceAsc(res.data.products)
                         : setMyProductLisPriceAsc(res.data.products)
                     setModalLoading(false)
                 }
@@ -119,33 +135,67 @@ const ProfileScreen = ({navigation, route}) => {
 
     const getUserInfo = () => {
         setModalLoading(true)
-        try {
+
+        axios({
+            method: 'get',
+            url: `${API_URL}/user/${route.params._id}`,
+        })
+            .then(res => {
+                if (res.status == 200) {
+                    setUserInfo(res.data.userInfo)
+
+                    currentUser.follows == res.data.userInfo.storeId &&
+                        setIsFollow(true)
+
+                    setModalLoading(false)
+                }
+            })
+            .catch(err => {
+                setModalLoading(false)
+                console.log('UserProfile: ', err.response.data)
+            })
+
+        if (route.params.storeId != undefined) {
+            setModalLoading(true)
+            setIsStore(true)
+
             axios({
                 method: 'get',
-                url: `${API_URL}/user/${route.params}`,
+                url: `${API_URL}/store/${route.params.storeId}`,
             })
                 .then(res => {
-                    if (res.status == 200) {
-                        setUserInfo(res.data.userInfo)
-
-                        currentUser.follows == res.data.userInfo.storeId &&
-                            setIsFollow(true)
-
-                        setModalLoading(false)
-                    }
+                    setModalLoading(false)
+                    setStoreInfo(res.data.store)
                 })
-                .catch(err => console.log('UserProfile: ', err))
-        } catch (error) {
-            console.log(error)
-            setModalLoading(false)
+                .catch(error => {
+                    setModalLoading(false)
+                    console.log(error.response.data)
+                })
         }
+    }
+
+    const getMyStore = () => {
+        setModalLoading(true)
+
+        axios({
+            method: 'get',
+            url: `${API_URL}/store/${route.params[0]}`,
+        })
+            .then(res => {
+                setModalLoading(false)
+                setStoreInfo(res.data.store)
+            })
+            .catch(error => {
+                setModalLoading(false)
+                console.log(error.response.data)
+            })
     }
 
     const getUserItems = () => {
         setModalLoading(true)
         axios({
             method: 'get',
-            url: `${API_URL}/product/user/${route.params}`,
+            url: `${API_URL}/product/user/${route.params._id}`,
             params: {
                 sortBy: `${
                     index == 0
@@ -155,8 +205,10 @@ const ProfileScreen = ({navigation, route}) => {
                         : index == 2
                         ? 'sale'
                         : index == 3
-                        ? filter && 'pricedesc'
-                        : 'priceacs'
+                        ? filter
+                            ? 'pricedesc'
+                            : 'priceacs'
+                        : ''
                 }`,
             },
         }).then(res => {
@@ -233,14 +285,18 @@ const ProfileScreen = ({navigation, route}) => {
 
     useEffect(() => {
         isCurrentUser ? getMyItems() : getUserItems()
-    }, [index])
+    }, [index, filter])
 
     useEffect(() => {
-        !isCurrentUser && getUserInfo()
+        !isCurrentUser ? getUserInfo() : isCurrentStore && getMyStore()
     }, [])
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.3 : 1,
+            }}>
             <Toast position="bottom" bottomOffset={70} />
             <ScrollView showsVerticalScrollIndicator={false}>
                 <ModalLoading visible={modalLoading} />
@@ -260,14 +316,19 @@ const ProfileScreen = ({navigation, route}) => {
                                 size={'large'}
                                 source={{
                                     uri: isCurrentUser
-                                        ? currentUser.avatar
+                                        ? isCurrentStore
+                                            ? storeInfo.shopImage
+                                            : currentUser.avatar
+                                        : isStore
+                                        ? storeInfo.shopImage
                                         : userInfo.avatar,
                                 }}
                                 avatarStyle={{
                                     borderWidth: 1,
-                                    borderColor: SECONDARY_COLOR,
+                                    borderColor: 'black',
                                 }}
                             />
+
                             <Badge
                                 value=" "
                                 status={
@@ -286,6 +347,7 @@ const ProfileScreen = ({navigation, route}) => {
                                 }}
                             />
                         </View>
+
                         <View>
                             <Text
                                 style={{
@@ -295,9 +357,14 @@ const ProfileScreen = ({navigation, route}) => {
                                     fontSize: 18,
                                 }}>
                                 {isCurrentUser
-                                    ? currentUser.fullName
+                                    ? isCurrentStore
+                                        ? storeInfo.displayName
+                                        : currentUser.fullName
+                                    : isStore
+                                    ? storeInfo.displayName
                                     : userInfo.fullName}
                             </Text>
+
                             <Text style={{color: 'black', marginLeft: 10}}>
                                 {isCurrentUser
                                     ? currentUser.onlineStatus == 'Online'
@@ -312,52 +379,62 @@ const ProfileScreen = ({navigation, route}) => {
                                       )}
                             </Text>
                         </View>
-                        <View style={{flex: 1}} />
-                        {!isCurrentUser
-                            ? userInfo.storeId != '' && (
-                                  <View
-                                      style={{
-                                          justifyContent: 'center',
-                                          alignItems: 'center',
-                                      }}>
-                                      <TouchableOpacity
-                                          onPress={handleFollowClick}
-                                          style={{
-                                              ...styles.touchStyle,
-                                              backgroundColor: isFollow
-                                                  ? 'red'
-                                                  : PRIMARY_COLOR,
-                                              marginRight: 5,
-                                          }}>
-                                          <Text style={{color: 'white'}}>
-                                              {isFollow
-                                                  ? '- Follow'
-                                                  : '+ Follow'}
-                                          </Text>
-                                      </TouchableOpacity>
 
-                                      <TouchableOpacity
-                                          style={{
-                                              ...styles.touchStyle,
-                                              backgroundColor: PRIMARY_COLOR,
-                                              marginRight: 5,
-                                              flexDirection: 'row',
-                                              marginTop: 5,
-                                          }}>
-                                          <Ion
-                                              name="chatbubble-ellipses-outline"
-                                              size={18}
-                                              color="white"
-                                          />
-                                          <Text style={{color: 'white'}}>
-                                              {' '}
-                                              Chat
-                                          </Text>
-                                      </TouchableOpacity>
-                                  </View>
-                              )
-                            : ''}
+                        <View style={{flex: 1}} />
+                        {isCurrentUser + isCurrentStore < 2 ? (
+                            <View
+                                style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                {userInfo.storeId != undefined && (
+                                    <TouchableOpacity
+                                        onPress={handleFollowClick}
+                                        style={{
+                                            ...styles.touchStyle,
+                                            backgroundColor: isFollow
+                                                ? 'red'
+                                                : PRIMARY_COLOR,
+                                            marginRight: 5,
+                                        }}>
+                                        <Text style={{color: 'white'}}>
+                                            {isFollow ? '- Follow' : '+ Follow'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+
+                                <TouchableOpacity
+                                    style={{
+                                        ...styles.touchStyle,
+                                        backgroundColor: PRIMARY_COLOR,
+                                        marginRight: 5,
+                                        flexDirection: 'row',
+                                        marginTop: 5,
+                                    }}>
+                                    <Ion
+                                        name="chatbubble-ellipses-outline"
+                                        size={18}
+                                        color="white"
+                                    />
+                                    <Text style={{color: 'white'}}> Chat</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View></View>
+                        )}
                     </View>
+
+                    {isStore && (
+                        <View>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    marginLeft: 85,
+                                }}>
+                                Description: {storeInfo.description}
+                            </Text>
+                        </View>
+                    )}
                 </Card>
                 <View
                     style={{

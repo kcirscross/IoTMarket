@@ -18,6 +18,7 @@ import {
 import DropDownPicker from 'react-native-dropdown-picker'
 import {Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
@@ -117,8 +118,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                     skipBackup: true,
                     path: 'images',
                 },
-                maxHeight: 200,
-                maxWidth: 200,
             },
             res => {
                 if (res.didCancel != true) {
@@ -132,8 +131,6 @@ const UploadDetailScreen = ({navigation, route}) => {
         await launchCamera(
             {
                 mediaType: 'photo',
-                maxHeight: 200,
-                maxWidth: 200,
             },
             res => {
                 if (res.didCancel != true) {
@@ -218,7 +215,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                                     onPress: () =>
                                                         navigation.replace(
                                                             'Profile',
-                                                            currentUser._id,
+                                                            currentUser,
                                                         ),
                                                 },
                                             ],
@@ -253,7 +250,10 @@ const UploadDetailScreen = ({navigation, route}) => {
             lengthAfterBoxed == '' ||
             chosenCondition == ''
         ) {
-            Alert.alert('Please fill in all field.')
+            Toast.show({
+                type: 'error',
+                text1: 'Please fill in all field.',
+            })
         } else {
             uploadProduct()
         }
@@ -263,7 +263,7 @@ const UploadDetailScreen = ({navigation, route}) => {
         <SafeAreaView
             style={{
                 ...globalStyles.container,
-                opacity: modalLoading ? 0.5 : 1,
+                opacity: modalLoading + modalPhotos ? 0.5 : 1,
             }}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -271,6 +271,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                         behavior="padding"
                         style={{height: '100%', width: '100%', paddingTop: 10}}>
                         <ModalLoading visible={modalLoading} />
+
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -719,6 +720,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 Upload Product
                             </Text>
                         </TouchableOpacity>
+                        <Toast position="bottom" bottomOffset={80} />
                     </KeyboardAvoidingView>
                 </TouchableWithoutFeedback>
             </ScrollView>
