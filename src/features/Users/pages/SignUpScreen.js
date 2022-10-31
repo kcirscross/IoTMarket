@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import messaging from '@react-native-firebase/messaging'
 import {
     GoogleSignin,
     GoogleSigninButton,
@@ -69,7 +70,7 @@ const SignUpScreen = ({navigation}) => {
         })
     }, [])
 
-    const handleEmailSignUp = () => {
+    const handleEmailSignUp = async () => {
         if (
             email == '' ||
             fullName == '' ||
@@ -83,9 +84,15 @@ const SignUpScreen = ({navigation}) => {
                 Alert.alert('Error', 'Password is not match.')
                 return
             } else {
+                await messaging().registerDeviceForRemoteMessages()
+                const tokenFCM = await messaging().getToken()
+
                 axios({
                     method: 'post',
                     url: `${API_URL}/auth/signup`,
+                    headers: {
+                        deviceTokenFCM: tokenFCM,
+                    },
                     data: {
                         email: email,
                         password: password,
@@ -116,9 +123,15 @@ const SignUpScreen = ({navigation}) => {
     const handleGoogleSignUp = async () => {
         const {user} = await GoogleSignin.signIn()
 
+        await messaging().registerDeviceForRemoteMessages()
+        const tokenFCM = await messaging().getToken()
+
         axios({
             method: 'post',
             url: `${API_URL}/auth/google`,
+            headers: {
+                deviceTokenFCM: tokenFCM,
+            },
             data: {
                 email: user.email,
                 fullName: user.name,

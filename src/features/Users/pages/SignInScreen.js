@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import messaging from '@react-native-firebase/messaging'
 import {
     GoogleSignin,
     GoogleSigninButton,
@@ -22,7 +23,6 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL} from '../../../components/constants'
-import {getCart} from '../../Products/cartSlice'
 import {getFavorite} from '../../Products/favoriteSlice'
 import {signIn} from '../userSlice'
 
@@ -58,8 +58,6 @@ const SignInScreen = ({navigation}) => {
             webClientId:
                 '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
         })
-
-        GoogleSignin.signOut()
     }, [])
 
     //Function Remember Account
@@ -75,10 +73,15 @@ const SignInScreen = ({navigation}) => {
 
     const handleGoogleSignUp = async () => {
         const {user} = await GoogleSignin.signIn()
+        await messaging().registerDeviceForRemoteMessages()
+        const tokenFCM = await messaging().getToken()
 
         axios({
             method: 'post',
             url: `${API_URL}/auth/google`,
+            headers: {
+                deviceTokenFCM: tokenFCM,
+            },
             data: {
                 email: user.email,
                 fullName: user.name,
@@ -92,7 +95,6 @@ const SignInScreen = ({navigation}) => {
                     dispatch(action)
 
                     rememberAccount(user.email, user.name, 'Google')
-                    getCartAfterSignIn()
                     getFavoriteAfterSignIn()
 
                     navigation.replace('BottomNavBar')
@@ -107,9 +109,15 @@ const SignInScreen = ({navigation}) => {
         if (email == '' || password == '') {
             return Alert.alert('Error', 'Please fill in all field.')
         } else {
+            await messaging().registerDeviceForRemoteMessages()
+            const tokenFCM = await messaging().getToken()
+
             axios({
                 method: 'post',
                 url: `${API_URL}/auth/signin`,
+                headers: {
+                    deviceTokenFCM: tokenFCM,
+                },
                 data: {
                     email: email,
                     password: password,
@@ -125,7 +133,6 @@ const SignInScreen = ({navigation}) => {
                         rememberCheckbox &&
                             rememberAccount(email, password, 'Email')
 
-                        getCartAfterSignIn()
                         getFavoriteAfterSignIn()
 
                         navigation.replace('BottomNavBar')
@@ -135,21 +142,6 @@ const SignInScreen = ({navigation}) => {
                     console.log(err.message)
                     Alert.alert('Wrong email or password. Please try again.')
                 })
-        }
-    }
-    const getCartAfterSignIn = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/cart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            }).then(res => dispatch(getCart(res.data.cart)))
-        } catch (error) {
-            console.log(error)
         }
     }
 
