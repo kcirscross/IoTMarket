@@ -1,14 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import React, {useEffect} from 'react'
-import {Alert} from 'react-native'
-import {Image, SafeAreaView, StyleSheet} from 'react-native'
+import {Alert, Image, SafeAreaView, StyleSheet} from 'react-native'
+import {useDispatch} from 'react-redux'
 import {globalStyles} from '~/assets/styles/globalStyles'
 import {API_URL} from '../../../components/constants'
-import {signIn} from '../userSlice'
-import {useDispatch} from 'react-redux'
-import {getCart} from '../../Products/cartSlice'
 import {getFavorite} from '../../Products/favoriteSlice'
+import {signIn} from '../userSlice'
 
 const SplashScreen = ({navigation}) => {
     const dispatch = useDispatch()
@@ -37,8 +35,6 @@ const SplashScreen = ({navigation}) => {
                             if (res.data.statusCode == 200) {
                                 const action = signIn(res.data.data)
                                 dispatch(action)
-
-                                getCartAfterSignIn()
 
                                 getFavoriteAfterSignIn()
 
@@ -72,8 +68,6 @@ const SplashScreen = ({navigation}) => {
 
                                 dispatch(action)
 
-                                getCartAfterSignIn()
-
                                 getFavoriteAfterSignIn()
 
                                 navigation.replace('BottomNavBar')
@@ -105,24 +99,6 @@ const SplashScreen = ({navigation}) => {
             }
         } catch (error) {
             console.log('Error when get data', error)
-        }
-    }
-
-    const getCartAfterSignIn = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/cart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            })
-                .then(res => dispatch(getCart(res.data.cart)))
-                .catch(err => console.log(err))
-        } catch (error) {
-            console.log(error)
         }
     }
 

@@ -159,6 +159,15 @@ const MoreScreen = ({navigation}) => {
 
             <TouchableOpacity
                 style={styles.container}
+                onPress={() => navigation.navigate('Cart')}>
+                <Ion name="cart-outline" size={25} color={PRIMARY_COLOR} />
+                <Text style={styles.textStyle}>My Cart</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.container}
                 onPress={() => navigation.navigate('Favorite')}>
                 <Icon name="heart" color={'#FF4122'} solid={true} size={24} />
                 <Text style={styles.textStyle}>Favorite Products</Text>

@@ -22,7 +22,6 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {API_URL} from '../../../components/constants'
-import {getCart} from '../../Products/cartSlice'
 import {getFavorite} from '../../Products/favoriteSlice'
 import {signIn} from '../userSlice'
 
@@ -92,7 +91,6 @@ const SignInScreen = ({navigation}) => {
                     dispatch(action)
 
                     rememberAccount(user.email, user.name, 'Google')
-                    getCartAfterSignIn()
                     getFavoriteAfterSignIn()
 
                     navigation.replace('BottomNavBar')
@@ -125,7 +123,6 @@ const SignInScreen = ({navigation}) => {
                         rememberCheckbox &&
                             rememberAccount(email, password, 'Email')
 
-                        getCartAfterSignIn()
                         getFavoriteAfterSignIn()
 
                         navigation.replace('BottomNavBar')
@@ -135,21 +132,6 @@ const SignInScreen = ({navigation}) => {
                     console.log(err.message)
                     Alert.alert('Wrong email or password. Please try again.')
                 })
-        }
-    }
-    const getCartAfterSignIn = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/cart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            }).then(res => dispatch(getCart(res.data.cart)))
-        } catch (error) {
-            console.log(error)
         }
     }
 

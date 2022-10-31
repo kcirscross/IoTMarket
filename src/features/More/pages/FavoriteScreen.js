@@ -1,5 +1,5 @@
 import React, {useLayoutEffect} from 'react'
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native'
+import {SafeAreaView, ScrollView, StyleSheet} from 'react-native'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
@@ -26,36 +26,16 @@ const FavoriteScreen = ({navigation}) => {
                 paddingTop: 5,
                 flex: 1,
             }}>
-            {currentFavorite.length != 0 ? (
-                <ScrollView
-                    style={{flex: 1}}
-                    showsVerticalScrollIndicator={false}>
-                    {currentFavorite.map((product, index) => (
-                        <ProductItemHorizontal
-                            key={index}
-                            navigation={navigation}
-                            product={product}
-                            type={'favorite'}
-                        />
-                    ))}
-                </ScrollView>
-            ) : (
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        flex: 1,
-                    }}>
-                    <Text
-                        style={{
-                            color: PRIMARY_COLOR,
-                            fontWeight: 'bold',
-                            fontSize: 30,
-                        }}>
-                        No product found.
-                    </Text>
-                </View>
-            )}
+            <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+                {currentFavorite.map((product, index) => (
+                    <ProductItemHorizontal
+                        key={index}
+                        navigation={navigation}
+                        product={product}
+                        type={'favorite'}
+                    />
+                ))}
+            </ScrollView>
         </SafeAreaView>
     )
 }
