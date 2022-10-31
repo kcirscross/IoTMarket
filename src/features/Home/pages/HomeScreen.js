@@ -1,10 +1,8 @@
 import axios from 'axios'
-import React, {useLayoutEffect} from 'react'
-import {useState} from 'react'
-import {useEffect} from 'react'
-import {RefreshControl} from 'react-native'
-import {FlatList} from 'react-native'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    FlatList,
+    RefreshControl,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -13,7 +11,6 @@ import {
     View,
 } from 'react-native'
 import {Input} from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'

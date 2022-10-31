@@ -13,13 +13,9 @@ import {
 import {Avatar} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
-import {useSelector, useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {
-    API_URL,
-    PRIMARY_COLOR,
-    SECONDARY_COLOR,
-} from '../../../components/constants'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 import {signOut} from '../../Users/userSlice'
 
 const MoreScreen = ({navigation}) => {
@@ -90,7 +86,7 @@ const MoreScreen = ({navigation}) => {
     return (
         <SafeAreaView style={globalStyles.container}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('Profile', currentUser._id)}
+                onPress={() => navigation.navigate('ChangeInfo')}
                 style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -117,13 +113,24 @@ const MoreScreen = ({navigation}) => {
                         }}>
                         {currentUser.fullName || ''}
                     </Text>
-                    <Text>See your profile.</Text>
+                    <Text>Following: {currentUser.follows.length}</Text>
                 </View>
             </TouchableOpacity>
 
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Store')}
+                style={styles.container}>
+                <Icon name="store" size={24} color={'orange'} />
+                <Text style={styles.textStyle}>My Store</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.container}>
-                <Ion name="people-outline" size={30} color={'blue'} />
+                <Ion name="people-outline" size={28} color={'blue'} />
                 <Text style={styles.textStyle}>Follow</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.container}>
@@ -134,6 +141,8 @@ const MoreScreen = ({navigation}) => {
                     }}
                 />
                 <Text style={styles.textStyle}>Bought Products</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.container}>
@@ -144,6 +153,8 @@ const MoreScreen = ({navigation}) => {
                     }}
                 />
                 <Text style={styles.textStyle}>Sold Products</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -151,6 +162,8 @@ const MoreScreen = ({navigation}) => {
                 onPress={() => navigation.navigate('Favorite')}>
                 <Icon name="heart" color={'#FF4122'} solid={true} size={24} />
                 <Text style={styles.textStyle}>Favorite Products</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -163,6 +176,8 @@ const MoreScreen = ({navigation}) => {
                     size={24}
                 />
                 <Text style={styles.textStyle}>Change Your Infomation</Text>
+                <View style={{flex: 1}} />
+                <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
             <TouchableOpacity

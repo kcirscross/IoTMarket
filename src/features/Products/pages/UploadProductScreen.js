@@ -1,16 +1,10 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {SafeAreaView} from 'react-native'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import {useLayoutEffect} from 'react'
-import {useState} from 'react'
-import {useEffect} from 'react'
 import axios from 'axios'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {ScrollView} from 'react-native'
-import {TouchableOpacity} from 'react-native'
-import {CategoryItemHorizontal} from '../../Home/components'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {SafeAreaView, ScrollView, StyleSheet, Text} from 'react-native'
 import ModalLoading from '~/components/utils/ModalLoading'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {CategoryItemHorizontal} from '../../Home/components'
 
 const UploadProductScreen = ({navigation}) => {
     const [listCategories, setListCategories] = useState([])

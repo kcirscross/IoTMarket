@@ -37,8 +37,6 @@ const ChangeInfoScreen = ({navigation}) => {
 
     const {street, ward, district, city} = currentUser.address || ''
 
-    // console.log(currentUser)
-
     const updatePhone = async () => {
         setModalLoading(true)
         try {
@@ -127,8 +125,6 @@ const ChangeInfoScreen = ({navigation}) => {
                     skipBackup: true,
                     path: 'images',
                 },
-                maxHeight: 200,
-                maxWidth: 200,
             },
             res => {
                 if (res.didCancel != true) {
@@ -146,8 +142,6 @@ const ChangeInfoScreen = ({navigation}) => {
         await launchCamera(
             {
                 mediaType: 'photo',
-                maxHeight: 200,
-                maxWidth: 200,
             },
             res => {
                 if (res.didCancel != true) {
@@ -163,10 +157,12 @@ const ChangeInfoScreen = ({navigation}) => {
 
     const uploadImageToFirebase = async (filePath, uri) => {
         try {
+            //Upload Image
             await storage()
                 .ref(filePath)
                 .putFile(uri)
                 .then(async () => {
+                    //Get URL
                     await storage()
                         .ref(filePath)
                         .getDownloadURL()
@@ -382,7 +378,7 @@ const ChangeInfoScreen = ({navigation}) => {
                         <Input
                             containerStyle={styles.textContainer}
                             defaultValue={
-                                currentUser.address == ''
+                                currentUser.address.city == ''
                                     ? ''
                                     : `${street},\n${ward},\n${district},\n${city}.`
                             }

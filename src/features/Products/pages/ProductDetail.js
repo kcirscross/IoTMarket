@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
+import {revokeScope} from 'immer/dist/internal'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
-    Alert,
     Dimensions,
     Image,
     SafeAreaView,
@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import Carousel from 'react-native-anchor-carousel'
 import {Avatar, Badge, Card} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
@@ -23,11 +24,10 @@ import {
     PRIMARY_COLOR,
     SECONDARY_COLOR,
 } from '../../../components/constants'
+import {addFollow, removeFollow} from '../../Users/userSlice'
 import {SimplePaginationDot} from '../components'
 import BottomMenuBar from '../components/BottomMenuBar'
 import {addFavorite, removeFavorite} from '../favoriteSlice'
-import Toast from 'react-native-toast-message'
-import {addFollow, removeFollow} from '../../Users/userSlice'
 
 const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -43,6 +43,9 @@ const ProductDetail = ({navigation, route}) => {
     const [ratingValue, setRatingValue] = useState(0)
     const [isFollow, setIsFollow] = useState(false)
     const [isOwner, setIsOwner] = useState(false)
+
+    const [storeInfo, setStoreInfo] = useState([])
+    const [isStore, setIsStore] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -79,6 +82,7 @@ const ProductDetail = ({navigation, route}) => {
     //Get Product Detail
     useEffect(() => {
         setModalLoading(true)
+
         axios({
             method: 'get',
             url: `${API_URL}/product/${_id}`,
@@ -87,33 +91,85 @@ const ProductDetail = ({navigation, route}) => {
                 if (res.status == 200) {
                     setProduct(res.data.product)
                     setListImages(res.data.product.detailImages)
-                    setModalLoading(false)
                     setRatingValue(res.data.product.rating.ratingValue)
 
                     res.data.product.peopleFavoriteThisProduct.forEach(id => {
                         id == currentUser._id && setFavorite(true)
                     })
 
-                    res.data.product.ownerId == currentUser._id
-                        ? setIsOwner(true)
-                        : setIsOwner(false)
+                    if (
+                        res.data.product.ownerId == currentUser._id ||
+                        res.data.product.ownerId == currentUser.storeId
+                    ) {
+                        setIsOwner(true)
+                    } else {
+                        setIsOwner(false)
+                    }
 
-                    axios({
-                        method: 'get',
-                        url: `${API_URL}/user/${res.data.product.ownerId}`,
-                    }).then(res => {
-                        if (res.status == 200) {
-                            setProductOwner(res.data.userInfo)
-                            currentUser.follows.forEach(
-                                id =>
-                                    id == res.data.userInfo.storeId &&
-                                    setIsFollow(true),
-                            )
-                        }
-                    })
+                    if (res.data.product.isStore) {
+                        axios({
+                            method: 'get',
+                            url: `${API_URL}/store/${res.data.product.ownerId}`,
+                        })
+                            .then(res => {
+                                setStoreInfo(res.data.store)
+                                setIsStore(true)
+
+                                //Get User Infomation
+                                axios({
+                                    method: 'get',
+                                    url: `${API_URL}/user/${res.data.store.ownerId}`,
+                                })
+                                    .then(res => {
+                                        if (res.status == 200) {
+                                            setProductOwner(res.data.userInfo)
+                                            currentUser.follows.forEach(
+                                                id =>
+                                                    id ==
+                                                        res.data.userInfo
+                                                            .storeId &&
+                                                    setIsFollow(true),
+                                            )
+                                        }
+                                        setModalLoading(false)
+                                    })
+                                    .catch(error => {
+                                        console.log(error.response)
+                                        setModalLoading(false)
+                                    })
+                            })
+                            .catch(error => {
+                                setModalLoading(false)
+                                console.log(error.response)
+                            })
+                    } else {
+                        setIsStore(false)
+                        axios({
+                            method: 'get',
+                            url: `${API_URL}/user/${res.data.product.ownerId}`,
+                        })
+                            .then(res => {
+                                if (res.status == 200) {
+                                    setProductOwner(res.data.userInfo)
+                                    currentUser.follows.forEach(
+                                        id =>
+                                            id == res.data.userInfo.storeId &&
+                                            setIsFollow(true),
+                                    )
+                                }
+                                setModalLoading(false)
+                            })
+                            .catch(error => {
+                                console.log(error.response)
+                                setModalLoading(false)
+                            })
+                    }
                 }
             })
-            .catch(error => console.log(error.message))
+            .catch(error => {
+                setModalLoading(false)
+                console.log(error.response.data)
+            })
     }, [])
 
     function handleCarouselScrollEnd(item, index) {
@@ -267,6 +323,7 @@ const ProductDetail = ({navigation, route}) => {
                 opacity: modalLoading ? 0.5 : 1,
             }}>
             <ModalLoading visible={modalLoading} />
+
             <View
                 style={{
                     height: 300,
@@ -325,11 +382,13 @@ const ProductDetail = ({navigation, route}) => {
                     length={listImages.length}
                 />
             </View>
+
             <Toast position="bottom" bottomOffset={70} />
+
             <Card containerStyle={globalStyles.cardContainer}>
                 <TouchableOpacity
                     onPress={() =>
-                        navigation.navigate('Profile', productOwner._id)
+                        navigation.navigate('Profile', productOwner)
                     }>
                     <View
                         style={{
@@ -340,12 +399,17 @@ const ProductDetail = ({navigation, route}) => {
                             <Avatar
                                 rounded
                                 size={'large'}
-                                source={{uri: productOwner.avatar}}
+                                source={{
+                                    uri: isStore
+                                        ? storeInfo.shopImage
+                                        : productOwner.avatar,
+                                }}
                                 avatarStyle={{
                                     borderWidth: 1,
-                                    borderColor: SECONDARY_COLOR,
+                                    borderColor: 'black',
                                 }}
                             />
+
                             <Badge
                                 value=" "
                                 status={
@@ -360,6 +424,7 @@ const ProductDetail = ({navigation, route}) => {
                                 }}
                             />
                         </View>
+
                         <View>
                             <Text
                                 style={{
@@ -368,7 +433,9 @@ const ProductDetail = ({navigation, route}) => {
                                     marginLeft: 10,
                                     fontSize: 18,
                                 }}>
-                                {productOwner.fullName}
+                                {isStore
+                                    ? storeInfo.displayName
+                                    : productOwner.fullName}
                             </Text>
                             <Text style={{color: 'black', marginLeft: 10}}>
                                 {productOwner.onlineStatus == 'Online'
@@ -385,7 +452,7 @@ const ProductDetail = ({navigation, route}) => {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                 }}>
-                                {productOwner.storeId != '' && (
+                                {isStore && (
                                     <TouchableOpacity
                                         onPress={handleFollowClick}
                                         style={{
