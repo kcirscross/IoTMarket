@@ -1,24 +1,15 @@
-import {StyleSheet, Text, View} from 'react-native'
-import React from 'react'
-import {useLayoutEffect} from 'react'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import ProductItemHorizontal from '../components/ProductItemHorizontal'
-import {useEffect} from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import {useState} from 'react'
-import {SafeAreaView} from 'react-native'
-import {ScrollView} from 'react-native'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {SafeAreaView, ScrollView, StyleSheet} from 'react-native'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {useDispatch, useSelector} from 'react-redux'
-import {getCart} from '../cartSlice'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import ProductItemHorizontal from '../components/ProductItemHorizontal'
 
 const CartScreen = ({navigation}) => {
     const [listProducts, setListProducts] = useState([])
     const [modalLoading, setModalLoading] = useState(false)
-
-    const currentCart = useSelector(state => state.cart)
-    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -32,17 +23,53 @@ const CartScreen = ({navigation}) => {
         })
     }, [])
 
+    const getCart = async () => {
+        try {
+            setModalLoading(true)
+            const token = await AsyncStorage.getItem('token')
+
+            axios({
+                method: 'get',
+                url: `${API_URL}/user/cart`,
+                headers: {
+                    authorization: `Bearer ${token}`,
+                },
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        setListProducts(res.data.cart.content)
+                        setModalLoading(false)
+                    }
+                })
+                .catch(error => {
+                    setModalLoading(false)
+                    console.log('Get Cart: ', error.response)
+                })
+        } catch (error) {
+            setModalLoading(false)
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
-        setListProducts(currentCart)
+        getCart()
     }, [])
 
     return (
         <SafeAreaView style={{...globalStyles.container, paddingTop: 5}}>
-            <ScrollView>
-                {listProducts.map((product, index) => (
-                    <ProductItemHorizontal key={index} product={product} />
-                ))}
-            </ScrollView>
+            <ModalLoading visible={modalLoading} />
+            {!modalLoading && (
+                <ScrollView>
+                    {listProducts.map((product, index) => (
+                        <ProductItemHorizontal
+                            key={index}
+                            product={product}
+                            navigation={navigation}
+                            type="cart"
+                        />
+                    ))}
+                </ScrollView>
+            )}
         </SafeAreaView>
     )
 }

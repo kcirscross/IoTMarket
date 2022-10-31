@@ -43,7 +43,14 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
         }
     }
 
-    const removeCart = async () => {
+    const handleDeleteAllClick = async () => {
+        Alert.alert('Do you want to remove this product from your cart?', '', [
+            {text: 'Yes', onPress: () => removeCart(quantity)},
+            {text: 'No'},
+        ])
+    }
+
+    const removeCart = async amount => {
         try {
             const token = await AsyncStorage.getItem('token')
             axios({
@@ -54,17 +61,17 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                 },
                 data: {
                     productId: product.productId._id,
-                    quantity: 1,
+                    quantity: amount,
                 },
             })
                 .then(res => {
                     if (res.status == 200) {
-                        setQuantity((parseInt(quantity) - 1).toString())
-                        dispatch(removeCart(product.productId._id))
+                        quantity != amount
+                            ? setQuantity((parseInt(quantity) - 1).toString())
+                            : setQuantity(0)
                     }
                 })
                 .catch(error => {
-                    Alert.alert('Run out of product.')
                     console.log('Cart: ', error)
                 })
         } catch (error) {
@@ -72,7 +79,7 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
         }
     }
 
-    const addCart = async () => {
+    const addToCart = async () => {
         try {
             const token = await AsyncStorage.getItem('token')
             axios({
@@ -89,7 +96,6 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                 .then(res => {
                     if (res.status == 200) {
                         setQuantity((parseInt(quantity) + 1).toString())
-                        dispatch(addCart(product.productId._id))
                     }
                 })
                 .catch(error => {
@@ -103,21 +109,17 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
 
     const subQuantity = () => {
         if (quantity > 1) {
-            removeCart()
+            removeCart(1)
         } else {
             Alert.alert(
                 'Do you want to remove this product from your cart?',
                 '',
-                [{text: 'Yes', onPress: removeCart}, {text: 'No'}],
+                [{text: 'Yes', onPress: () => removeCart(1)}, {text: 'No'}],
             )
         }
     }
 
-    // const addQuantity = () => {
-    //     addCart()
-    // }
-
-    return (
+    return quantity >= 1 || type == 'favorite' ? (
         <Card
             containerStyle={{
                 ...globalStyles.cardContainer,
@@ -148,12 +150,13 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                     resizeMode="contain"
                 />
 
-                <View>
+                <View style={{marginLeft: 5, flex: 1}}>
                     <Text
                         style={{
                             color: 'black',
                             fontSize: 18,
                             fontWeight: 'bold',
+                            width: '100%',
                         }}>
                         {type == 'favorite'
                             ? product.productName
@@ -188,29 +191,29 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                                     paddingHorizontal: 5,
                                     fontSize: 20,
                                 }}
+                                defaultValue={quantity.toString()}
                                 value={quantity}
                                 textAlign="center"
                                 onChangeText={text => setQuantity(text)}
                             />
                             <TouchableOpacity
-                                onPress={addCart}
+                                onPress={addToCart}
                                 style={styles.touchStyle}>
                                 <Text style={styles.textStyle}>+</Text>
                             </TouchableOpacity>
                         </View>
                     )}
                 </View>
-                <View style={{flex: 1}} />
-                {type == 'cart' && (
+                {type == 'cart' ? (
                     <TouchableOpacity
+                        onPress={handleDeleteAllClick}
                         style={{
                             justifyContent: 'center',
                             marginRight: 5,
                         }}>
                         <Icon name="trash" color={'#FA8072'} size={24} />
                     </TouchableOpacity>
-                )}
-                {type == 'favorite' && (
+                ) : (
                     <TouchableOpacity
                         onPress={handleRemoveFavoriteClick}
                         style={{
@@ -227,6 +230,8 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                 )}
             </TouchableOpacity>
         </Card>
+    ) : (
+        <View />
     )
 }
 

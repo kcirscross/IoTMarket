@@ -189,7 +189,16 @@ const ProductDetail = ({navigation, route}) => {
                     productId: _id,
                     quantity: 1,
                 },
-            }).then(res => res.status == 200 && console.log(res.data))
+            })
+                .then(
+                    res =>
+                        res.status == 200 &&
+                        Toast.show({
+                            type: 'success',
+                            text1: 'Added to cart.',
+                        }),
+                )
+                .catch(error => console.log('Cart: ', error.response.data))
         } catch (error) {
             console.log(error)
         }
