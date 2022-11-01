@@ -47,7 +47,7 @@ const MoreScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerShown: true,
+            headerShown: false,
             headerStyle: {
                 backgroundColor: PRIMARY_COLOR,
             },
@@ -113,7 +113,12 @@ const MoreScreen = ({navigation}) => {
                         }}>
                         {currentUser.fullName || ''}
                     </Text>
-                    <Text>Following: {currentUser.follows.length}</Text>
+                    <Text>
+                        Following:{' '}
+                        {currentUser.follows != undefined
+                            ? currentUser.follows.length
+                            : 0}
+                    </Text>
                 </View>
             </TouchableOpacity>
 

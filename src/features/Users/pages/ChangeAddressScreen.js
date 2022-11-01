@@ -45,7 +45,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: 'Change Address',
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,

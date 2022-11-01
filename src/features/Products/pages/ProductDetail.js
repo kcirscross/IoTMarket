@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
-import {revokeScope} from 'immer/dist/internal'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Dimensions,
@@ -21,8 +20,8 @@ import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
+    AVATAR_BORDER,
     PRIMARY_COLOR,
-    SECONDARY_COLOR,
 } from '../../../components/constants'
 import {addFollow, removeFollow} from '../../Users/userSlice'
 import {SimplePaginationDot} from '../components'
@@ -49,7 +48,7 @@ const ProductDetail = ({navigation, route}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: 'Detail',
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
@@ -325,7 +324,7 @@ const ProductDetail = ({navigation, route}) => {
         }
     }
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -415,7 +414,7 @@ const ProductDetail = ({navigation, route}) => {
                                 }}
                                 avatarStyle={{
                                     borderWidth: 1,
-                                    borderColor: 'black',
+                                    borderColor: AVATAR_BORDER,
                                 }}
                             />
 
@@ -502,8 +501,12 @@ const ProductDetail = ({navigation, route}) => {
                     </View>
                 </TouchableOpacity>
             </Card>
+
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <Text
                     style={{
                         fontWeight: 'bold',
@@ -588,6 +591,7 @@ const ProductDetail = ({navigation, route}) => {
                     )}
                 </View>
             </Card>
+
             <Card
                 containerStyle={{
                     ...globalStyles.cardContainer,
@@ -602,7 +606,16 @@ const ProductDetail = ({navigation, route}) => {
                     <Text>{product.description}</Text>
                 </View>
             </Card>
+
             {!isOwner && <BottomMenuBar productOwner={productOwner} />}
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.5 : 1,
+            }}>
+            <ModalLoading visible={modalLoading} />
         </SafeAreaView>
     )
 }

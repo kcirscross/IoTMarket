@@ -1,7 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {Image} from 'react-native'
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 
 const CategoryItemHorizontal = ({category, navigation}) => {
@@ -16,15 +14,16 @@ const CategoryItemHorizontal = ({category, navigation}) => {
                 source={{uri: category.image}}
                 style={{
                     width: 80,
-                    height: 50,
+                    height: 60,
+                    margin: 2,
                 }}
-                resizeMethod="scale"
+                resizeMethod="resize"
                 resizeMode="contain"
             />
             <Text
                 style={{
                     color: 'black',
-                    fontSize: 16,
+                    fontSize: 18,
                 }}>
                 {category.categoryName}
             </Text>

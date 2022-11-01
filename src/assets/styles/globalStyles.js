@@ -1,5 +1,5 @@
-import {StyleSheet} from 'react-native'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../components/constants'
+import { StyleSheet } from 'react-native'
+import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../components/constants'
 
 export const globalStyles = StyleSheet.create({
     container: {
@@ -43,6 +43,6 @@ export const globalStyles = StyleSheet.create({
         paddingLeft: 5,
         paddingRight: 5,
         borderRadius: 10,
-        paddingVertical: 5
+        paddingVertical: 5,
     },
 })

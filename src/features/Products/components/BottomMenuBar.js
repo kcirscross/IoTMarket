@@ -11,7 +11,7 @@ const BottomMenuBar = ({productOwner}) => {
     const handleSmsClick = () => {
         Linking.openURL(`sms:${productOwner.phoneNumber}`)
     }
-    
+
     return (
         <View
             style={{

@@ -12,7 +12,7 @@ const UploadProductScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerShown: true,
+            headerShown: false,
             headerStyle: {
                 backgroundColor: PRIMARY_COLOR,
             },

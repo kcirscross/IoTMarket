@@ -59,7 +59,7 @@ const ProfileScreen = ({navigation, route}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: !isCurrentUser ? 'Store' : '',
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
@@ -291,15 +291,16 @@ const ProfileScreen = ({navigation, route}) => {
         !isCurrentUser ? getUserInfo() : isCurrentStore && getMyStore()
     }, [])
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
                 opacity: modalLoading ? 0.3 : 1,
             }}>
+            <ModalLoading visible={modalLoading} />
+
             <Toast position="bottom" bottomOffset={70} />
             <ScrollView showsVerticalScrollIndicator={false}>
-                <ModalLoading visible={modalLoading} />
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
@@ -669,6 +670,14 @@ const ProfileScreen = ({navigation, route}) => {
                     </TabView.Item>
                 </TabView>
             </ScrollView>
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.3 : 1,
+            }}>
+            <ModalLoading visible={modalLoading} />
         </SafeAreaView>
     )
 }

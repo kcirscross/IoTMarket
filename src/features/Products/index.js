@@ -1,12 +1,10 @@
-import ProductsScreen from './pages/ProductsScreen'
-import UploadProductScreen from './pages/UploadProductScreen'
-import ProductDetail from './pages/ProductDetail'
 import ProductItemHorizontal from './components/ProductItemHorizontal'
 import CartScreen from './pages/CartScreen'
+import ProductDetail from './pages/ProductDetail'
 import UploadDetailScreen from './pages/UploadDetailScreen'
+import UploadProductScreen from './pages/UploadProductScreen'
 
 export {
-    ProductsScreen,
     UploadProductScreen,
     ProductDetail,
     ProductItemHorizontal,
