@@ -21,8 +21,6 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
     const dispatch = useDispatch()
     const [quantity, setQuantity] = useState(product.quantity)
 
-    console.log(product)
-
     const handleRemoveFavoriteClick = async () => {
         try {
             const token = await AsyncStorage.getItem('token')

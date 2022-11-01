@@ -17,11 +17,13 @@ import {
 import {Avatar, Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
+    AVATAR_BORDER,
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
 } from '../../../components/constants'
@@ -107,7 +109,7 @@ const ChangeInfoScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: 'My Infomation',
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
@@ -206,6 +208,10 @@ const ChangeInfoScreen = ({navigation}) => {
 
     return (
         <SafeAreaView
+            onTouchStart={() => {
+                setModalAvatarVisible(false)
+                setModalGenderVisible(false)
+            }}
             style={{
                 ...globalStyles.container,
                 opacity:
@@ -221,24 +227,44 @@ const ChangeInfoScreen = ({navigation}) => {
                         height: '100%',
                     }}>
                     <ModalLoading visible={modalLoading} />
+
                     <Modal
                         animationType="slide"
                         transparent={true}
                         visible={modalAvatarVisible}>
                         <SafeAreaView
-                            // onTouchStart={() => setModalAvatarVisible(false)}
                             style={{
                                 flex: 1,
                             }}>
                             <View style={styles.modalView}>
-                                <Text
+                                <View
                                     style={{
-                                        ...styles.labelStyle,
-                                        fontSize: 18,
-                                        marginLeft: -10,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
                                     }}>
-                                    Choose your image from?
-                                </Text>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            fontSize: 18,
+                                            marginLeft: -10,
+                                        }}>
+                                        Choose your image from?
+                                    </Text>
+
+                                    <View style={{flex: 1}} />
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setModalAvatarVisible(false)
+                                        }>
+                                        <Ion
+                                            name="close-circle-outline"
+                                            size={30}
+                                            color="black"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
@@ -248,30 +274,45 @@ const ChangeInfoScreen = ({navigation}) => {
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Gallery
                                     </Text>
+
+                                    <Ion
+                                        name="images-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
                                         pickImageFromCamera()
                                     }}
-                                    style={styles.touchModalView}>
+                                    style={{
+                                        ...styles.touchModalView,
+                                        marginTop: 10,
+                                    }}>
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Camera
                                     </Text>
+
+                                    <Ion
+                                        name="camera-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </SafeAreaView>
                     </Modal>
+
                     <View
                         style={{
                             flexDirection: 'row',
@@ -289,9 +330,10 @@ const ChangeInfoScreen = ({navigation}) => {
                                 size={80}
                                 avatarStyle={{
                                     borderWidth: 1,
-                                    borderColor: 'gray',
+                                    borderColor: AVATAR_BORDER,
                                 }}
                             />
+
                             <Icon
                                 name="camera"
                                 size={20}
@@ -397,29 +439,46 @@ const ChangeInfoScreen = ({navigation}) => {
                     </TouchableOpacity>
 
                     <Modal
-                        animationType="fade"
+                        animationType="slide"
                         transparent={true}
                         visible={modalGenderVisible}>
                         <SafeAreaView
-                            onTouchStart={() => setModalGenderVisible(false)}
                             style={{
                                 flex: 1,
                             }}>
                             <View style={styles.modalView}>
-                                <Text
-                                    style={{
-                                        ...styles.labelStyle,
-                                        fontSize: 18,
-                                        marginLeft: -10,
-                                    }}>
-                                    Choose your gender.
-                                </Text>
+                                <View style={{flexDirection: 'row'}}>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            fontSize: 18,
+                                            marginLeft: -10,
+                                        }}>
+                                        Choose your gender.
+                                    </Text>
+
+                                    <View style={{flex: 1}} />
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setModalGenderVisible(false)
+                                        }>
+                                        <Ion
+                                            name="close-circle-outline"
+                                            size={30}
+                                            color="black"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalGenderVisible(false)
                                         changeGender('Male')
                                     }}
-                                    style={styles.touchModalView}>
+                                    style={{
+                                        ...styles.touchModalView,
+                                        flexDirection: 'row',
+                                    }}>
                                     {currentUser.gender == 'Male' ? (
                                         <Icon
                                             name="check-square"
@@ -443,12 +502,16 @@ const ChangeInfoScreen = ({navigation}) => {
                                         Male
                                     </Text>
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalGenderVisible(false)
                                         changeGender('Female')
                                     }}
-                                    style={styles.touchModalView}>
+                                    style={{
+                                        ...styles.touchModalView,
+                                        flexDirection: 'row',
+                                    }}>
                                     {currentUser.gender == 'Female' ? (
                                         <Icon
                                             name="check-square"
@@ -500,7 +563,8 @@ const ChangeInfoScreen = ({navigation}) => {
                         onPress={() => {
                             currentUser.fromGoogle
                                 ? Alert.alert(
-                                      'Can not change password because you are signing in with Google account.',
+                                      'Cannot change password',
+                                      'Because you are signing in with Google account.',
                                   )
                                 : navigation.navigate('ChangePassword')
                         }}>
@@ -554,7 +618,6 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     touchModalView: {
-        flexDirection: 'row',
         alignItems: 'center',
     },
 })

@@ -74,7 +74,7 @@ const UploadDetailScreen = ({navigation, route}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: route.params.categoryName,
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
@@ -358,6 +358,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     Images: {`${listImages.length}/5`}
                                 </Text>
                             </TouchableOpacity>
+
                             {listImages.length > 0 && (
                                 <ScrollView
                                     horizontal
@@ -377,7 +378,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                             )}
 
                             <Input
-                                placeholder="Product Name"
                                 label="Product Name"
                                 containerStyle={{
                                     ...globalStyles.input,
@@ -392,12 +392,12 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     fontSize: 16,
                                     ...styles.textStyle,
                                 }}
+                                labelStyle={styles.labelStyle}
                                 renderErrorMessage={false}
                                 onChangeText={text => setProductName(text)}
                             />
 
                             <Input
-                                placeholder="Product Description"
                                 label="Product Description"
                                 multiline={true}
                                 numberOfLines={10}
@@ -415,6 +415,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     ...styles.textStyle,
                                     textAlignVertical: 'top',
                                 }}
+                                labelStyle={styles.labelStyle}
                                 renderErrorMessage={false}
                                 onChangeText={text =>
                                     setProductDescription(text)
@@ -422,7 +423,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                             />
 
                             <Input
-                                placeholder="Price"
                                 label="Price (VND)"
                                 keyboardType="number-pad"
                                 containerStyle={{
@@ -438,12 +438,12 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     fontSize: 16,
                                     ...styles.textStyle,
                                 }}
+                                labelStyle={styles.labelStyle}
                                 renderErrorMessage={false}
                                 onChangeText={text => setProductPrice(text)}
                             />
 
                             <Input
-                                placeholder="Number in Stock"
                                 label="Number in Stock"
                                 keyboardType="number-pad"
                                 containerStyle={{
@@ -459,17 +459,20 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     fontSize: 16,
                                     ...styles.textStyle,
                                 }}
+                                labelStyle={styles.labelStyle}
                                 renderErrorMessage={false}
                                 onChangeText={text => setProductAmount(text)}
                             />
+
                             <Text
                                 style={{
                                     ...styles.labelStyle,
                                     fontSize: 18,
-                                    marginTop: 5,
+                                    marginTop: 10,
                                 }}>
                                 Condition of Product
                             </Text>
+
                             <DropDownPicker
                                 open={openCondition}
                                 value={valueCondition}
@@ -488,17 +491,17 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 style={{
                                     ...styles.labelStyle,
                                     fontSize: 18,
-                                    marginTop: 5,
+                                    marginTop: 10,
                                 }}>
                                 Size of Product Before Boxed
                             </Text>
+
                             <View
                                 style={{
                                     flexDirection: 'row',
                                     justifyContent: 'center',
                                 }}>
                                 <Input
-                                    placeholder="Weight"
                                     label="Weight (gram)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -514,13 +517,13 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setWeightBeforeBoxed(text)
                                     }
                                 />
                                 <Input
-                                    placeholder="Height"
                                     label="Height  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -537,6 +540,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setHeightBeforeBoxed(text)
@@ -550,7 +554,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     justifyContent: 'center',
                                 }}>
                                 <Input
-                                    placeholder="Width"
                                     label="Width (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -566,13 +569,13 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setWidthBeforeBoxed(text)
                                     }
                                 />
                                 <Input
-                                    placeholder="Length"
                                     label="Length  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -589,6 +592,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setLengthBeforeBoxed(text)
@@ -600,17 +604,17 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 style={{
                                     ...styles.labelStyle,
                                     fontSize: 18,
-                                    marginTop: 5,
+                                    marginTop: 10,
                                 }}>
                                 Size of Product After Boxed
                             </Text>
+
                             <View
                                 style={{
                                     flexDirection: 'row',
                                     justifyContent: 'center',
                                 }}>
                                 <Input
-                                    placeholder="Weight"
                                     label="Weight  (gram)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -626,13 +630,14 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setWeightAfterBoxed(text)
                                     }
                                 />
+
                                 <Input
-                                    placeholder="Height"
                                     label="Height  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -649,6 +654,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setHeightAfterBoxed(text)
@@ -662,7 +668,6 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     justifyContent: 'center',
                                 }}>
                                 <Input
-                                    placeholder="Width"
                                     label="Width (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -678,13 +683,14 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setWidthAfterBoxed(text)
                                     }
                                 />
+
                                 <Input
-                                    placeholder="Length"
                                     label="Length (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
@@ -701,6 +707,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         fontSize: 16,
                                         ...styles.textStyle,
                                     }}
+                                    labelStyle={styles.labelStyle}
                                     renderErrorMessage={false}
                                     onChangeText={text =>
                                         setLengthAfterBoxed(text)
@@ -734,11 +741,6 @@ const styles = StyleSheet.create({
     touch: {
         alignItems: 'center',
         justifyContent: 'center',
-        borderColor: 'red',
-        borderWidth: 1,
-        borderRadius: 10,
-        borderStyle: 'dashed',
-        padding: 10,
     },
     modalView: {
         backgroundColor: 'white',

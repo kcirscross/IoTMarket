@@ -17,10 +17,15 @@ import {Avatar, Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {
+    API_URL,
+    AVATAR_BORDER,
+    PRIMARY_COLOR,
+} from '../../../components/constants'
 
 const UpdateStoreScreen = ({navigation, route}) => {
     const storeInfo = route.params
@@ -244,7 +249,12 @@ const UpdateStoreScreen = ({navigation, route}) => {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            onTouchStart={() => setModalAvatarVisible(false)}
+            style={{
+                ...globalStyles.container,
+                opacity: modalAvatarVisible + modalLoading ? 0.3 : 1,
+            }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
                     behavior="height"
@@ -253,25 +263,46 @@ const UpdateStoreScreen = ({navigation, route}) => {
                         width: '100%',
                     }}>
                     <ModalLoading visible={modalLoading} />
+
                     <Toast position="bottom" bottomOffset={70} />
+
                     <Modal
                         animationType="slide"
                         transparent={true}
                         visible={modalAvatarVisible}>
                         <SafeAreaView
-                            // onTouchStart={() => setModalAvatarVisible(false)}
                             style={{
                                 flex: 1,
                             }}>
                             <View style={styles.modalView}>
-                                <Text
+                                <View
                                     style={{
-                                        ...styles.labelStyle,
-                                        fontSize: 18,
-                                        marginLeft: -10,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
                                     }}>
-                                    Choose your image from?
-                                </Text>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            fontSize: 18,
+                                            marginLeft: -10,
+                                        }}>
+                                        Choose your image from?
+                                    </Text>
+
+                                    <View style={{flex: 1}} />
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setModalAvatarVisible(false)
+                                        }>
+                                        <Ion
+                                            name="close-circle-outline"
+                                            size={30}
+                                            color="black"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
@@ -281,30 +312,45 @@ const UpdateStoreScreen = ({navigation, route}) => {
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Gallery
                                     </Text>
+
+                                    <Ion
+                                        name="images-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
                                         pickImageFromCamera()
                                     }}
-                                    style={styles.touchModalView}>
+                                    style={{
+                                        ...styles.touchModalView,
+                                        marginTop: 10,
+                                    }}>
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Camera
                                     </Text>
+
+                                    <Ion
+                                        name="camera-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </SafeAreaView>
                     </Modal>
+
                     <Text style={{...styles.labelStyle, fontSize: 20}}>
                         Store Logo
                     </Text>
@@ -316,14 +362,14 @@ const UpdateStoreScreen = ({navigation, route}) => {
                         }}>
                         <Avatar
                             rounded
-                            size={90}
+                            size={100}
                             source={
                                 shopImage == ''
                                     ? {uri: storeInfo.shopImage}
                                     : {uri: shopImage}
                             }
                             avatarStyle={{
-                                borderColor: 'black',
+                                borderColor: AVATAR_BORDER,
                                 borderWidth: 1,
                             }}
                         />
@@ -385,6 +431,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             marginTop: 10,
                         }}>
                         <Text style={styles.labelStyle}>Choose your city.</Text>
+
                         <DropDownPicker
                             open={openCity}
                             value={valueCity}
@@ -412,6 +459,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                         <Text style={styles.labelStyle}>
                             Choose your district.
                         </Text>
+
                         <DropDownPicker
                             open={openDistrict}
                             value={valueDistrict}
@@ -437,6 +485,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             marginTop: 10,
                         }}>
                         <Text style={styles.labelStyle}>Choose your ward.</Text>
+
                         <DropDownPicker
                             open={openWard}
                             value={valueWard}
@@ -495,7 +544,6 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     touchModalView: {
-        flexDirection: 'row',
         alignItems: 'center',
     },
 })

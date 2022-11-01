@@ -23,7 +23,11 @@ import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {
+    API_URL,
+    AVATAR_BORDER,
+    PRIMARY_COLOR,
+} from '../../../components/constants'
 
 const StoreScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -320,7 +324,7 @@ const StoreScreen = ({navigation}) => {
         }
     }, [isFocus])
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -334,7 +338,9 @@ const StoreScreen = ({navigation}) => {
                         width: '100%',
                     }}>
                     <ModalLoading visible={modalLoading} />
+
                     <Toast position="bottom" bottomOffset={70} />
+
                     <Modal
                         animationType="slide"
                         transparent={true}
@@ -392,6 +398,7 @@ const StoreScreen = ({navigation}) => {
                             <Text style={{...styles.labelStyle, fontSize: 20}}>
                                 Store Logo
                             </Text>
+
                             <TouchableOpacity
                                 onPress={() => setModalAvatarVisible(true)}
                                 style={{
@@ -422,6 +429,7 @@ const StoreScreen = ({navigation}) => {
                                     }}
                                 />
                             </TouchableOpacity>
+
                             <Input
                                 placeholder="Store Name"
                                 containerStyle={styles.textContainer}
@@ -573,10 +581,11 @@ const StoreScreen = ({navigation}) => {
                                             : {uri: storeInfo.shopImage}
                                     }
                                     avatarStyle={{
-                                        borderColor: 'black',
+                                        borderColor: AVATAR_BORDER,
                                         borderWidth: 1,
                                     }}
                                 />
+
                                 <View style={{marginLeft: 10, flex: 1}}>
                                     <Text
                                         style={{
@@ -586,6 +595,7 @@ const StoreScreen = ({navigation}) => {
                                         }}>
                                         {storeInfo.displayName}
                                     </Text>
+
                                     <View
                                         style={{
                                             flexDirection: 'row',
@@ -595,7 +605,9 @@ const StoreScreen = ({navigation}) => {
                                         <Text style={{color: 'black'}}>
                                             {followers} Follow
                                         </Text>
+
                                         <View style={{flex: 1}} />
+
                                         <TouchableOpacity
                                             onPress={() =>
                                                 navigation.navigate('Profile', {
@@ -627,6 +639,14 @@ const StoreScreen = ({navigation}) => {
                     )}
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalLoading ? 0.5 : 1,
+            }}>
+            <ModalLoading visible={modalLoading} />
         </SafeAreaView>
     )
 }

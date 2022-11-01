@@ -1,7 +1,5 @@
-import {StyleSheet, Text, View} from 'react-native'
 import React from 'react'
-import {Image} from 'react-native'
-import {TouchableOpacity} from 'react-native'
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native'
 import Ion from 'react-native-vector-icons/Ionicons'
 
 const UploadImageItem = props => {

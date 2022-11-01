@@ -1,3 +1,5 @@
+import axios from 'axios'
+import React, {useLayoutEffect, useState} from 'react'
 import {
     Alert,
     Image,
@@ -8,14 +10,10 @@ import {
     Text,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View,
 } from 'react-native'
-import React, {useLayoutEffect, useState} from 'react'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
-import {globalStyles} from '../../../assets/styles/globalStyles'
 import {Input} from 'react-native-elements'
-import firebase from '@react-native-firebase/app'
-import axios from 'axios'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
 
 const RecoverPasswordScreen = ({navigation}) => {
     const [email, setEmail] = useState('')

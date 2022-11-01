@@ -1,8 +1,6 @@
-import {StyleSheet, Text, View} from 'react-native'
 import React from 'react'
-import {Modal} from 'react-native'
-import {ActivityIndicator} from 'react-native'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../constants'
+import {ActivityIndicator, Modal, StyleSheet} from 'react-native'
+import {PRIMARY_COLOR} from '../constants'
 
 const ModalLoading = ({visible}) => {
     return (

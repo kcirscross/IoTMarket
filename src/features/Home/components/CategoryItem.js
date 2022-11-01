@@ -1,5 +1,5 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import React from 'react'
+import {Image, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 

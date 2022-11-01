@@ -10,7 +10,7 @@ const FavoriteScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: '',
+            title: 'My Favorite Products',
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
