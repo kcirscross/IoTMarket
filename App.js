@@ -22,6 +22,7 @@ import {
     ChangeAddressScreen,
     ChangeInfoScreen,
     ChangePasswordScreen,
+    FilterByCategoryScreen,
     ProfileScreen,
     RecoverPasswordScreen,
     SignInScreen,
@@ -141,6 +142,10 @@ export default function App() {
                     <Stack.Screen
                         name="SettingStore"
                         component={SettingStoreScreen}
+                    />
+                    <Stack.Screen
+                        name="FilterByCategory"
+                        component={FilterByCategoryScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

@@ -175,6 +175,7 @@ const HomeScreen = ({navigation}) => {
                                 <CategoryItem
                                     data={[item, index, listCategories.length]}
                                     key={index}
+                                    navigation={navigation}
                                 />
                             )}
                         />

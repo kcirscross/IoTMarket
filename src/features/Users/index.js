@@ -1,3 +1,4 @@
+import FilterByCategoryScreen from '../Products/pages/FilterByCategoryScreen'
 import ChangeAddressScreen from './pages/ChangeAddressScreen'
 import ChangeInfoScreen from './pages/ChangeInfoScreen'
 import ChangePasswordScreen from './pages/ChangePasswordScreen'
@@ -16,4 +17,5 @@ export {
     ChangeInfoScreen,
     ChangeAddressScreen,
     ChangePasswordScreen,
+    FilterByCategoryScreen,
 }
