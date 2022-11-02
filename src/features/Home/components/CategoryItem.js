@@ -3,34 +3,30 @@ import {Image, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 
-const CategoryItem = data => {
-    const [{categoryName, image}] = data.data
-    const index = data.data[1]
-
-    const handleCategoryItemClick = () => {
-        console.log('Click category: ', categoryName)
-    }
+const CategoryItem = ({data, navigation}) => {
+    const {categoryName, image, _id} = data[0]
+    const index = data[1]
 
     return (
         <Card
             containerStyle={{
                 ...globalStyles.cardContainer,
                 marginLeft:
-                    data.data[2] > 4
-                        ? index == Math.round(data.data[2] / 2) || index == 0
+                    data[2] > 4
+                        ? index == Math.round(data[2] / 2) || index == 0
                             ? 0
                             : 5
                         : index == 0
                         ? 0
                         : 5,
                 marginTop:
-                    index >= Math.round(data.data[2] / 2) && data.data[2] > 4
-                        ? 5
-                        : 0,
+                    index >= Math.round(data[2] / 2) && data[2] > 4 ? 5 : 0,
             }}>
             <TouchableOpacity
-                onPress={handleCategoryItemClick}
-                style={styles.categoryItem}>
+                style={styles.categoryItem}
+                onPress={() =>
+                    navigation.navigate('FilterByCategory', data[0])
+                }>
                 <Image
                     source={{uri: image}}
                     style={{

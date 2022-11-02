@@ -378,7 +378,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                             )}
 
                             <Input
-                                label="Product Name"
+                                label="Name"
                                 containerStyle={{
                                     ...globalStyles.input,
                                     marginTop: 10,
@@ -398,7 +398,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                             />
 
                             <Input
-                                label="Product Description"
+                                label="Description"
                                 multiline={true}
                                 numberOfLines={10}
                                 containerStyle={{

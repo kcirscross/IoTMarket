@@ -17,6 +17,7 @@ import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
+    AVATAR_BORDER,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
 } from '../../../components/constants'
@@ -326,7 +327,7 @@ const ProfileScreen = ({navigation, route}) => {
                                 }}
                                 avatarStyle={{
                                     borderWidth: 1,
-                                    borderColor: 'black',
+                                    borderColor: AVATAR_BORDER,
                                 }}
                             />
 
@@ -437,6 +438,7 @@ const ProfileScreen = ({navigation, route}) => {
                         </View>
                     )}
                 </Card>
+
                 <View
                     style={{
                         borderTopColor: 'black',
@@ -571,6 +573,7 @@ const ProfileScreen = ({navigation, route}) => {
                                   ))}
                         </ScrollView>
                     </TabView.Item>
+                    
                     <TabView.Item style={{width: '100%'}}>
                         <ScrollView
                             showsVerticalScrollIndicator={false}
