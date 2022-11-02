@@ -7,6 +7,7 @@ import RecoverPasswordScreen from './pages/RecoverPasswordScreen'
 import SignInScreen from './pages/SignInScreen'
 import SignUpScreen from './pages/SignUpScreen'
 import SplashScreen from './pages/SplashScreen'
+import StoreProfileScreen from './pages/StoreProfileScreen'
 
 export {
     SignInScreen,
@@ -18,4 +19,5 @@ export {
     ChangeAddressScreen,
     ChangePasswordScreen,
     FilterByCategoryScreen,
+    StoreProfileScreen,
 }

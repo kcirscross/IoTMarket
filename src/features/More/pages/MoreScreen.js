@@ -131,9 +131,11 @@ const MoreScreen = ({navigation}) => {
                 <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Following')}
+                style={styles.container}>
                 <Ion name="people-outline" size={28} color={'blue'} />
-                <Text style={styles.textStyle}>Follow</Text>
+                <Text style={styles.textStyle}>Following</Text>
                 <View style={{flex: 1}} />
                 <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
