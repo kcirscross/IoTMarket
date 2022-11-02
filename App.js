@@ -8,7 +8,11 @@ import {Provider} from 'react-redux'
 import {API_URL} from './src/components/constants'
 import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
-import {SettingStoreScreen, UpdateStoreScreen} from './src/features/More'
+import {
+    FollowingScreen,
+    SettingStoreScreen,
+    UpdateStoreScreen,
+} from './src/features/More'
 import FavoriteScreen from './src/features/More/pages/FavoriteScreen'
 import MoreScreen from './src/features/More/pages/MoreScreen'
 import StoreScreen from './src/features/More/pages/StoreScreen'
@@ -28,6 +32,7 @@ import {
     SignInScreen,
     SignUpScreen,
     SplashScreen,
+    StoreProfileScreen,
 } from './src/features/Users'
 import {store} from './store'
 
@@ -146,6 +151,14 @@ export default function App() {
                     <Stack.Screen
                         name="FilterByCategory"
                         component={FilterByCategoryScreen}
+                    />
+                    <Stack.Screen
+                        name="Following"
+                        component={FollowingScreen}
+                    />
+                    <Stack.Screen
+                        name="StoreProfile"
+                        component={StoreProfileScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
