@@ -1,6 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useIsFocused} from '@react-navigation/native'
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Modal,
@@ -15,18 +13,14 @@ import Toast from 'react-native-toast-message'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {
-    API_URL,
-    PRIMARY_COLOR,
-    SECONDARY_COLOR,
-} from '../../../components/constants'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {getAPI, patchAPI} from '../../../components/utils/base_API'
 
 const SettingStoreScreen = ({navigation}) => {
     const [switchValue, setSwitchValue] = useState(true)
     const [modalActive, setModalActive] = useState(false)
     const currentUser = useSelector(state => state.user)
     const [storeInfo, setStoreInfo] = useState([])
-
     const isFocus = useIsFocused()
 
     useLayoutEffect(() => {
@@ -42,70 +36,44 @@ const SettingStoreScreen = ({navigation}) => {
     }, [])
 
     const handleActiveClick = async () => {
-        if (switchValue) {
-            setSwitchValue(false)
-            try {
-                const token = await AsyncStorage.getItem('token')
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/store/deactive`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                })
-                    .then(res => {
-                        if (res.status == 200) {
-                            setModalActive(false)
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Your store is deactived.',
-                            })
-                        }
-                    })
-                    .catch(error => {
-                        setModalActive(false)
-                        console.log(error.response.data)
-                    })
-            } catch (error) {
-                console.log(error)
-            }
-        } else {
-            try {
-                const token = await AsyncStorage.getItem('token')
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/store/active`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                })
-                    .then(res => {
-                        if (res.status == 200) {
-                            setModalActive(false)
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Your store is actived.',
-                            })
-                            setSwitchValue(true)
-                        }
-                    })
-                    .catch(error => {
-                        setModalActive(false)
-                        console.log(error.response.data)
-                    })
-            } catch (error) {
-                console.log(error)
-            }
-        }
+        switchValue
+            ? patchAPI({url: 'store/deactive'})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setModalActive(false)
+                          setSwitchValue(false)
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Your store is deactived.',
+                          })
+                      }
+                  })
+                  .catch(err => {
+                      setModalActive(false)
+                      console.log('Deactive Store: ', err)
+                  })
+            : patchAPI({url: 'store/active'})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setModalActive(false)
+                          setSwitchValue(true)
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Your store is actived.',
+                          })
+                      }
+                  })
+                  .catch(err => {
+                      setModalActive(false)
+                      console.log('Active Store: ', err)
+                  })
     }
 
+    //Get Store Information
     useEffect(() => {
-        axios({
-            method: 'get',
-            url: `${API_URL}/store/${currentUser.storeId}`,
-        })
+        getAPI({url: `store/${currentUser.storeId}`})
             .then(res => {
-                if (res.status == 200) {
+                if (res.status === 200) {
                     res.data.store.status == 'Active'
                         ? setSwitchValue(true)
                         : setSwitchValue(false)
@@ -113,7 +81,7 @@ const SettingStoreScreen = ({navigation}) => {
                     setStoreInfo(res.data.store)
                 }
             })
-            .catch(error => console.log(error.response))
+            .catch(err => console.log('Get Store: ', err))
     }, [isFocus])
 
     return (

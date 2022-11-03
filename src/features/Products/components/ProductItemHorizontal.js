@@ -1,5 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
 import React, {useState} from 'react'
 import {
     Alert,
@@ -14,95 +12,66 @@ import {Card} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL} from '../../../components/constants'
+import {patchAPI} from '../../../components/utils/base_API'
 import {removeFavorite} from '../favoriteSlice'
 
 const ProductItemHorizontal = ({navigation, product, type}) => {
     const dispatch = useDispatch()
     const [quantity, setQuantity] = useState(product.quantity)
 
-    const handleRemoveFavoriteClick = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/unfavorite/${product._id}`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            }).then(res => {
-                if (res.status == 200) {
+    const handleRemoveFavoriteClick = () => {
+        patchAPI({url: `user/unfavorite/${product._id}`})
+            .then(res => {
+                if (res.status === 200) {
                     dispatch(removeFavorite(product._id))
                 }
             })
-        } catch (error) {
-            console.log(error)
-        }
+            .catch(err => console.log('Remove Favorite: ', err))
     }
 
-    const handleDeleteAllClick = async () => {
+    const handleDeleteAllClick = () => {
         Alert.alert('Do you want to remove this product from your cart?', '', [
             {text: 'Yes', onPress: () => removeCart(quantity)},
             {text: 'No'},
         ])
     }
 
-    const removeCart = async amount => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/removecart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                data: {
-                    productId: product.productId._id,
-                    quantity: amount,
-                },
+    const removeCart = amount => {
+        patchAPI({
+            url: 'user/removecart',
+            data: {
+                productId: product.productId._id,
+                quantity: amount,
+            },
+        })
+            .then(res => {
+                if (res.status === 200) {
+                    quantity != amount
+                        ? setQuantity((parseInt(quantity) - 1).toString())
+                        : setQuantity(0)
+                }
             })
-                .then(res => {
-                    if (res.status == 200) {
-                        quantity != amount
-                            ? setQuantity((parseInt(quantity) - 1).toString())
-                            : setQuantity(0)
-                    }
-                })
-                .catch(error => {
-                    console.log('Cart: ', error)
-                })
-        } catch (error) {
-            console.log(error)
-        }
+            .catch(err => {
+                console.log('Cart: ', err)
+            })
     }
 
-    const addToCart = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/addcart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                data: {
-                    productId: product.productId._id,
-                    quantity: 1,
-                },
+    const addToCart = () => {
+        patchAPI({
+            url: 'user/addcart',
+            data: {
+                productId: product.productId._id,
+                quantity: 1,
+            },
+        })
+            .then(res => {
+                res.status === 200 &&
+                    setQuantity((parseInt(quantity) + 1).toString())
             })
-                .then(res => {
-                    if (res.status == 200) {
-                        setQuantity((parseInt(quantity) + 1).toString())
-                    }
-                })
-                .catch(error => {
-                    Alert.alert('Run out of product.')
-                    console.log('Cart: ', error)
-                })
-        } catch (error) {
-            console.log(error)
-        }
+            .catch(err => {
+                Alert.alert('Run out of product.')
+                console.log('Cart: ', err)
+            })
     }
 
     const subQuantity = () => {

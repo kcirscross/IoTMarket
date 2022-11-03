@@ -75,11 +75,12 @@ const BottomNavBar = () => {
             <Tab.Screen
                 name="Profile"
                 component={ProfileScreen}
-                initialParams={[
-                    currentUser.storeId != undefined
-                        ? currentUser.storeId
-                        : currentUser._id,
-                ]}
+                initialParams={{
+                    0:
+                        currentUser.storeId != undefined
+                            ? currentUser.storeId
+                            : currentUser._id,
+                }}
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>

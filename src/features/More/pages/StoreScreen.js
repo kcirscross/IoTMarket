@@ -28,6 +28,7 @@ import {
     AVATAR_BORDER,
     PRIMARY_COLOR,
 } from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 
 const StoreScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -309,18 +310,18 @@ const StoreScreen = ({navigation}) => {
     useEffect(() => {
         if (currentUser.storeId != undefined) {
             setModalLoading(true)
-            axios({
-                method: 'get',
-                url: `${API_URL}/store/${currentUser.storeId}`,
-            })
+            getAPI({url: `store/${currentUser.storeId}`})
                 .then(res => {
-                    if (res.status == 200) {
+                    if (res.status === 200) {
                         setStoreInfo(res.data.store)
                         setFollowers(res.data.store.followers.length)
                         setModalLoading(false)
                     }
                 })
-                .catch(error => console.log(error.response.data))
+                .catch(err => {
+                    setModalLoading(false)
+                    console.log('Get Store: ', err)
+                })
         }
     }, [isFocus])
 
@@ -346,7 +347,6 @@ const StoreScreen = ({navigation}) => {
                         transparent={true}
                         visible={modalAvatarVisible}>
                         <SafeAreaView
-                            // onTouchStart={() => setModalAvatarVisible(false)}
                             style={{
                                 flex: 1,
                             }}>

@@ -13,10 +13,6 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 const ProductItem = ({data, navigation}) => {
     const {price, productName, thumbnailImage, soldCount} = data
 
-    const handleProductItemClick = () => {
-        navigation.navigate('ProductDetail', {_id: data._id})
-    }
-
     return (
         <View
             style={{
@@ -24,21 +20,17 @@ const ProductItem = ({data, navigation}) => {
                 padding: 2,
             }}>
             <Card containerStyle={globalStyles.cardContainer}>
-                <TouchableOpacity onPress={handleProductItemClick}>
-                    <View>
-                        <Image
-                            source={{uri: thumbnailImage}}
-                            resizeMode="contain"
-                            resizeMethod="resize"
-                            style={{
-                                width: '100%',
-                                height: 120,
-                                borderRadius: 10,
-                                borderWidth: 1,
-                                borderColor: '#99999',
-                            }}
-                        />
-                    </View>
+                <TouchableOpacity
+                    onPress={() =>
+                        navigation.navigate('ProductDetail', {_id: data._id})
+                    }>
+                    <Image
+                        source={{uri: thumbnailImage}}
+                        resizeMode="contain"
+                        resizeMethod="resize"
+                        style={styles.imageStyle}
+                    />
+
                     <View
                         style={{
                             paddingLeft: 10,
@@ -50,6 +42,7 @@ const ProductItem = ({data, navigation}) => {
                             }}>
                             {productName}
                         </Text>
+
                         <View
                             style={{
                                 flexDirection: 'row',
@@ -60,7 +53,9 @@ const ProductItem = ({data, navigation}) => {
                                 }}>
                                 {Intl.NumberFormat('en-US').format(price)} đ
                             </Text>
+
                             <View style={{flex: 1}} />
+
                             <Text>
                                 Sold:{' '}
                                 {Intl.NumberFormat('en-US').format(soldCount)}
@@ -75,4 +70,12 @@ const ProductItem = ({data, navigation}) => {
 
 export default ProductItem
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    imageStyle: {
+        width: '100%',
+        height: 120,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#99999',
+    },
+})

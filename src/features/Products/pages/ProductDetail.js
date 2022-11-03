@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
@@ -21,8 +20,10 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     API_URL,
     AVATAR_BORDER,
+    convertTime,
     PRIMARY_COLOR,
 } from '../../../components/constants'
+import {patchAPI} from '../../../components/utils/base_API'
 import {addFollow, removeFollow} from '../../Users/userSlice'
 import {SimplePaginationDot} from '../components'
 import BottomMenuBar from '../components/BottomMenuBar'
@@ -175,153 +176,87 @@ const ProductDetail = ({navigation, route}) => {
         setCurrentIndex(index)
     }
 
-    const handleAddCartClick = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/addcart`,
-                headers: {
-                    authorization: `Bearer ${token} `,
-                },
-                data: {
-                    productId: _id,
-                    quantity: 1,
-                },
-            })
-                .then(
-                    res =>
-                        res.status == 200 &&
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Added to cart.',
-                        }),
-                )
-                .catch(error => console.log('Cart: ', error.response.data))
-        } catch (error) {
-            console.log(error)
-        }
+    const handleAddCartClick = () => {
+        patchAPI({
+            url: 'user/addcart',
+            data: {
+                productId: _id,
+                quantity: 1,
+            },
+        })
+            .then(
+                res =>
+                    res.status === 200 &&
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Added to cart.',
+                    }),
+            )
+            .catch(err => console.log('Add Cart: ', err))
     }
 
-    const handleFavoriteClick = async () => {
-        const token = await AsyncStorage.getItem('token')
+    const handleFavoriteClick = () => {
+        !favorite
+            ? patchAPI({url: `user/favorite/${_id}`})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setFavorite(!favorite)
 
-        if (!favorite) {
-            try {
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/favorite/${_id}`,
-                    headers: {
-                        authorization: `Bearer ${token} `,
-                    },
-                }).then(res => {
-                    if (res.status == 200) {
-                        setFavorite(!favorite)
-                        dispatch(addFavorite(product))
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Added to your favorite.',
+                          })
 
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Added to your favorite.',
-                        })
-                    }
-                })
-            } catch (error) {
-                console.log(error)
-            }
-        } else {
-            try {
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/unfavorite/${_id}`,
-                    headers: {
-                        authorization: `Bearer ${token} `,
-                    },
-                }).then(res => {
-                    if (res.status == 200) {
-                        setFavorite(false)
-                        dispatch(removeFavorite(product._id))
+                          dispatch(addFavorite(product))
+                      }
+                  })
+                  .catch(err => console.log('Add Favorite: ', err))
+            : patchAPI({url: `user/unfavorite/${_id}`})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setFavorite(false)
 
-                        Toast.show({
-                            type: 'success',
-                            text1: 'Removed from your favorite.',
-                        })
-                    }
-                })
-            } catch (error) {
-                console.log(error)
-            }
-        }
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Removed from your favorite.',
+                          })
+
+                          dispatch(removeFavorite(product._id))
+                      }
+                  })
+                  .catch(err => console.log('Remove Favorite: ', err))
     }
 
-    const convertTime = ms => {
-        let temp = (Date.now() - ms) / 1000
-        if (temp < 120) {
-            return 'Just now'
-        } else if (temp >= 120 && temp / 60 / 60 < 1) {
-            return (temp / 60).toFixed(0) + ' minutes ago'
-        } else if (temp / 60 / 60 >= 1 && temp / 60 / 60 < 2) {
-            return '1 hour ago'
-        } else if (temp / 60 / 60 >= 2 && temp / 60 / 60 / 24 < 1) {
-            return (temp / 60 / 60).toFixed(0) + ' hours ago'
-        } else if (temp / 60 / 60 / 24 >= 1 && temp / 60 / 60 / 24 < 2) {
-            return '1 day ago'
-        } else {
-            return (temp / 60 / 60 / 24).toFixed(0) + ' days ago'
-        }
-    }
+    const handleFollowClick = () => {
+        !isFollow
+            ? patchAPI({url: `user/follow/${productOwner.storeId}`})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setIsFollow(true)
 
-    const handleFollowClick = async () => {
-        try {
-            setModalLoading(true)
-            const token = await AsyncStorage.getItem('token')
-            if (!isFollow) {
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/follow/${productOwner.storeId}`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                })
-                    .then(res => {
-                        if (res.status == 200) {
-                            dispatch(addFollow(productOwner.storeId))
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Followed',
+                          })
 
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Followed',
-                            })
+                          dispatch(addFollow(productOwner.storeId))
+                      }
+                  })
+                  .catch(err => console.log('Follow: ', err))
+            : patchAPI({url: `unfollow/${productOwner.storeId}`})
+                  .then(res => {
+                      if (res.status === 200) {
+                          setIsFollow(false)
 
-                            setIsFollow(true)
-                            setModalLoading(false)
-                        }
-                    })
-                    .catch(error => console.log(error))
-            } else {
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/unfollow/${productOwner.storeId}`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                })
-                    .then(res => {
-                        if (res.status == 200) {
-                            dispatch(removeFollow(productOwner.storeId))
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Unfollowed',
+                          })
 
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Unfollowed',
-                            })
-                            setModalLoading(false)
-                            setIsFollow(false)
-                        }
-                    })
-                    .catch(error => console.log(error))
-            }
-        } catch (error) {
-            console.log(error)
-            setModalLoading(false)
-        }
+                          dispatch(removeFollow(productOwner.storeId))
+                      }
+                  })
+                  .catch(err => console.log('Unfollow: ', err))
     }
 
     return !modalLoading ? (
@@ -343,13 +278,7 @@ const ProductDetail = ({navigation, route}) => {
                             source={{uri: listImages[0]}}
                             resizeMethod="scale"
                             resizeMode="contain"
-                            style={{
-                                width: '100%',
-                                height: 250,
-                                borderRadius: 10,
-                                elevation: 3,
-                                marginVertical: 10,
-                            }}
+                            style={styles.imageStyle}
                         />
                     </View>
                 ) : (
@@ -396,7 +325,10 @@ const ProductDetail = ({navigation, route}) => {
             <Card containerStyle={globalStyles.cardContainer}>
                 <TouchableOpacity
                     onPress={() =>
-                        navigation.navigate('Profile', productOwner)
+                        navigation.navigate('StoreProfile', {
+                            store: storeInfo,
+                            ownerInfo: productOwner,
+                        })
                     }>
                     <View
                         style={{
@@ -631,5 +563,12 @@ const styles = StyleSheet.create({
     viewStyle: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    imageStyle: {
+        width: '100%',
+        height: 250,
+        borderRadius: 10,
+        elevation: 3,
+        marginVertical: 10,
     },
 })

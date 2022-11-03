@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import messaging from '@react-native-firebase/messaging'
 import {
     GoogleSignin,
     GoogleSigninButton,
@@ -19,10 +18,12 @@ import {
     View,
 } from 'react-native'
 import {Input} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL} from '../../../components/constants'
+import {API_URL, WEB_CLIENT_ID} from '../../../components/constants'
+import {getAPI, postAPI} from '../../../components/utils/base_API'
 import {getFavorite} from '../../Products/favoriteSlice'
 import {signIn} from '../userSlice'
 
@@ -55,8 +56,7 @@ const SignInScreen = ({navigation}) => {
     //Config for Google Sign In
     useEffect(() => {
         GoogleSignin.configure({
-            webClientId:
-                '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
+            webClientId: WEB_CLIENT_ID,
         })
     }, [])
 
@@ -73,26 +73,19 @@ const SignInScreen = ({navigation}) => {
 
     const handleGoogleSignUp = async () => {
         const {user} = await GoogleSignin.signIn()
-        await messaging().registerDeviceForRemoteMessages()
-        const tokenFCM = await messaging().getToken()
 
-        axios({
-            method: 'post',
-            url: `${API_URL}/auth/google`,
-            headers: {
-                deviceTokenFCM: tokenFCM,
-            },
+        postAPI({
+            url: 'auth/google',
             data: {
                 email: user.email,
                 fullName: user.name,
             },
         })
             .then(res => {
-                if (res.data.statusCode == 200) {
+                if (res.status === 200) {
                     storeToken(res.data.token)
 
-                    const action = signIn(res.data.data)
-                    dispatch(action)
+                    dispatch(signIn(res.data.data))
 
                     rememberAccount(user.email, user.name, 'Google')
                     getFavoriteAfterSignIn()
@@ -100,35 +93,31 @@ const SignInScreen = ({navigation}) => {
                     navigation.replace('BottomNavBar')
                 }
             })
-            .catch(err =>
-                Alert.alert('Have something wrong here. Please try again.'),
-            )
+            .catch(err => {
+                Alert.alert('Have something wrong here. Please try again.')
+                console.log('Login: ', err)
+            })
     }
 
-    const handleEmailSignIn = async () => {
+    const handleEmailSignIn = () => {
         if (email == '' || password == '') {
-            return Alert.alert('Error', 'Please fill in all field.')
+            Toast.show({
+                type: 'error',
+                text1: 'Please fill in all field',
+            })
         } else {
-            await messaging().registerDeviceForRemoteMessages()
-            const tokenFCM = await messaging().getToken()
-
-            axios({
-                method: 'post',
-                url: `${API_URL}/auth/signin`,
-                headers: {
-                    deviceTokenFCM: tokenFCM,
-                },
+            postAPI({
+                url: 'auth/signin',
                 data: {
                     email: email,
                     password: password,
                 },
             })
                 .then(res => {
-                    if ((res.data.statusCode = 200)) {
+                    if (res.status === 200) {
                         storeToken(res.data.token)
 
-                        const action = signIn(res.data.data)
-                        dispatch(action)
+                        dispatch(signIn(res.data.data))
 
                         rememberCheckbox &&
                             rememberAccount(email, password, 'Email')
@@ -139,26 +128,20 @@ const SignInScreen = ({navigation}) => {
                     }
                 })
                 .catch(err => {
-                    console.log(err.message)
+                    console.log('Log in: ', err)
                     Alert.alert('Wrong email or password. Please try again.')
                 })
         }
     }
 
-    const getFavoriteAfterSignIn = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/favorite`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            }).then(res => dispatch(getFavorite(res.data.favorites)))
-        } catch (error) {
-            console.log(error)
-        }
+    const getFavoriteAfterSignIn = () => {
+        getAPI({url: 'user/favorite'})
+            .then(
+                res =>
+                    res.status === 200 &&
+                    dispatch(getFavorite(res.data.favorites)),
+            )
+            .catch(err => console.log('Get Favorite: ', err))
     }
 
     return (
@@ -175,9 +158,13 @@ const SignInScreen = ({navigation}) => {
                         width: '100%',
                     }}>
                     <Image source={require('~/assets/images/logo.jpg')} />
+
+                    <Toast position="bottom" bottomOffset={70} />
+
                     <Text style={globalStyles.textTitle}>
                         Welcome to, IoTMarket
                     </Text>
+
                     <Text>Enter your account to continue.</Text>
 
                     <View style={styles.textContainer}>
@@ -305,6 +292,7 @@ const SignInScreen = ({navigation}) => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
+
                         <TouchableOpacity
                             onPress={() =>
                                 navigation.navigate('RecoverPassword')

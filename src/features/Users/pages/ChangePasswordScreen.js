@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
 import React, {useLayoutEffect, useState} from 'react'
 import {
     Alert,
@@ -12,11 +11,13 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native'
 import {Input} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {patchAPI, postAPI} from '../../../components/utils/base_API'
 import {signOut} from '../userSlice'
 
 const ChangePasswordScreen = ({navigation}) => {
@@ -40,89 +41,80 @@ const ChangePasswordScreen = ({navigation}) => {
         })
     }, [])
 
-    const deleteRememberAccount = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/changeonlinestatus`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                data: {
-                    status: 'Offline',
-                },
-            }).then(async () => {
-                await AsyncStorage.removeItem('account')
-                await AsyncStorage.removeItem('password')
-                await AsyncStorage.removeItem('accountType')
-                await AsyncStorage.removeItem('token')
+    const deleteRememberAccount = () => {
+        patchAPI({
+            url: 'user/changeonlinestatus',
+            data: {status: 'Offline'},
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    await AsyncStorage.removeItem('account')
+                    await AsyncStorage.removeItem('password')
+                    await AsyncStorage.removeItem('accountType')
+                    await AsyncStorage.removeItem('token')
+                }
             })
-        } catch (error) {
-            console.log('Error when delete remember account', error)
-        }
+            .catch(err => console.log('Logout: ', err))
     }
 
     const changePassword = async () => {
         //Validate Password
         if (currentPassword == '' || newPassword == '' || reNewPassword == '') {
-            Alert.alert('Please fill in all field.')
+            Toast.show({
+                type: 'success',
+                text1: 'Your password is invalid.',
+            })
         } else if (newPassword != reNewPassword) {
-            Alert.alert('Your confirm password is not match.')
+            Toast.show({
+                type: 'success',
+                text1: 'Your confirm password is not match.',
+            })
         } else {
             setModalLoading(true)
-            try {
-                const token = await AsyncStorage.getItem('token')
 
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/changepassword`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                    data: {
-                        currentPassword: currentPassword,
-                        newPassword: newPassword,
-                    },
-                }).then(res => {
-                    if (res.status == 200) {
-                        if (res.status == 200) {
-                            setModalLoading(false)
-                            Alert.alert(
-                                'Update password successfully. Please sign in again.',
-                                '',
-                                [
-                                    {
-                                        text: 'OK',
-                                        onPress: () => {
-                                            axios({
-                                                method: 'post',
-                                                url: `${API_URL}/auth/logout`,
-                                                data: {
-                                                    email: currentUser.email,
-                                                },
-                                            }).then(res => {
-                                                const action = signOut()
-                                                res.status == 200 &&
-                                                    dispatch(action)
+            patchAPI({
+                url: 'user/changepassword',
+                data: {
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                },
+            }).then(res => {
+                if (res.status === 200) {
+                    setModalLoading(false)
 
-                                                deleteRememberAccount()
-
-                                                navigation.reset({
-                                                    index: 0,
-                                                    routes: [{name: 'Splash'}],
-                                                })
-                                            })
+                    Alert.alert(
+                        'Update password successfully. Please sign in again.',
+                        '',
+                        [
+                            {
+                                text: 'OK',
+                                onPress: () => {
+                                    postAPI({
+                                        url: 'auth/logout',
+                                        data: {
+                                            email: currentUser.email,
                                         },
-                                    },
-                                ],
-                            )
-                        }
-                    }
-                })
-            } catch (error) {
-                console.log('Error: ', error)
-            }
+                                    })
+                                        .then(res => {
+                                            res.status === 200 &&
+                                                dispatch(signOut())
+
+                                            deleteRememberAccount()
+
+                                            navigation.reset({
+                                                index: 0,
+                                                routes: [{name: 'Splash'}],
+                                            })
+                                        })
+                                        .catch(err =>
+                                            console.log('Logout: ', err),
+                                        )
+                                },
+                            },
+                        ],
+                    )
+                }
+            })
         }
     }
 
@@ -137,6 +129,9 @@ const ChangePasswordScreen = ({navigation}) => {
                     behavior="padding"
                     style={{width: '100%', height: '100%'}}>
                     <ModalLoading visible={modalLoading} />
+
+                    <Toast position="bottom" bottomOffset={70} />
+
                     <Input
                         containerStyle={styles.textContainer}
                         label="Current Password"

@@ -27,7 +27,9 @@ import {
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
 } from '../../../components/constants'
+import {patchAPI} from '../../../components/utils/base_API'
 import {updateAvatar, updateGender, updatePhoneNumber} from '../userSlice'
+import Toast from 'react-native-toast-message'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -39,32 +41,32 @@ const ChangeInfoScreen = ({navigation}) => {
 
     const {street, ward, district, city} = currentUser.address || ''
 
-    const updatePhone = async () => {
+    const updatePhone = () => {
         setModalLoading(true)
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/changephone`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                data: {
-                    phoneNumber: phoneNumber,
-                },
-            }).then(res => {
-                if (res.status == 200) {
+
+        patchAPI({
+            url: 'user/changephone',
+            data: {
+                phoneNumber: phoneNumber,
+            },
+        })
+            .then(res => {
+                if (res.status === 200) {
+                    setModalLoading(false)
+
                     const action = updatePhoneNumber(res.data.newPhoneNumber)
                     dispatch(action)
 
-                    setModalLoading(false)
-
-                    Alert.alert('Update phone number successfully.')
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Your phone number is updated.',
+                    })
                 }
             })
-        } catch (error) {
-            console.log('Error when get token.', error.message)
-        }
+            .catch(err => {
+                setModalLoading(false)
+                console.log('Update Phone: ', err)
+            })
     }
 
     const handleChangePhoneNumberClick = () => {
@@ -76,34 +78,29 @@ const ChangeInfoScreen = ({navigation}) => {
         }
     }
 
-    const changeGender = async gender => {
+    const changeGender = gender => {
         //Validate Gender
         if (gender != '') {
             setModalLoading(true)
-            try {
-                const token = await AsyncStorage.getItem('token')
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/changegender`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                    data: {
-                        gender: gender,
-                    },
-                }).then(res => {
-                    if (res.status == 200) {
-                        const action = updateGender(res.data.newGender)
-                        dispatch(action)
 
-                        setModalLoading(false)
+            patchAPI({
+                url: 'user/changegender',
+                data: {
+                    gender: gender,
+                },
+            }).then(res => {
+                if (res.status === 200) {
+                    setModalLoading(false)
 
-                        Alert.alert('Update successfully.')
-                    }
-                })
-            } catch (error) {
-                console.log('Error: ', error.message)
-            }
+                    const action = updateGender(res.data.newGender)
+                    dispatch(action)
+
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Your gender is updated.',
+                    })
+                }
+            })
         }
     }
 
@@ -168,37 +165,32 @@ const ChangeInfoScreen = ({navigation}) => {
                     await storage()
                         .ref(filePath)
                         .getDownloadURL()
-                        .then(async url => {
-                            try {
-                                const token = await AsyncStorage.getItem(
-                                    'token',
-                                )
-                                axios({
-                                    method: 'patch',
-                                    url: `${API_URL}/user/changeavatar`,
-                                    headers: {
-                                        authorization: `Bearer ${token}`,
-                                    },
-                                    data: {
-                                        avatarLink: url,
-                                    },
-                                }).then(res => {
-                                    if (res.status == 200) {
-                                        const action = updateAvatar(
-                                            res.data.newAvatarLink,
-                                        )
-                                        dispatch(action)
-
+                        .then(url => {
+                            patchAPI({
+                                url: 'user/changeavatar',
+                                data: {
+                                    avatarLink: url,
+                                },
+                            })
+                                .then(res => {
+                                    if (res.status === 200) {
                                         setModalLoading(false)
 
-                                        Alert.alert(
-                                            'Update avatar successfully.',
+                                        dispatch(
+                                            updateAvatar(
+                                                res.data.newAvatarLink,
+                                            ),
                                         )
+
+                                        Toast.show({
+                                            type: 'success',
+                                            text1: 'Your avatar is updated.',
+                                        })
                                     }
                                 })
-                            } catch (error) {
-                                console.log('Error ', error.message)
-                            }
+                                .catch(err =>
+                                    console.log('Update Avatar: ', err),
+                                )
                         })
                 })
         } catch (error) {
@@ -208,10 +200,6 @@ const ChangeInfoScreen = ({navigation}) => {
 
     return (
         <SafeAreaView
-            onTouchStart={() => {
-                setModalAvatarVisible(false)
-                setModalGenderVisible(false)
-            }}
             style={{
                 ...globalStyles.container,
                 opacity:
@@ -226,6 +214,8 @@ const ChangeInfoScreen = ({navigation}) => {
                         width: '100%',
                         height: '100%',
                     }}>
+                    <Toast position="bottom" bottomOffset={70} />
+
                     <ModalLoading visible={modalLoading} />
 
                     <Modal
@@ -472,8 +462,8 @@ const ChangeInfoScreen = ({navigation}) => {
                                 </View>
                                 <TouchableOpacity
                                     onPress={() => {
-                                        setModalGenderVisible(false)
                                         changeGender('Male')
+                                        setModalGenderVisible(false)
                                     }}
                                     style={{
                                         ...styles.touchModalView,
@@ -505,8 +495,8 @@ const ChangeInfoScreen = ({navigation}) => {
 
                                 <TouchableOpacity
                                     onPress={() => {
-                                        setModalGenderVisible(false)
                                         changeGender('Female')
+                                        setModalGenderVisible(false)
                                     }}
                                     style={{
                                         ...styles.touchModalView,

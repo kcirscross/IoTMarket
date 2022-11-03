@@ -22,13 +22,15 @@ import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
-    API_URL,
     AVATAR_BORDER,
     PRIMARY_COLOR,
+    SECONDARY_COLOR,
 } from '../../../components/constants'
+import {patchAPI} from '../../../components/utils/base_API'
 
 const UpdateStoreScreen = ({navigation, route}) => {
     const storeInfo = route.params
+
     const currentUser = useSelector(state => state.user)
 
     const [openCity, setOpenCity] = useState(false)
@@ -177,12 +179,8 @@ const UpdateStoreScreen = ({navigation, route}) => {
     }, [])
 
     const updateStore = image => {
-        axios({
-            method: 'patch',
-            url: `${API_URL}/store`,
-            headers: {
-                authorization: `Bearer ${currentUser.deviceToken}`,
-            },
+        patchAPI({
+            url: 'store',
             data: {
                 displayName: displayName,
                 description: description,
@@ -196,14 +194,16 @@ const UpdateStoreScreen = ({navigation, route}) => {
             },
         })
             .then(res => {
-                setModalLoading(false)
-                Toast.show({
-                    type: 'success',
-                    text1: 'Your store is updated.',
-                })
+                if (res.status === 200) {
+                    setModalLoading(false)
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Your store is updated.',
+                    })
+                }
             })
-            .catch(error => {
-                console.log(error.response.data)
+            .catch(err => {
+                console.log('Patch Store', err)
                 setModalLoading(false)
             })
     }
@@ -447,7 +447,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                                 getDistrict(item.value)
                                 setChosenCity(item.label)
                             }}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={3}
                         />
                     </View>
@@ -475,7 +475,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                                 getWard(item.value)
                                 setChosenDistrict(item.label)
                             }}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={2}
                         />
                     </View>
@@ -497,7 +497,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             setOpen={setOpenWard}
                             setValue={setValueWard}
                             setItems={setItemsWard}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={1}
                             onSelectItem={item => setChosenWard(item.label)}
                         />
@@ -545,5 +545,10 @@ const styles = StyleSheet.create({
     },
     touchModalView: {
         alignItems: 'center',
+    },
+
+    dropStyle: {
+        marginTop: 5,
+        backgroundColor: SECONDARY_COLOR,
     },
 })

@@ -1,4 +1,3 @@
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     FlatList,
@@ -14,7 +13,8 @@ import {Input} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../../Products/components'
 import {CategoryItem} from '../components'
 
@@ -25,32 +25,15 @@ const HomeScreen = ({navigation}) => {
     const [listCategories, setListCategories] = useState([])
     const [refreshing, setRefreshing] = useState(false)
 
-    const getProducts = () => {
-        axios({
-            method: 'get',
-            url: `${API_URL}/product`,
-        })
-            .then(res => {
-                setListProducts(res.data.products)
-            })
-            .catch(error => console.log(error))
-    }
-
+    //Get Products and Categories
     useEffect(() => {
-        getProducts()
-    }, [])
+        getAPI({url: 'product'}).then(
+            res => res.status === 200 && setListProducts(res.data.products),
+        )
 
-    useEffect(() => {
-        axios({
-            method: 'get',
-            url: `${API_URL}/category`,
-        })
-            .then(res => {
-                if (res.status == 200) {
-                    setListCategories(res.data.categories)
-                }
-            })
-            .catch(error => console.log(error))
+        getAPI({url: 'category'}).then(
+            res => res.status === 200 && setListCategories(res.data.categories),
+        )
     }, [])
 
     const handleNotificationClick = () => {
@@ -58,7 +41,9 @@ const HomeScreen = ({navigation}) => {
     }
 
     const onRefresh = () => {
-        getProducts()
+        getAPI({url: 'product'}).then(
+            res => res.status === 200 && setListProducts(res.data.products),
+        )
 
         setTimeout(() => {
             setRefreshing(false)
