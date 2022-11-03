@@ -1,7 +1,5 @@
-import axios from 'axios'
 import React, {useLayoutEffect, useState} from 'react'
 import {
-    Alert,
     Image,
     Keyboard,
     KeyboardAvoidingView,
@@ -12,28 +10,35 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native'
 import {Input} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {postAPI} from '../../../components/utils/base_API'
 
 const RecoverPasswordScreen = ({navigation}) => {
     const [email, setEmail] = useState('')
 
-    const handleRecoverPassword = async () => {
-        await axios({
-            method: 'post',
-            url: `${API_URL}/auth/forgotpassword`,
+    const handleRecoverPassword = () => {
+        postAPI({
+            url: 'auth/forgotpassword',
             data: {
                 email: email,
             },
         })
             .then(res => {
-                if (res.status == 200) {
-                    Alert.alert('Please check your email.')
-                }
+                res.status === 200 &&
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Please check your email.',
+                    })
             })
             .catch(err => {
-                console.log(err.message)
-                Alert.alert('Wrong email or password. Please try again.')
+                Toast.show({
+                    type: 'success',
+                    text1: 'Wrong email or password. Please try again.',
+                })
+
+                console.log('Recover Password: ', err)
             })
     }
 
@@ -55,7 +60,10 @@ const RecoverPasswordScreen = ({navigation}) => {
                 <KeyboardAvoidingView
                     behavior="padding"
                     style={styles.container}>
+                    <Toast position="bottom" bottomOffset={70} />
+
                     <Image source={require('~/assets/images/logo.jpg')} />
+
                     <Input
                         placeholder="Email"
                         containerStyle={globalStyles.input}

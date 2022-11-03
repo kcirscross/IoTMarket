@@ -1,10 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import messaging from '@react-native-firebase/messaging'
 import {
     GoogleSignin,
     GoogleSigninButton,
 } from '@react-native-google-signin/google-signin'
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Alert,
@@ -19,10 +17,12 @@ import {
     View,
 } from 'react-native'
 import {Input} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {useDispatch} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR, WEB_CLIENT_ID} from '../../../components/constants'
+import {patchAPI, postAPI} from '../../../components/utils/base_API'
 import {signIn} from '../userSlice'
 
 const SignUpScreen = ({navigation}) => {
@@ -36,16 +36,13 @@ const SignUpScreen = ({navigation}) => {
     const storeToken = async token => {
         try {
             await AsyncStorage.setItem('token', token)
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/changeonlinestatus`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
+
+            patchAPI({
+                url: 'user/changeonlinestatus',
                 data: {
                     status: 'Online',
                 },
-            })
+            }).catch(err => console.log('Change Online Status: ', err))
         } catch (error) {
             console.log('Error when store token.', error)
         }
@@ -65,34 +62,30 @@ const SignUpScreen = ({navigation}) => {
 
     useEffect(() => {
         GoogleSignin.configure({
-            webClientId:
-                '550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com',
+            webClientId: WEB_CLIENT_ID,
         })
     }, [])
 
-    const handleEmailSignUp = async () => {
+    const handleEmailSignUp = () => {
         if (
             email == '' ||
             fullName == '' ||
             password == '' ||
             rePassword == ''
         ) {
-            Alert.alert('Error', 'Please fill in all field.')
-            return
+            Toast.show({
+                type: 'error',
+                text1: 'Please fill in all field',
+            })
         } else {
             if (password != rePassword) {
-                Alert.alert('Error', 'Password is not match.')
-                return
+                Toast.show({
+                    type: 'error',
+                    text1: 'Password is not match.',
+                })
             } else {
-                await messaging().registerDeviceForRemoteMessages()
-                const tokenFCM = await messaging().getToken()
-
-                axios({
-                    method: 'post',
-                    url: `${API_URL}/auth/signup`,
-                    headers: {
-                        deviceTokenFCM: tokenFCM,
-                    },
+                postAPI({
+                    url: 'auth/signup',
                     data: {
                         email: email,
                         password: password,
@@ -100,22 +93,22 @@ const SignUpScreen = ({navigation}) => {
                     },
                 })
                     .then(res => {
-                        if (res.data.statusCode == 200) {
+                        if (res.status === 200) {
                             Alert.alert('Sign up successfully.')
 
                             storeToken(res.data.token)
 
-                            const action = signIn(res.data.data)
-                            dispatch(action)
+                            dispatch(signIn(res.data.data))
 
                             navigation.replace('BottomNavBar')
                         }
                     })
-                    .catch(err =>
+                    .catch(err => {
                         Alert.alert(
                             'Have something wrong here. Please try again.',
-                        ),
-                    )
+                        )
+                        console.log('Sign up: ', err)
+                    })
             }
         }
     }
@@ -123,35 +116,28 @@ const SignUpScreen = ({navigation}) => {
     const handleGoogleSignUp = async () => {
         const {user} = await GoogleSignin.signIn()
 
-        await messaging().registerDeviceForRemoteMessages()
-        const tokenFCM = await messaging().getToken()
-
-        axios({
-            method: 'post',
-            url: `${API_URL}/auth/google`,
-            headers: {
-                deviceTokenFCM: tokenFCM,
-            },
+        postAPI({
+            url: 'auth/google',
             data: {
                 email: user.email,
                 fullName: user.name,
             },
         })
             .then(res => {
-                if (res.data.statusCode == 200) {
+                if (res.status === 200) {
                     Alert.alert('Sign up successfully.')
 
                     storeToken(res.data.token)
 
-                    const action = signIn(res.data.data)
-                    dispatch(action)
+                    dispatch(signIn(res.data.data))
 
                     navigation.replace('BottomNavBar')
                 }
             })
-            .catch(err =>
-                Alert.alert('Have something wrong here. Please try again.'),
-            )
+            .catch(err => {
+                Alert.alert('Have something wrong here. Please try again.')
+                console.log('Sign up: ', err)
+            })
     }
 
     return (

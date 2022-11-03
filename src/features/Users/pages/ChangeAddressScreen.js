@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
@@ -17,7 +16,8 @@ import {Input} from 'react-native-elements'
 import {useDispatch} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {patchAPI} from '../../../components/utils/base_API'
 import {updateAddress} from '../userSlice'
 
 const ChangeAddressScreen = ({navigation, route}) => {
@@ -146,40 +146,31 @@ const ChangeAddressScreen = ({navigation, route}) => {
             Alert.alert('Please fill in all field.')
         } else {
             setModalLoading(true)
-            try {
-                const token = await AsyncStorage.getItem('token')
-                axios({
-                    method: 'patch',
-                    url: `${API_URL}/user/changeaddress`,
-                    headers: {
-                        authorization: `Bearer ${token}`,
-                    },
-                    data: {
-                        street: chosenStreet,
-                        ward: chosenWard,
-                        district: chosenDistrict,
-                        city: chosenCity,
-                    },
-                }).then(res => {
-                    if (res.status == 200) {
-                        const action = updateAddress(res.data.newAddress)
-                        dispatch(action)
 
-                        setModalLoading(false)
+            patchAPI({
+                url: 'user/changeaddress',
+                data: {
+                    street: chosenStreet,
+                    ward: chosenWard,
+                    district: chosenDistrict,
+                    city: chosenCity,
+                },
+            }).then(res => {
+                if (res.status === 200) {
+                    setModalLoading(false)
 
-                        Alert.alert('Update successfully.', '', [
-                            {
-                                text: 'OK',
-                                onPress: () => {
-                                    navigation.goBack()
-                                },
+                    dispatch(updateAddress(res.data.newAddress))
+
+                    Alert.alert('Update successfully.', '', [
+                        {
+                            text: 'OK',
+                            onPress: () => {
+                                navigation.goBack()
                             },
-                        ])
-                    }
-                })
-            } catch (error) {
-                console.log(error.message)
-            }
+                        },
+                    ])
+                }
+            })
         }
     }
 
@@ -218,7 +209,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
                                 getDistrict(item.value)
                                 setChosenCity(item.label)
                             }}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={3}
                         />
                     </View>
@@ -248,7 +239,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
                                 getWard(item.value)
                                 setChosenDistrict(item.label)
                             }}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={2}
                         />
                     </View>
@@ -272,7 +263,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
                             setOpen={setOpenWard}
                             setValue={setValueWard}
                             setItems={setItemsWard}
-                            style={{marginTop: 5}}
+                            style={styles.dropStyle}
                             zIndex={1}
                             onSelectItem={item => setChosenWard(item.label)}
                         />
@@ -290,6 +281,9 @@ const ChangeAddressScreen = ({navigation, route}) => {
                             defaultValue={chosenStreet}
                             inputContainerStyle={{
                                 borderBottomWidth: 0,
+                                backgroundColor: SECONDARY_COLOR,
+                                padding: 5,
+                                borderRadius: 10,
                             }}
                             inputStyle={{
                                 padding: 0,
@@ -323,4 +317,5 @@ const styles = StyleSheet.create({
     textStyle: {
         color: 'black',
     },
+    dropStyle: {marginTop: 5, backgroundColor: SECONDARY_COLOR},
 })

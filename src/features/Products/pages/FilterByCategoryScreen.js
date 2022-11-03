@@ -1,14 +1,10 @@
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native'
 import {Tab, TabView} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {
-    API_URL,
-    PRIMARY_COLOR,
-    SECONDARY_COLOR,
-} from '../../../components/constants'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../components'
 
 const FilterByCategoryScreen = ({navigation, route}) => {
@@ -33,10 +29,10 @@ const FilterByCategoryScreen = ({navigation, route}) => {
         })
     }, [])
 
-    const getProducts = () => {
-        axios({
-            method: 'get',
-            url: `${API_URL}/product/category/${route.params._id}`,
+    //Get List Products
+    useEffect(() => {
+        getAPI({
+            url: `product/category/${route.params._id}`,
             params: {
                 sortBy: `${
                     index == 0
@@ -66,11 +62,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                         : setListProductsPriceAcs(res.data.products)
                     : setListProductsPriceAcs(res.data.products)
             })
-            .catch(error => console.log(error))
-    }
-
-    useEffect(() => {
-        getProducts()
+            .catch(err => console.log('Get List Products: ', err))
     }, [index, filter])
 
     return (
@@ -81,14 +73,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                         marginTop: 5,
                         flex: 1,
                     }}>
-                    <View
-                        style={{
-                            borderTopColor: 'black',
-                            borderTopWidth: 1,
-                            borderBottomColor: SECONDARY_COLOR,
-                            borderBottomWidth: 1,
-                            marginTop: 5,
-                        }}>
+                    <View style={styles.viewContainer}>
                         <Tab
                             indicatorStyle={{backgroundColor: PRIMARY_COLOR}}
                             value={index}
@@ -102,13 +87,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                                 buttonStyle={{
                                     padding: 0,
                                 }}
-                                containerStyle={{
-                                    padding: 0,
-                                    margin: 0,
-                                    backgroundColor: 'white',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                containerStyle={styles.tabContainer}
                             />
 
                             <Tab.Item
@@ -120,13 +99,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                                 buttonStyle={{
                                     padding: 0,
                                 }}
-                                containerStyle={{
-                                    padding: 0,
-                                    margin: 0,
-                                    backgroundColor: 'white',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                containerStyle={styles.tabContainer}
                             />
 
                             <Tab.Item
@@ -138,13 +111,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                                 buttonStyle={{
                                     padding: 0,
                                 }}
-                                containerStyle={{
-                                    padding: 0,
-                                    margin: 0,
-                                    backgroundColor: 'white',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                containerStyle={styles.tabContainer}
                             />
 
                             <Tab.Item
@@ -156,13 +123,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                                 buttonStyle={{
                                     padding: 0,
                                 }}
-                                containerStyle={{
-                                    padding: 0,
-                                    margin: 0,
-                                    backgroundColor: 'white',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}
+                                containerStyle={styles.tabContainer}
                                 onPressIn={() => {
                                     setFilter(!filter)
                                 }}
@@ -297,4 +258,20 @@ const FilterByCategoryScreen = ({navigation, route}) => {
 
 export default FilterByCategoryScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    viewContainer: {
+        borderTopColor: 'black',
+        borderTopWidth: 1,
+        borderBottomColor: SECONDARY_COLOR,
+        borderBottomWidth: 1,
+        marginTop: 5,
+    },
+
+    tabContainer: {
+        padding: 0,
+        margin: 0,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+})

@@ -36,15 +36,7 @@ const CategoryItem = ({data, navigation}) => {
                     resizeMethod="scale"
                     resizeMode="contain"
                 />
-                <Text
-                    style={{
-                        fontWeight: 'bold',
-                        color: 'black',
-                        textAlign: 'center',
-                        marginBottom: 5,
-                    }}>
-                    {categoryName}
-                </Text>
+                <Text style={styles.textStyle}>{categoryName}</Text>
             </TouchableOpacity>
         </Card>
     )
@@ -59,5 +51,11 @@ const styles = StyleSheet.create({
         height: 90,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    textStyle: {
+        fontWeight: 'bold',
+        color: 'black',
+        textAlign: 'center',
+        marginBottom: 5,
     },
 })

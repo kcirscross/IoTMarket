@@ -1,15 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {View} from 'react-native'
 import {SafeAreaView, ScrollView, StyleSheet} from 'react-native'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 import {FollowingItemHorizontal} from '../components'
 
 const FollowingScreen = ({navigation}) => {
     const [listFollowing, setListFollowing] = useState([])
-    const [modalLoading, setModalLoading] = useState(false)
+    const [modalLoading, setModalLoading] = useState(true)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -23,28 +23,16 @@ const FollowingScreen = ({navigation}) => {
         })
     }, [])
 
-    const getFollowing = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/follow`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            })
-                .then(res => {
-                    setListFollowing(res.data.follows)
-                })
-                .catch(err => console.log(err.response))
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
+    //Get List Following
     useEffect(() => {
-        getFollowing()
+        getAPI({url: 'user/follow'})
+            .then(res => {
+                if (res.status === 200) {
+                    setListFollowing(res.data.follows)
+                    setModalLoading(false)
+                }
+            })
+            .catch(err => console.log('Get Follow: ', err))
     }, [])
 
     return (

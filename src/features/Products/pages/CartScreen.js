@@ -1,10 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {SafeAreaView, ScrollView, StyleSheet} from 'react-native'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 import ProductItemHorizontal from '../components/ProductItemHorizontal'
 
 const CartScreen = ({navigation}) => {
@@ -23,36 +22,21 @@ const CartScreen = ({navigation}) => {
         })
     }, [])
 
-    const getCart = async () => {
-        try {
-            setModalLoading(true)
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/cart`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            })
-                .then(res => {
-                    if (res.status === 200) {
-                        setListProducts(res.data.cart.content)
-                        setModalLoading(false)
-                    }
-                })
-                .catch(error => {
-                    setModalLoading(false)
-                    console.log('Get Cart: ', error.response)
-                })
-        } catch (error) {
-            setModalLoading(false)
-            console.log(error)
-        }
-    }
-
+    //Get Cart
     useEffect(() => {
-        getCart()
+        setModalLoading(true)
+
+        getAPI({url: 'user/cart'})
+            .then(res => {
+                if (res.status === 200) {
+                    setListProducts(res.data.cart.content)
+                    setModalLoading(false)
+                }
+            })
+            .catch(err => {
+                setModalLoading(false)
+                console.log('Get Cart: ', err)
+            })
     }, [])
 
     return (

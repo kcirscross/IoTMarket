@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import axios from 'axios'
 import React, {useLayoutEffect} from 'react'
 import {
     Alert,
@@ -15,34 +14,28 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
+import {patchAPI, postAPI} from '../../../components/utils/base_API'
 import {signOut} from '../../Users/userSlice'
 
 const MoreScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
 
-    const deleteRememberAccount = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-            axios({
-                method: 'patch',
-                url: `${API_URL}/user/changeonlinestatus`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-                data: {
-                    status: 'Offline',
-                },
-            }).then(async () => {
-                await AsyncStorage.removeItem('account')
-                await AsyncStorage.removeItem('password')
-                await AsyncStorage.removeItem('accountType')
-                await AsyncStorage.removeItem('token')
+    const deleteRememberAccount = () => {
+        patchAPI({
+            url: 'user/changeonlinestatus',
+            data: {status: 'Offline'},
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    await AsyncStorage.removeItem('account')
+                    await AsyncStorage.removeItem('password')
+                    await AsyncStorage.removeItem('accountType')
+                    await AsyncStorage.removeItem('token')
+                }
             })
-        } catch (error) {
-            console.log('Error when delete remember account', error)
-        }
+            .catch(err => console.log('Logout: ', err))
     }
 
     useLayoutEffect(() => {
@@ -60,20 +53,21 @@ const MoreScreen = ({navigation}) => {
             {
                 text: 'Yes',
                 onPress: () => {
-                    axios({
-                        method: 'post',
-                        url: `${API_URL}/auth/logout`,
-                        data: {
-                            email: currentUser.email,
-                        },
-                    }).then(res => {
-                        const action = signOut()
-                        res.status == 200 && dispatch(action)
-
-                        deleteRememberAccount()
-
-                        navigation.navigate('SignIn')
+                    postAPI({
+                        url: 'auth/logout',
+                        data: {email: currentUser.email},
                     })
+                        .then(res => {
+                            if (res.status === 200) {
+                                const action = signOut()
+                                res.status == 200 && dispatch(action)
+
+                                deleteRememberAccount()
+
+                                navigation.navigate('SignIn')
+                            }
+                        })
+                        .catch(err => console.log('Logout: ', err))
                 },
             },
 

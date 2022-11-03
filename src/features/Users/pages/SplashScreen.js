@@ -1,11 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import messaging from '@react-native-firebase/messaging'
-import axios from 'axios'
 import React, {useEffect} from 'react'
 import {Alert, Image, SafeAreaView, StyleSheet} from 'react-native'
 import {useDispatch} from 'react-redux'
 import {globalStyles} from '~/assets/styles/globalStyles'
-import {API_URL} from '../../../components/constants'
+import {getAPI, postAPI} from '../../../components/utils/base_API'
 import {getFavorite} from '../../Products/favoriteSlice'
 import {signIn} from '../userSlice'
 
@@ -23,25 +21,17 @@ const SplashScreen = ({navigation}) => {
                 storedEmail != null &&
                 storedAccountType != null
             ) {
-                if (storedAccountType == 'Google') {
-                    await messaging().registerDeviceForRemoteMessages()
-                    const tokenFCM = await messaging().getToken()
-
-                    axios({
-                        method: 'post',
-                        url: `${API_URL}/auth/google`,
-                        headers: {
-                            deviceTokenFCM: tokenFCM,
-                        },
+                storedAccountType == 'Google' &&
+                    postAPI({
+                        url: 'auth/google',
                         data: {
                             email: storedEmail,
                             fullName: storedPassword,
                         },
                     })
                         .then(async res => {
-                            if (res.data.statusCode == 200) {
-                                const action = signIn(res.data.data)
-                                dispatch(action)
+                            if (res.status === 200) {
+                                dispatch(signIn(res.data.data))
 
                                 getFavoriteAfterSignIn()
 
@@ -57,29 +47,20 @@ const SplashScreen = ({navigation}) => {
                             Alert.alert(
                                 'Have something wrong here. Please try again.',
                             ),
-                                console.log(err.message)
+                                console.log('Auto Login: ', err)
                         })
-                }
 
-                if (storedAccountType == 'Email') {
-                    await messaging().registerDeviceForRemoteMessages()
-                    const tokenFCM = await messaging().getToken()
-                    axios({
-                        method: 'post',
-                        url: `${API_URL}/auth/signin`,
-                        headers: {
-                            deviceTokenFCM: tokenFCM,
-                        },
+                storedAccountType == 'Email' &&
+                    postAPI({
+                        url: 'auth/signin',
                         data: {
                             email: storedEmail,
                             password: storedPassword,
                         },
                     })
                         .then(async res => {
-                            if ((res.data.statusCode = 200)) {
-                                const action = signIn(res.data.data)
-
-                                dispatch(action)
+                            if (res.status === 200) {
+                                dispatch(signIn(res.data.data))
 
                                 getFavoriteAfterSignIn()
 
@@ -92,7 +73,7 @@ const SplashScreen = ({navigation}) => {
                             }
                         })
                         .catch(err => {
-                            console.log(err.message)
+                            console.log('Auto Login: ', err)
                             Alert.alert(
                                 'Wrong email or password. Please try again.',
                                 '',
@@ -105,10 +86,9 @@ const SplashScreen = ({navigation}) => {
                                 ],
                             )
                         })
-                }
             } else {
                 setTimeout(() => {
-                    navigation.navigate('SignIn')
+                    navigation.replace('SignIn')
                 }, 2000)
             }
         } catch (error) {
@@ -116,20 +96,14 @@ const SplashScreen = ({navigation}) => {
         }
     }
 
-    const getFavoriteAfterSignIn = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token')
-
-            axios({
-                method: 'get',
-                url: `${API_URL}/user/favorite`,
-                headers: {
-                    authorization: `Bearer ${token}`,
-                },
-            }).then(res => dispatch(getFavorite(res.data.favorites)))
-        } catch (error) {
-            console.log(error)
-        }
+    const getFavoriteAfterSignIn = () => {
+        getAPI({url: 'user/favorite'})
+            .then(
+                res =>
+                    res.status === 200 &&
+                    dispatch(getFavorite(res.data.favorites)),
+            )
+            .catch(err => console.log('Get Favorite: ', err))
     }
 
     useEffect(() => {

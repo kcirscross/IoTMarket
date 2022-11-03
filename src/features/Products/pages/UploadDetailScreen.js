@@ -20,10 +20,15 @@ import {Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {API_URL, PRIMARY_COLOR} from '../../../components/constants'
+import {
+    API_URL,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR,
+} from '../../../components/constants'
 import UploadImageItem from '../components/UploadImageItem'
 
 const UploadDetailScreen = ({navigation, route}) => {
@@ -215,7 +220,13 @@ const UploadDetailScreen = ({navigation, route}) => {
                                                     onPress: () =>
                                                         navigation.replace(
                                                             'Profile',
-                                                            currentUser,
+                                                            {
+                                                                0:
+                                                                    currentUser.storeId !=
+                                                                    undefined
+                                                                        ? currentUser.storeId
+                                                                        : currentUser._id,
+                                                            },
                                                         ),
                                                 },
                                             ],
@@ -234,7 +245,7 @@ const UploadDetailScreen = ({navigation, route}) => {
         }
     }
 
-    const handleUploadClick = async () => {
+    const handleUploadClick = () => {
         if (
             productName == '' ||
             productDescription == '' ||
@@ -265,11 +276,9 @@ const UploadDetailScreen = ({navigation, route}) => {
                 ...globalStyles.container,
                 opacity: modalLoading + modalPhotos ? 0.5 : 1,
             }}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <KeyboardAvoidingView
-                        behavior="padding"
-                        style={{height: '100%', width: '100%', paddingTop: 10}}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <KeyboardAvoidingView behavior="padding">
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         <ModalLoading visible={modalLoading} />
 
                         <Modal
@@ -281,14 +290,34 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     flex: 1,
                                 }}>
                                 <View style={styles.modalView}>
-                                    <Text
+                                    <View
                                         style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 18,
-                                            marginLeft: -10,
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
                                         }}>
-                                        Choose your image from?
-                                    </Text>
+                                        <Text
+                                            style={{
+                                                ...styles.labelStyle,
+                                                fontSize: 18,
+                                                marginLeft: -10,
+                                            }}>
+                                            Choose your image from?
+                                        </Text>
+
+                                        <View style={{flex: 1}} />
+
+                                        <TouchableOpacity
+                                            onPress={() =>
+                                                setModalPhotos(false)
+                                            }>
+                                            <Ion
+                                                name="close-circle-outline"
+                                                size={30}
+                                                color="black"
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+
                                     <TouchableOpacity
                                         onPress={() => {
                                             setModalPhotos(false)
@@ -298,26 +327,40 @@ const UploadDetailScreen = ({navigation, route}) => {
                                         <Text
                                             style={{
                                                 ...styles.labelStyle,
-                                                marginLeft: 10,
-                                                fontSize: 16,
+                                                fontSize: 18,
                                             }}>
                                             Gallery
                                         </Text>
+
+                                        <Ion
+                                            name="images-outline"
+                                            size={64}
+                                            color={PRIMARY_COLOR}
+                                        />
                                     </TouchableOpacity>
+
                                     <TouchableOpacity
                                         onPress={() => {
                                             setModalPhotos(false)
                                             pickImageFromCamera()
                                         }}
-                                        style={styles.touchModalView}>
+                                        style={{
+                                            ...styles.touchModalView,
+                                            marginTop: 10,
+                                        }}>
                                         <Text
                                             style={{
                                                 ...styles.labelStyle,
-                                                marginLeft: 10,
-                                                fontSize: 16,
+                                                fontSize: 18,
                                             }}>
                                             Camera
                                         </Text>
+
+                                        <Ion
+                                            name="camera-outline"
+                                            size={64}
+                                            color={PRIMARY_COLOR}
+                                        />
                                     </TouchableOpacity>
                                 </View>
                             </SafeAreaView>
@@ -344,6 +387,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 onSelectItem={item =>
                                     setChosenSubCategory(item.value)
                                 }
+                                style={styles.dropStyle}
                             />
 
                             <TouchableOpacity
@@ -482,6 +526,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 setItems={setItemsCondition}
                                 listMode={'SCROLLVIEW'}
                                 placeholder="Select a condition"
+                                style={styles.dropStyle}
                                 onSelectItem={item =>
                                     setChosenCondition(item.value)
                                 }
@@ -728,9 +773,9 @@ const UploadDetailScreen = ({navigation, route}) => {
                             </Text>
                         </TouchableOpacity>
                         <Toast position="bottom" bottomOffset={80} />
-                    </KeyboardAvoidingView>
-                </TouchableWithoutFeedback>
-            </ScrollView>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
         </SafeAreaView>
     )
 }
@@ -754,7 +799,6 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     touchModalView: {
-        flexDirection: 'row',
         alignItems: 'center',
     },
     labelStyle: {
@@ -763,5 +807,8 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         color: 'black',
+    },
+    dropStyle: {
+        backgroundColor: SECONDARY_COLOR,
     },
 })
