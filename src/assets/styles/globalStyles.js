@@ -1,12 +1,12 @@
-import { StyleSheet } from 'react-native'
-import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../components/constants'
+import {StyleSheet} from 'react-native'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../components/constants'
 
 export const globalStyles = StyleSheet.create({
     container: {
         paddingLeft: 10,
         paddingRight: 10,
         flex: 1,
-        backgroundColor: 'white',
+        backgroundColor: SECONDARY_COLOR,
     },
 
     textTitle: {
@@ -16,11 +16,16 @@ export const globalStyles = StyleSheet.create({
     },
 
     input: {
-        backgroundColor: SECONDARY_COLOR,
+        backgroundColor: 'white',
         width: '90%',
         borderRadius: 10,
         paddingHorizontal: 10,
         marginTop: 10,
+        shadowColor: PRIMARY_COLOR,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
     },
 
     button: {
@@ -44,5 +49,10 @@ export const globalStyles = StyleSheet.create({
         paddingRight: 5,
         borderRadius: 10,
         paddingVertical: 5,
+        shadowColor: PRIMARY_COLOR,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 5,
     },
 })

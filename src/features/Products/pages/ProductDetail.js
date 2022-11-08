@@ -1,9 +1,11 @@
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {RefreshControl} from 'react-native'
 import {
     Dimensions,
     Image,
     SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -46,6 +48,8 @@ const ProductDetail = ({navigation, route}) => {
 
     const [storeInfo, setStoreInfo] = useState([])
     const [isStore, setIsStore] = useState(false)
+    const [modalBuyVisible, setModalBuyVisible] = useState(false)
+    const [refreshing, setRefreshing] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -81,6 +85,10 @@ const ProductDetail = ({navigation, route}) => {
 
     //Get Product Detail
     useEffect(() => {
+        getProduct()
+    }, [])
+
+    const getProduct = () => {
         setModalLoading(true)
 
         axios({
@@ -170,7 +178,15 @@ const ProductDetail = ({navigation, route}) => {
                 setModalLoading(false)
                 console.log(error.response.data)
             })
-    }, [])
+    }
+
+    const onRefresh = () => {
+        getProduct()
+
+        setTimeout(() => {
+            setRefreshing(false)
+        }, 2000)
+    }
 
     function handleCarouselScrollEnd(item, index) {
         setCurrentIndex(index)
@@ -259,287 +275,316 @@ const ProductDetail = ({navigation, route}) => {
                   .catch(err => console.log('Unfollow: ', err))
     }
 
+    const setVisible = isVisible => {
+        setModalBuyVisible(isVisible)
+    }
+
     return !modalLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
-                opacity: modalLoading ? 0.5 : 1,
+                opacity: modalLoading + modalBuyVisible ? 0.3 : 1,
             }}>
             <ModalLoading visible={modalLoading} />
 
-            <View
-                style={{
-                    height: 300,
-                    marginBottom: 10,
-                }}>
-                {listImages.length == 1 ? (
-                    <View>
-                        <Image
-                            source={{uri: listImages[0]}}
-                            resizeMethod="scale"
-                            resizeMode="contain"
-                            style={styles.imageStyle}
-                        />
-                    </View>
-                ) : (
-                    <Carousel
-                        autoplay={true}
-                        lockScrollWhileSnapping={true}
-                        autoplayInterval={1000}
-                        data={listImages}
-                        style={{
-                            marginBottom: 10,
-                        }}
-                        initialIndex={0}
-                        onScrollEnd={handleCarouselScrollEnd}
-                        itemWidth={Dimensions.get('window').width * 0.95}
-                        containerWidth={Dimensions.get('window').width * 0.95}
-                        separatorWidth={2}
-                        inActiveOpacity={0.5}
-                        onSnapToItem={index => setIndex(index)}
-                        renderItem={({item}) => (
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }>
+                <View
+                    style={{
+                        height: 300,
+                        marginBottom: 10,
+                    }}>
+                    {listImages.length == 1 ? (
+                        <View>
                             <Image
-                                source={{
-                                    uri: item,
-                                }}
+                                source={{uri: listImages[0]}}
                                 resizeMethod="scale"
                                 resizeMode="contain"
-                                style={{
-                                    width: '100%',
-                                    height: 250,
-                                    borderRadius: 10,
-                                    elevation: 3,
-                                }}
+                                style={styles.imageStyle}
                             />
-                        )}
+                        </View>
+                    ) : (
+                        <Carousel
+                            autoplay={true}
+                            lockScrollWhileSnapping={true}
+                            autoplayInterval={1000}
+                            data={listImages}
+                            style={{
+                                marginBottom: 10,
+                            }}
+                            initialIndex={0}
+                            onScrollEnd={handleCarouselScrollEnd}
+                            itemWidth={Dimensions.get('window').width * 0.95}
+                            containerWidth={
+                                Dimensions.get('window').width * 0.95
+                            }
+                            separatorWidth={2}
+                            inActiveOpacity={0.5}
+                            onSnapToItem={index => setIndex(index)}
+                            renderItem={({item}) => (
+                                <Image
+                                    source={{
+                                        uri: item,
+                                    }}
+                                    resizeMethod="scale"
+                                    resizeMode="contain"
+                                    style={{
+                                        width: '100%',
+                                        height: 250,
+                                        borderRadius: 10,
+                                        elevation: 3,
+                                    }}
+                                />
+                            )}
+                        />
+                    )}
+                    <SimplePaginationDot
+                        currentIndex={currentIndex}
+                        length={listImages.length}
                     />
-                )}
-                <SimplePaginationDot
-                    currentIndex={currentIndex}
-                    length={listImages.length}
-                />
-            </View>
+                </View>
 
-            <Toast position="bottom" bottomOffset={70} />
+                <Card containerStyle={globalStyles.cardContainer}>
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('StoreProfile', {
+                                store: storeInfo,
+                                ownerInfo: productOwner,
+                            })
+                        }>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <View>
+                                <Avatar
+                                    rounded
+                                    size={'large'}
+                                    source={{
+                                        uri: isStore
+                                            ? storeInfo.shopImage
+                                            : productOwner.avatar,
+                                    }}
+                                    avatarStyle={{
+                                        borderWidth: 1,
+                                        borderColor: AVATAR_BORDER,
+                                    }}
+                                />
 
-            <Card containerStyle={globalStyles.cardContainer}>
-                <TouchableOpacity
-                    onPress={() =>
-                        navigation.navigate('StoreProfile', {
-                            store: storeInfo,
-                            ownerInfo: productOwner,
-                        })
-                    }>
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                        }}>
-                        <View>
-                            <Avatar
-                                rounded
-                                size={'large'}
-                                source={{
-                                    uri: isStore
-                                        ? storeInfo.shopImage
-                                        : productOwner.avatar,
-                                }}
-                                avatarStyle={{
-                                    borderWidth: 1,
-                                    borderColor: AVATAR_BORDER,
-                                }}
-                            />
+                                <Badge
+                                    value=" "
+                                    status={
+                                        productOwner.onlineStatus == 'Online'
+                                            ? 'success'
+                                            : 'warning'
+                                    }
+                                    containerStyle={{
+                                        position: 'absolute',
+                                        bottom: 2,
+                                        right: 5,
+                                    }}
+                                />
+                            </View>
 
-                            <Badge
-                                value=" "
-                                status={
-                                    productOwner.onlineStatus == 'Online'
-                                        ? 'success'
-                                        : 'warning'
-                                }
-                                containerStyle={{
-                                    position: 'absolute',
-                                    bottom: 2,
-                                    right: 5,
-                                }}
-                            />
-                        </View>
-
-                        <View>
-                            <Text
-                                style={{
-                                    fontWeight: 'bold',
-                                    color: 'black',
-                                    marginLeft: 10,
-                                    fontSize: 18,
-                                }}>
-                                {isStore
-                                    ? storeInfo.displayName
-                                    : productOwner.fullName}
-                            </Text>
-                            <Text style={{color: 'black', marginLeft: 10}}>
-                                {productOwner.onlineStatus == 'Online'
-                                    ? 'Online'
-                                    : convertTime(
-                                          Date.parse(productOwner.updatedAt),
-                                      )}
-                            </Text>
-                        </View>
-                        <View style={{flex: 1}} />
-                        {!isOwner && (
-                            <View
-                                style={{
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                }}>
-                                {isStore && (
+                            <View>
+                                <Text
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: 'black',
+                                        marginLeft: 10,
+                                        fontSize: 18,
+                                    }}>
+                                    {isStore
+                                        ? storeInfo.displayName
+                                        : productOwner.fullName}
+                                </Text>
+                                <Text style={{color: 'black', marginLeft: 10}}>
+                                    {productOwner.onlineStatus == 'Online'
+                                        ? 'Online'
+                                        : convertTime(
+                                              Date.parse(
+                                                  productOwner.updatedAt,
+                                              ),
+                                          )}
+                                </Text>
+                            </View>
+                            <View style={{flex: 1}} />
+                            {!isOwner && (
+                                <View
+                                    style={{
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                    }}>
+                                    {isStore && (
+                                        <TouchableOpacity
+                                            onPress={handleFollowClick}
+                                            style={{
+                                                ...styles.touchStyle,
+                                                backgroundColor: isFollow
+                                                    ? 'red'
+                                                    : PRIMARY_COLOR,
+                                                marginRight: 5,
+                                            }}>
+                                            {isFollow ? (
+                                                <Text style={{color: 'white'}}>
+                                                    - Follow
+                                                </Text>
+                                            ) : (
+                                                <Text style={{color: 'white'}}>
+                                                    + Follow
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    )}
                                     <TouchableOpacity
-                                        onPress={handleFollowClick}
                                         style={{
                                             ...styles.touchStyle,
-                                            backgroundColor: isFollow
-                                                ? 'red'
-                                                : PRIMARY_COLOR,
+                                            backgroundColor: PRIMARY_COLOR,
                                             marginRight: 5,
+                                            flexDirection: 'row',
+                                            marginTop: 5,
                                         }}>
-                                        {isFollow ? (
-                                            <Text style={{color: 'white'}}>
-                                                - Follow
-                                            </Text>
-                                        ) : (
-                                            <Text style={{color: 'white'}}>
-                                                + Follow
-                                            </Text>
-                                        )}
+                                        <Ion
+                                            name="chatbubble-ellipses-outline"
+                                            size={18}
+                                            color="white"
+                                        />
+                                        <Text style={{color: 'white'}}>
+                                            {' '}
+                                            Chat
+                                        </Text>
                                     </TouchableOpacity>
-                                )}
-                                <TouchableOpacity
-                                    style={{
-                                        ...styles.touchStyle,
-                                        backgroundColor: PRIMARY_COLOR,
-                                        marginRight: 5,
-                                        flexDirection: 'row',
-                                        marginTop: 5,
-                                    }}>
-                                    <Ion
-                                        name="chatbubble-ellipses-outline"
-                                        size={18}
-                                        color="white"
-                                    />
-                                    <Text style={{color: 'white'}}> Chat</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </View>
-                </TouchableOpacity>
-            </Card>
+                                </View>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                </Card>
 
-            <Card
-                containerStyle={{
-                    ...globalStyles.cardContainer,
-                    marginTop: 5,
-                }}>
-                <Text
-                    style={{
-                        fontWeight: 'bold',
-                        color: 'black',
-                        fontSize: 20,
+                <Card
+                    containerStyle={{
+                        ...globalStyles.cardContainer,
+                        marginTop: 5,
                     }}>
-                    {product.productName}
-                </Text>
-
-                <Text
-                    style={{
-                        color: 'blue',
-                        fontSize: 18,
-                    }}>
-                    Price: {Intl.NumberFormat('en-US').format(product.price)} đ
-                </Text>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Icon
-                        name="star"
-                        size={15}
-                        color="#FA8128"
-                        solid={1 <= ratingValue}
-                    />
-                    <Icon
-                        name="star"
-                        size={15}
-                        color="#FA8128"
-                        solid={2 <= ratingValue}
-                    />
-                    <Icon
-                        name="star"
-                        size={15}
-                        color="#FA8128"
-                        solid={3 <= ratingValue}
-                    />
-                    <Icon
-                        name="star"
-                        size={15}
-                        color="#FA8128"
-                        solid={4 <= ratingValue}
-                    />
-                    <Icon
-                        name="star"
-                        size={15}
-                        color="#FA8128"
-                        solid={5 <= ratingValue}
-                    />
                     <Text
                         style={{
+                            fontWeight: 'bold',
                             color: 'black',
-                            fontSize: 16,
-                            marginLeft: 5,
+                            fontSize: 20,
                         }}>
-                        {ratingValue} | Sold:{' '}
-                        {Intl.NumberFormat('en-US').format(product.soldCount)}
+                        {product.productName}
                     </Text>
-                    <View style={{flex: 1}} />
 
-                    {!isOwner && (
-                        <TouchableOpacity
-                            onPress={handleFavoriteClick}
-                            style={{...styles.touchStyle}}>
-                            <Icon
-                                name="heart"
-                                size={24}
-                                color={favorite ? 'red' : PRIMARY_COLOR}
-                                solid={favorite}
-                            />
-                        </TouchableOpacity>
-                    )}
+                    <Text
+                        style={{
+                            color: 'blue',
+                            fontSize: 18,
+                        }}>
+                        Price:{' '}
+                        {Intl.NumberFormat('en-US').format(product.price)} đ
+                    </Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Icon
+                            name="star"
+                            size={15}
+                            color="#FA8128"
+                            solid={1 <= ratingValue}
+                        />
+                        <Icon
+                            name="star"
+                            size={15}
+                            color="#FA8128"
+                            solid={2 <= ratingValue}
+                        />
+                        <Icon
+                            name="star"
+                            size={15}
+                            color="#FA8128"
+                            solid={3 <= ratingValue}
+                        />
+                        <Icon
+                            name="star"
+                            size={15}
+                            color="#FA8128"
+                            solid={4 <= ratingValue}
+                        />
+                        <Icon
+                            name="star"
+                            size={15}
+                            color="#FA8128"
+                            solid={5 <= ratingValue}
+                        />
+                        <Text
+                            style={{
+                                color: 'black',
+                                fontSize: 16,
+                                marginLeft: 5,
+                            }}>
+                            {ratingValue} | Sold:{' '}
+                            {Intl.NumberFormat('en-US').format(
+                                product.soldCount,
+                            )}
+                        </Text>
+                        <View style={{flex: 1}} />
 
-                    {!isOwner && (
-                        <TouchableOpacity
-                            onPress={handleAddCartClick}
-                            style={styles.touchStyle}>
-                            <Ion
-                                name="cart-outline"
-                                size={30}
-                                color={PRIMARY_COLOR}
-                            />
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </Card>
+                        {!isOwner && (
+                            <TouchableOpacity
+                                onPress={handleFavoriteClick}
+                                style={{...styles.touchStyle}}>
+                                <Icon
+                                    name="heart"
+                                    size={24}
+                                    color={favorite ? 'red' : PRIMARY_COLOR}
+                                    solid={favorite}
+                                />
+                            </TouchableOpacity>
+                        )}
 
-            <Card
-                containerStyle={{
-                    ...globalStyles.cardContainer,
-                    marginTop: 5,
-                }}>
-                <View style={styles.viewStyle}>
-                    <Text style={styles.textStyle}>Condition: </Text>
-                    <Text>{product.condition}</Text>
-                </View>
-                <View style={styles.viewStyle}>
-                    <Text style={styles.textStyle}>Description: </Text>
-                    <Text>{product.description}</Text>
-                </View>
-            </Card>
+                        {!isOwner && (
+                            <TouchableOpacity
+                                onPress={handleAddCartClick}
+                                style={styles.touchStyle}>
+                                <Ion
+                                    name="cart-outline"
+                                    size={30}
+                                    color={PRIMARY_COLOR}
+                                />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </Card>
 
-            {!isOwner && <BottomMenuBar productOwner={productOwner} />}
+                <Card
+                    containerStyle={{
+                        ...globalStyles.cardContainer,
+                        marginTop: 5,
+                    }}>
+                    <View style={styles.viewStyle}>
+                        <Text style={styles.textStyle}>Condition: </Text>
+                        <Text>{product.condition}</Text>
+                    </View>
+                    <View style={styles.viewStyle}>
+                        <Text style={styles.textStyle}>Description: </Text>
+                        <Text>{product.description}</Text>
+                    </View>
+                </Card>
+            </ScrollView>
+            <Toast position="bottom" bottomOffset={70} />
+
+            {!isOwner && (
+                <BottomMenuBar
+                    navigation={navigation}
+                    onPress={setVisible}
+                    productOwner={productOwner}
+                    product={product}
+                />
+            )}
         </SafeAreaView>
     ) : (
         <SafeAreaView

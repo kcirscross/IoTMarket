@@ -10,6 +10,7 @@ import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
 import {
     FollowingScreen,
+    OrderScreen,
     SettingStoreScreen,
     UpdateStoreScreen,
 } from './src/features/More'
@@ -18,10 +19,12 @@ import MoreScreen from './src/features/More/pages/MoreScreen'
 import StoreScreen from './src/features/More/pages/StoreScreen'
 import {
     CartScreen,
+    PaymentCartScreen,
+    PaymentScreen,
     ProductDetail,
     UploadDetailScreen,
 } from './src/features/Products'
-import {ProductItem} from './src/features/Products/components'
+import {ProductItem, WebViewPayment} from './src/features/Products/components'
 import {
     ChangeAddressScreen,
     ChangeInfoScreen,
@@ -160,6 +163,16 @@ export default function App() {
                         name="StoreProfile"
                         component={StoreProfileScreen}
                     />
+                    <Stack.Screen name="Payment" component={PaymentScreen} />
+                    <Stack.Screen
+                        name="PaymentCart"
+                        component={PaymentCartScreen}
+                    />
+                    <Stack.Screen
+                        name="WebViewPayment"
+                        component={WebViewPayment}
+                    />
+                    <Stack.Screen name="Order" component={OrderScreen} />
                 </Stack.Navigator>
             </NavigationContainer>
         </Provider>
