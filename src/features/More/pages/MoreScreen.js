@@ -64,7 +64,10 @@ const MoreScreen = ({navigation}) => {
 
                                 deleteRememberAccount()
 
-                                navigation.navigate('SignIn')
+                                navigation.reset({
+                                    index: 0,
+                                    routes: [{name: 'SignIn'}],
+                                })
                             }
                         })
                         .catch(err => console.log('Logout: ', err))
@@ -134,26 +137,16 @@ const MoreScreen = ({navigation}) => {
                 <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Order')}
+                style={styles.container}>
                 <Image
                     source={require('~/assets/images/buy.png')}
                     style={{
                         tintColor: 'red',
                     }}
                 />
-                <Text style={styles.textStyle}>Bought Products</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.container}>
-                <Image
-                    source={require('~/assets/images/sell.png')}
-                    style={{
-                        tintColor: 'green',
-                    }}
-                />
-                <Text style={styles.textStyle}>Sold Products</Text>
+                <Text style={styles.textStyle}>My Orders</Text>
                 <View style={{flex: 1}} />
                 <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>

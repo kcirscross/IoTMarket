@@ -1,15 +1,25 @@
 import React from 'react'
+import {useEffect} from 'react'
+import {useState} from 'react'
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import ModalChooseQuantity from './ModalChooseQuantity'
 
-const BottomMenuBar = ({productOwner}) => {
+const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
+    const [modalBuy, setModalBuy] = useState(false)
+
     const handleCallClick = () => {
         Linking.openURL(`tel:${productOwner.phoneNumber}`)
     }
 
     const handleSmsClick = () => {
         Linking.openURL(`sms:${productOwner.phoneNumber}`)
+    }
+
+    const setModalVisible = isVisible => {
+        onPress(isVisible)
+        setModalBuy(isVisible)
     }
 
     return (
@@ -23,8 +33,9 @@ const BottomMenuBar = ({productOwner}) => {
                 justifyContent: 'space-between',
                 borderTopEndRadius: 10,
                 borderTopLeftRadius: 10,
-                borderTopColor: SECONDARY_COLOR,
+                borderTopColor: 'white',
                 borderTopWidth: 3,
+                backgroundColor: 'white',
             }}>
             <TouchableOpacity
                 onPress={handleCallClick}
@@ -88,6 +99,10 @@ const BottomMenuBar = ({productOwner}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
+                onPress={() => {
+                    setModalBuy(true)
+                    onPress(true)
+                }}
                 style={{
                     flexDirection: 'row',
                     width: '25%',
@@ -106,6 +121,13 @@ const BottomMenuBar = ({productOwner}) => {
                     BUY NOW
                 </Text>
             </TouchableOpacity>
+            <ModalChooseQuantity
+                navigation={navigation}
+                visible={modalBuy}
+                productOwner={productOwner}
+                product={product}
+                onPress={setModalVisible}
+            />
         </View>
     )
 }

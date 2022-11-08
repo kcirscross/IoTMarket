@@ -15,9 +15,10 @@ import {globalStyles} from '../../../assets/styles/globalStyles'
 import {patchAPI} from '../../../components/utils/base_API'
 import {removeFavorite} from '../favoriteSlice'
 
-const ProductItemHorizontal = ({navigation, product, type}) => {
+const ProductItemHorizontal = ({navigation, product, type, onPress}) => {
     const dispatch = useDispatch()
     const [quantity, setQuantity] = useState(product.quantity)
+    const [check, setCheck] = useState(false)
 
     const handleRemoveFavoriteClick = () => {
         patchAPI({url: `user/unfavorite/${product._id}`})
@@ -102,6 +103,25 @@ const ProductItemHorizontal = ({navigation, product, type}) => {
                     })
                 }
                 style={{flexDirection: 'row'}}>
+                {type == 'cart' && (
+                    <TouchableOpacity
+                        style={{alignSelf: 'center', padding: 10}}
+                        onPress={() => {
+                            onPress({
+                                action: !check,
+                                product: product.productId,
+                                quantity: quantity,
+                            })
+                            setCheck(!check)
+                        }}>
+                        {check ? (
+                            <Icon name="check-square" size={24} color="black" />
+                        ) : (
+                            <Icon name="square" size={24} color="black" />
+                        )}
+                    </TouchableOpacity>
+                )}
+
                 <Image
                     source={{
                         uri:
