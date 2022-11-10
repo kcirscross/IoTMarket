@@ -1,5 +1,6 @@
 import {useIsFocused} from '@react-navigation/native'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
+import {Alert} from 'react-native'
 import {
     Image,
     Modal,
@@ -69,31 +70,56 @@ const PaymentCartScreen = ({navigation, route}) => {
     }, [isFocus])
 
     const handlePaymentClick = () => {
-        setModalLoading(true)
+        if (deleveryMethod) {
+            Alert.alert(
+                'Confirm Order',
+                'You will pay when received product.',
+                [
+                    {
+                        text: 'Yes',
+                        onPress: () => {
+                            setModalLoading(true)
 
-        !deleveryMethod
-            ? postAPI({
-                  url: 'user/buy',
-                  params: {
-                      isCodQuery: deleveryMethod,
-                  },
-                  data: listOrder,
-              })
-                  .then(res => {
-                      if (res.status === 200) {
-                          setModalLoading(false)
-                          navigation.navigate('WebViewPayment', {
-                              url: res.data.vnpUrl,
-                              from: 'cart',
-                              data: listOrder,
-                          })
-                      }
-                  })
-                  .catch(err => console.log('Payment: ', err))
-            : navigation.reset({
-                  index: 1,
-                  routes: [{name: 'BottomNavBar'}, {name: 'Order'}],
-              })
+                            postAPI({
+                                url: 'user/buy',
+                                params: {
+                                    isCodQuery: true,
+                                },
+                                data: listOrder,
+                            })
+                                .then(res => {
+                                    if (res.status === 200) {
+                                        setModalLoading(false)
+                                        navigation.replace('Order')
+                                    }
+                                })
+                                .catch(err => console.log('Payment: ', err))
+                        },
+                    },
+                    {
+                        text: 'Cancel',
+                    },
+                ],
+            )
+        } else {
+            setModalLoading(true)
+
+            postAPI({
+                url: 'user/buy',
+                data: listOrder,
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        setModalLoading(false)
+                        navigation.navigate('WebViewPayment', {
+                            url: res.data.vnpUrl,
+                            from: 'cart',
+                            data: listOrder,
+                        })
+                    }
+                })
+                .catch(err => console.log('Payment: ', err))
+        }
     }
 
     return (

@@ -1,25 +1,72 @@
 import moment from 'moment'
 import React, {useEffect, useState} from 'react'
-import {Image, StyleSheet, Text, TouchableOpacity} from 'react-native'
+import {Alert, Image, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {View} from 'react-native-animatable'
 import {Card, Divider} from 'react-native-elements'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
-import {getAPI} from '../../../components/utils/base_API'
+import {getAPI, postAPI} from '../../../components/utils/base_API'
 
-const OrderItemHorizontal = ({navigation, order}) => {
+const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
     const [product, setProduct] = useState([])
+    const [statusDelivery, setStatusDelivery] = useState('')
 
     //Get Product Information
     useEffect(() => {
         getAPI({url: `product/${order.productsList[0].name}`})
-            .then(res => setProduct(res.data.product))
+            .then(res => {
+                if (res.status === 200) {
+                    setProduct(res.data.product)
+                }
+            })
             .catch(err => console.log('Get product: ', err))
+
+        if (order.shippingLogs[0] != undefined) {
+            switch (order.shippingLogs[order.shippingLogs.length - 1].status) {
+                case 'ready_to_pick':
+                    setStatusDelivery('Ready to pick')
+                    break
+
+                case 'delivered':
+                    setStatusDelivery('Delivered')
+                    break
+
+                default:
+                    ''
+                    break
+            }
+        }
     }, [])
-    // console.log(order)
+
+    const handleConfirmReceivedClick = () => {
+        Alert.alert('Confirm Received', 'Did you receive your product?', [
+            {
+                text: 'Yes',
+                onPress: () => {
+                    postAPI({url: `order/receive/${order._id}`}).then(res => {
+                        if (res.status === 200) {
+                            sendIndex({index: 1, reload: true})
+                        }
+                    })
+                },
+            },
+            {
+                text: 'Cancel',
+            },
+        ])
+    }
+
     return (
-        <Card containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
-            <TouchableOpacity>
+        <Card
+            containerStyle={{
+                ...globalStyles.cardContainer,
+                marginTop: 5,
+            }}>
+            <TouchableOpacity
+                onPress={() =>
+                    navigation.navigate('OrderDetail', {_id: order._id})
+                }>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -40,22 +87,79 @@ const OrderItemHorizontal = ({navigation, order}) => {
                         <Text style={{color: 'black', fontWeight: '600'}}>
                             {product.productName}
                         </Text>
-                        <Text style={{alignSelf: 'flex-end', color: 'black'}}>
-                            x{order.productsList[0].quantity}
-                        </Text>
-                        <Text style={{alignSelf: 'flex-end', color: 'blue'}}>
-                            {Intl.NumberFormat('en-US').format(product.price)}
-                        </Text>
+
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <Text style={{color: 'black'}}>
+                                {order.isCod
+                                    ? 'COD'
+                                    : `Giao Hang Nhanh - ${order.deliveryCode}`}
+                            </Text>
+
+                            <View style={{flex: 1}} />
+
+                            <View>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                    }}>
+                                    x{order.productsList[0].quantity}
+                                </Text>
+
+                                <Text
+                                    style={{
+                                        color: 'blue',
+                                    }}>
+                                    {Intl.NumberFormat('en-US').format(
+                                        product.price,
+                                    )}
+                                </Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
 
                 <Divider width={1} color={PRIMARY_COLOR} />
 
-                <View style={{paddingVertical: 5}}>
+                <View
+                    style={{
+                        paddingVertical: 5,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                    {order.shippingLogs[0] != undefined && (
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                marginLeft: 4,
+                                alignItems: 'center',
+                            }}>
+                            <Ion
+                                name="ellipse"
+                                size={14}
+                                color={PRIMARY_COLOR}
+                            />
+                            <View style={{marginLeft: 16}}>
+                                <Text style={{color: 'black'}}>
+                                    {statusDelivery}
+                                </Text>
+                                <Text style={{color: 'black'}}>
+                                    {moment(
+                                        order.shippingLogs.update_date,
+                                    ).format('Do - MM - YYYY HH:MM')}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+
+                    <View style={{flex: 1}} />
+
                     <Text
                         style={{
                             color: 'black',
-                            alignSelf: 'flex-end',
                             fontWeight: '600',
                         }}>
                         Total:{' '}
@@ -82,14 +186,23 @@ const OrderItemHorizontal = ({navigation, order}) => {
 
                     <View style={{flex: 1}} />
 
-                    <TouchableOpacity
-                        style={{
-                            backgroundColor: PRIMARY_COLOR,
-                            padding: 10,
-                            borderRadius: 10,
-                        }}>
-                        <Text style={globalStyles.textButton}>Received</Text>
-                    </TouchableOpacity>
+                    {statusDelivery != 'Delivered' && (
+                        <TouchableOpacity
+                            onPress={handleConfirmReceivedClick}
+                            style={styles.touchStyle}>
+                            <Text style={globalStyles.textButton}>
+                                Received
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {statusDelivery == 'Delivered' && (
+                        <TouchableOpacity
+                            onPress={handleConfirmReceivedClick}
+                            style={styles.touchStyle}>
+                            <Text style={globalStyles.textButton}>Review</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </TouchableOpacity>
         </Card>
@@ -98,4 +211,11 @@ const OrderItemHorizontal = ({navigation, order}) => {
 
 export default OrderItemHorizontal
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    touchStyle: {
+        backgroundColor: PRIMARY_COLOR,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 10,
+    },
+})
