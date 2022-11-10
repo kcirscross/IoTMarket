@@ -10,6 +10,7 @@ import BottomNavBar from './src/components/utils/BottomNavBar'
 import {HomeScreen} from './src/features/Home'
 import {
     FollowingScreen,
+    OrderDetailScreen,
     OrderScreen,
     SettingStoreScreen,
     UpdateStoreScreen,
@@ -173,6 +174,10 @@ export default function App() {
                         component={WebViewPayment}
                     />
                     <Stack.Screen name="Order" component={OrderScreen} />
+                    <Stack.Screen
+                        name="OrderDetail"
+                        component={OrderDetailScreen}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </Provider>

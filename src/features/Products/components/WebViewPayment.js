@@ -27,13 +27,22 @@ const WebViewPayment = ({navigation, route}) => {
                             routes: [{name: 'BottomNavBar'}, {name: 'Order'}],
                         })
 
-                        route.params.from === 'cart' &&
-                            patchAPI({
-                                url: 'user/removecart',
-                                data: route.params.data,
-                            }).catch(err =>
-                                console.log('Remove Cart After Payment: ', err),
-                            )
+                        // route.params.from === 'cart' &&
+                        //     route.params.data.forEach(async product => {
+                        //         await patchAPI({
+                        //             url: 'user/removecart',
+                        //             data: product,
+                        //         })
+                        //             .then(res => {
+                        //                 console.log(res.data)
+                        //             })
+                        //             .catch(err =>
+                        //                 console.log(
+                        //                     'Remove Cart After Payment: ',
+                        //                     err,
+                        //                 ),
+                        //             )
+                        //     })
                     } else {
                         navigation.goBack()
                     }
