@@ -1,3 +1,4 @@
+import {useIsFocused} from '@react-navigation/native'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     FlatList,
@@ -9,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
-import {Input} from 'react-native-elements'
+import {Badge, Input} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
@@ -24,8 +25,11 @@ const HomeScreen = ({navigation}) => {
     const [listProducts, setListProducts] = useState([])
     const [listCategories, setListCategories] = useState([])
     const [refreshing, setRefreshing] = useState(false)
+    const [total, setTotal] = useState(0)
+    const isFocus = useIsFocused()
+    const [loading, setLoading] = useState(true)
 
-    //Get Products and Categories
+    //Get Products and Categories, Get Total of Notification
     useEffect(() => {
         getAPI({url: 'product'}).then(
             res => res.status === 200 && setListProducts(res.data.products),
@@ -34,11 +38,16 @@ const HomeScreen = ({navigation}) => {
         getAPI({url: 'category'}).then(
             res => res.status === 200 && setListCategories(res.data.categories),
         )
-    }, [])
 
-    const handleNotificationClick = () => {
-        console.log('Click Notification')
-    }
+        getAPI({url: 'noti'})
+            .then(res => {
+                if (res.status === 200) {
+                    setTotal(res.data.notifications.length)
+                    setLoading(false)
+                }
+            })
+            .catch(err => console.log('Get Notification: ', err))
+    }, [isFocus])
 
     const onRefresh = () => {
         getAPI({url: 'product'}).then(
@@ -84,17 +93,38 @@ const HomeScreen = ({navigation}) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{marginLeft: 10}}
-                        onPress={handleNotificationClick}>
+                        onPress={() => navigation.navigate('Notification')}>
                         <Ion
                             name="notifications-outline"
                             size={26}
                             color="white"
                         />
+                        <Badge
+                            value={
+                                <Text
+                                    style={{
+                                        alignSelf: 'center',
+                                        justifyContent: 'center',
+                                        color: 'white',
+                                        fontSize: 12,
+                                    }}>
+                                    {total < 100 ? total : '99+'}
+                                </Text>
+                            }
+                            status="error"
+                            containerStyle={{
+                                position: 'absolute',
+                                bottom: -5,
+                                right: -5,
+                                padding: 2,
+                                display: total <= 0 ? 'none' : 'flex',
+                            }}
+                        />
                     </TouchableOpacity>
                 </View>
             ),
         })
-    }, [])
+    }, [isFocus, loading])
 
     return (
         <SafeAreaView style={globalStyles.container}>
