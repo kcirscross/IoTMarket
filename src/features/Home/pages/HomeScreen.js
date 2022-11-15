@@ -97,7 +97,7 @@ const HomeScreen = ({navigation}) => {
     }, [])
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 refreshControl={
@@ -201,11 +201,6 @@ const HomeScreen = ({navigation}) => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 10,
-        flex: 1,
-    },
-
     adsView: {
         backgroundColor: PRIMARY_COLOR,
         borderRadius: 10,

@@ -3,7 +3,7 @@ import {Image, Modal, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {View} from 'react-native-animatable'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {SECONDARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
 
 const ModalChooseQuantity = ({
     navigation,
@@ -27,13 +27,7 @@ const ModalChooseQuantity = ({
                 <View style={styles.viewContainer}>
                     <Image
                         source={{uri: product.thumbnailImage}}
-                        style={{
-                            width: 120,
-                            height: 150,
-                            borderRadius: 10,
-                            borderColor: SECONDARY_COLOR,
-                            borderWidth: 1,
-                        }}
+                        style={styles.imageStyle}
                         resizeMethod="resize"
                         resizeMode="contain"
                     />
@@ -121,7 +115,16 @@ const styles = StyleSheet.create({
         width: '100%',
     },
 
+    imageStyle: {
+        width: 120,
+        height: 150,
+        borderRadius: 10,
+        borderColor: SECONDARY_COLOR,
+        borderWidth: 1,
+    },
+
     viewContainer: {flexDirection: 'row', marginTop: 10, alignItems: 'center'},
+
     touchStyle: {
         borderColor: SECONDARY_COLOR,
         borderRadius: 5,

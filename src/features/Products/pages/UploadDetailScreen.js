@@ -388,6 +388,9 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     setChosenSubCategory(item.value)
                                 }
                                 style={styles.dropStyle}
+                                dropDownContainerStyle={{
+                                    borderColor: SECONDARY_COLOR,
+                                }}
                             />
 
                             <TouchableOpacity
@@ -527,9 +530,13 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 listMode={'SCROLLVIEW'}
                                 placeholder="Select a condition"
                                 style={styles.dropStyle}
+                                dropDownContainerStyle={{
+                                    borderColor: SECONDARY_COLOR,
+                                }}
                                 onSelectItem={item =>
                                     setChosenCondition(item.value)
                                 }
+                                dropDownDirection="TOP"
                             />
 
                             <Text
@@ -809,6 +816,12 @@ const styles = StyleSheet.create({
         color: 'black',
     },
     dropStyle: {
-        backgroundColor: SECONDARY_COLOR,
+        backgroundColor: 'white',
+        shadowColor: PRIMARY_COLOR,
+        elevation: 10,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        borderColor: SECONDARY_COLOR,
     },
 })

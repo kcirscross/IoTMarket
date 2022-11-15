@@ -2,11 +2,13 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
 import {StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
+import Ion from 'react-native-vector-icons/Ionicons'
+import MaterialCom from 'react-native-vector-icons/MaterialCommunityIcons'
 import {useSelector} from 'react-redux'
 import {ChatsScreen} from '~/features/Chats'
 import {HomeScreen} from '~/features/Home'
 import {MoreScreen} from '~/features/More'
-import {ProductsScreen, UploadProductScreen} from '~/features/Products'
+import {UploadProductScreen} from '~/features/Products'
 import ProfileScreen from '../../features/Users/pages/ProfileScreen'
 import {PRIMARY_COLOR} from '../constants'
 
@@ -63,10 +65,10 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Icon
-                                name={'home'}
-                                size={focused ? 36 : 24}
-                                color={focused ? PRIMARY_COLOR : '#999999'}
+                            <Ion
+                                name={focused ? 'home' : 'home-outline'}
+                                size={focused ? 40 : 30}
+                                color={focused ? PRIMARY_COLOR : 'black'}
                             />
                         </View>
                     ),
@@ -84,11 +86,14 @@ const BottomNavBar = () => {
                 options={{
                     tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Icon
-                                name={'store'}
-                                size={focused ? 36 : 24}
-                                color={focused ? PRIMARY_COLOR : '#999999'}
-                                light={true}
+                            <MaterialCom
+                                name={
+                                    focused
+                                        ? 'storefront'
+                                        : 'storefront-outline'
+                                }
+                                size={focused ? 42 : 32}
+                                color={focused ? PRIMARY_COLOR : '#323232'}
                             />
                         </View>
                     ),
@@ -113,10 +118,10 @@ const BottomNavBar = () => {
                 component={ChatsScreen}
                 options={{
                     tabBarIcon: ({focused}) => (
-                        <Icon
-                            name="comment-alt"
-                            size={focused ? 36 : 24}
-                            color={focused ? PRIMARY_COLOR : '#999999'}
+                        <Ion
+                            name={focused ? 'chatbox' : 'chatbox-outline'}
+                            size={focused ? 40 : 30}
+                            color={focused ? PRIMARY_COLOR : 'black'}
                             solid={true}
                         />
                     ),
@@ -127,10 +132,10 @@ const BottomNavBar = () => {
                 component={MoreScreen}
                 options={{
                     tabBarIcon: ({focused}) => (
-                        <Icon
-                            name="cog"
-                            size={focused ? 36 : 24}
-                            color={focused ? PRIMARY_COLOR : '#999999'}
+                        <MaterialCom
+                            name={focused ? 'cog' : 'cog-outline'}
+                            size={focused ? 42 : 32}
+                            color={focused ? PRIMARY_COLOR : '#323232'}
                         />
                     ),
                 }}
