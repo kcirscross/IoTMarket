@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import messaging from '@react-native-firebase/messaging'
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import axios from 'axios'
@@ -7,7 +8,7 @@ import {AppState, StyleSheet} from 'react-native'
 import {Provider} from 'react-redux'
 import {API_URL} from './src/components/constants'
 import BottomNavBar from './src/components/utils/BottomNavBar'
-import {HomeScreen} from './src/features/Home'
+import {HomeScreen, NotificationScreen} from './src/features/Home'
 import {
     FollowingScreen,
     OrderDetailScreen,
@@ -54,6 +55,38 @@ export default function App() {
         return () => {
             AppState.removeEventListener('change', _handleAppStateChange)
         }
+    }, [])
+
+    //Handle Background or Quit State Messages of Notification
+    useEffect(() => {
+        messaging().onNotificationOpenedApp(remoteMessage => {
+            console.log(
+                'Notification caused app to open from background state:',
+                remoteMessage.notification,
+            )
+        })
+        messaging()
+            .getInitialNotification()
+            .then(remoteMessage => {
+                if (remoteMessage) {
+                    console.log(
+                        'Notification caused app to open from quit state:',
+                        remoteMessage.notification,
+                    )
+                }
+            })
+    }, [])
+
+    //Handle Foreground State Messages of Notification
+    useEffect(() => {
+        const unsubscribe = messaging().onMessage(async remoteMessage => {
+            console.log(
+                'A new FCM message arrived!',
+                JSON.stringify(remoteMessage),
+            )
+        })
+
+        return unsubscribe
     }, [])
 
     const _handleAppStateChange = async () => {
@@ -177,6 +210,10 @@ export default function App() {
                     <Stack.Screen
                         name="OrderDetail"
                         component={OrderDetailScreen}
+                    />
+                    <Stack.Screen
+                        name="Notification"
+                        component={NotificationScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
