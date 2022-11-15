@@ -30,6 +30,7 @@ import {addFollow, removeFollow} from '../../Users/userSlice'
 import {SimplePaginationDot} from '../components'
 import BottomMenuBar from '../components/BottomMenuBar'
 import {addFavorite, removeFavorite} from '../favoriteSlice'
+import Ant from 'react-native-vector-icons/AntDesign'
 
 const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -338,7 +339,11 @@ const ProductDetail = ({navigation, route}) => {
                                         width: '100%',
                                         height: 250,
                                         borderRadius: 10,
-                                        elevation: 3,
+                                        shadowColor: 'black',
+                                        shadowOffset: {width: -2, height: 4},
+                                        shadowOpacity: 0.5,
+                                        shadowRadius: 3,
+                                        elevation: 10,
                                     }}
                                 />
                             )}
@@ -433,13 +438,43 @@ const ProductDetail = ({navigation, route}) => {
                                                 marginRight: 5,
                                             }}>
                                             {isFollow ? (
-                                                <Text style={{color: 'white'}}>
-                                                    - Follow
-                                                </Text>
+                                                <View
+                                                    style={{
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                    <Ant
+                                                        name="minuscircleo"
+                                                        size={14}
+                                                        color="white"
+                                                    />
+                                                    <Text
+                                                        style={{
+                                                            color: 'white',
+                                                            marginLeft: 5,
+                                                        }}>
+                                                        Follow
+                                                    </Text>
+                                                </View>
                                             ) : (
-                                                <Text style={{color: 'white'}}>
-                                                    + Follow
-                                                </Text>
+                                                <View
+                                                    style={{
+                                                        flexDirection: 'row',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                    <Ant
+                                                        name="pluscircleo"
+                                                        size={14}
+                                                        color="white"
+                                                    />
+                                                    <Text
+                                                        style={{
+                                                            color: 'white',
+                                                            marginLeft: 5,
+                                                        }}>
+                                                        Follow
+                                                    </Text>
+                                                </View>
                                             )}
                                         </TouchableOpacity>
                                     )}
@@ -450,6 +485,7 @@ const ProductDetail = ({navigation, route}) => {
                                             marginRight: 5,
                                             flexDirection: 'row',
                                             marginTop: 5,
+                                            paddingHorizontal: 10,
                                         }}>
                                         <Ion
                                             name="chatbubble-ellipses-outline"

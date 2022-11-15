@@ -9,9 +9,10 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
-import {Avatar} from 'react-native-elements'
+import {Avatar, Divider} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
@@ -119,10 +120,12 @@ const MoreScreen = ({navigation}) => {
                 </View>
             </TouchableOpacity>
 
+            <Divider width={1} color={PRIMARY_COLOR} style={{marginTop: 10}} />
+
             <TouchableOpacity
                 onPress={() => navigation.navigate('Store')}
                 style={styles.container}>
-                <Icon name="store" size={24} color={'orange'} />
+                <MaterialIcon name="storefront" size={28} color="#f7cd4d" />
                 <Text style={styles.textStyle}>My Store</Text>
                 <View style={{flex: 1}} />
                 <Ion name="chevron-forward-outline" size={24} color="black" />
@@ -146,7 +149,7 @@ const MoreScreen = ({navigation}) => {
                         tintColor: 'red',
                     }}
                 />
-                <Text style={styles.textStyle}>My Orders</Text>
+                <Text style={styles.textStyle}>My Order</Text>
                 <View style={{flex: 1}} />
                 <Ion name="chevron-forward-outline" size={24} color="black" />
             </TouchableOpacity>

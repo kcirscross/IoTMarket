@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import {Card} from 'react-native-elements'
 import {globalStyles} from '../../../assets/styles/globalStyles'
+import {PRIMARY_COLOR} from '../../../components/constants'
 
 const ProductItem = ({data, navigation}) => {
     const {price, productName, thumbnailImage, soldCount} = data
@@ -37,8 +38,9 @@ const ProductItem = ({data, navigation}) => {
                         }}>
                         <Text
                             style={{
-                                fontWeight: 'bold',
+                                fontWeight: '600',
                                 color: 'black',
+                                fontSize: 16,
                             }}>
                             {productName}
                         </Text>
@@ -46,17 +48,19 @@ const ProductItem = ({data, navigation}) => {
                         <View
                             style={{
                                 flexDirection: 'row',
+                                marginTop: 5,
                             }}>
                             <Text
                                 style={{
-                                    color: 'red',
+                                    color: 'blue',
+                                    fontWeight: '500',
                                 }}>
                                 {Intl.NumberFormat('en-US').format(price)} đ
                             </Text>
 
                             <View style={{flex: 1}} />
 
-                            <Text>
+                            <Text style={{color: 'black'}}>
                                 Sold:{' '}
                                 {Intl.NumberFormat('en-US').format(soldCount)}
                             </Text>

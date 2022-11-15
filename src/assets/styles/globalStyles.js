@@ -51,8 +51,8 @@ export const globalStyles = StyleSheet.create({
         paddingVertical: 5,
         shadowColor: PRIMARY_COLOR,
         shadowOffset: {width: -2, height: 4},
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.5,
         shadowRadius: 3,
-        elevation: 5,
+        elevation: 10,
     },
 })
