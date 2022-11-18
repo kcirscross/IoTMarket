@@ -1,11 +1,13 @@
-import React from 'react'
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native'
+import React, {useState} from 'react'
+import {View} from 'react-native'
+import {Image, StyleSheet, TouchableOpacity} from 'react-native'
 import Ion from 'react-native-vector-icons/Ionicons'
 
 const UploadImageItem = props => {
     let deleteImage = () => {
         props.onPress(props.imageURI)
     }
+
     return (
         <View style={styles.container} key={props.imageURI}>
             <Image

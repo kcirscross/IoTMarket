@@ -1,4 +1,5 @@
 import ProductItemHorizontal from './components/ProductItemHorizontal'
+import AllReviewScreen from './pages/AllReviewScreen'
 import CartScreen from './pages/CartScreen'
 import PaymentCartScreen from './pages/PaymentCartScreen'
 import PaymentScreen from './pages/PaymentScreen'
@@ -14,4 +15,5 @@ export {
     UploadDetailScreen,
     PaymentScreen,
     PaymentCartScreen,
+    AllReviewScreen,
 }

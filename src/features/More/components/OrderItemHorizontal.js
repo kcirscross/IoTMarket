@@ -149,7 +149,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                                 <Text style={{color: 'black'}}>
                                     {moment(
                                         order.shippingLogs.update_date,
-                                    ).format('Do - MM - YYYY HH:MM')}
+                                    ).format('HH:MM  DD - MM - YYYY ')}
                                 </Text>
                             </View>
                         </View>
@@ -177,12 +177,14 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                         alignItems: 'center',
                         marginTop: 5,
                     }}>
-                    <Text style={{color: 'black'}}>
-                        Expected delivery time:
-                        {moment(order.expected_delivery_time).format(
-                            ' Do - MM - YYYY',
-                        )}
-                    </Text>
+                    {statusDelivery != 'Delivered' && (
+                        <Text style={{color: 'black'}}>
+                            Expected delivery time:
+                            {moment(order.expected_delivery_time).format(
+                                ' DD - MM - YYYY',
+                            )}
+                        </Text>
+                    )}
 
                     <View style={{flex: 1}} />
 
@@ -198,7 +200,11 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
 
                     {statusDelivery == 'Delivered' && (
                         <TouchableOpacity
-                            onPress={handleConfirmReceivedClick}
+                            onPress={() =>
+                                navigation.navigate('Review', {
+                                    _id: order.productsList[0].name,
+                                })
+                            }
                             style={styles.touchStyle}>
                             <Text style={globalStyles.textButton}>Review</Text>
                         </TouchableOpacity>

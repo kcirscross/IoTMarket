@@ -1,9 +1,9 @@
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
-import {RefreshControl} from 'react-native'
 import {
     Dimensions,
     Image,
+    RefreshControl,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -12,8 +12,10 @@ import {
     View,
 } from 'react-native'
 import Carousel from 'react-native-anchor-carousel'
-import {Avatar, Badge, Card} from 'react-native-elements'
+import {Avatar, Badge, Card, Divider, Rating} from 'react-native-elements'
+import * as Progress from 'react-native-progress'
 import Toast from 'react-native-toast-message'
+import Ant from 'react-native-vector-icons/AntDesign'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
@@ -24,13 +26,17 @@ import {
     AVATAR_BORDER,
     convertTime,
     PRIMARY_COLOR,
+    SECONDARY_COLOR,
 } from '../../../components/constants'
-import {patchAPI} from '../../../components/utils/base_API'
+import {getAPI, patchAPI} from '../../../components/utils/base_API'
 import {addFollow, removeFollow} from '../../Users/userSlice'
-import {SimplePaginationDot} from '../components'
+import {
+    ProductItem,
+    ReviewItemHorizontal,
+    SimplePaginationDot,
+} from '../components'
 import BottomMenuBar from '../components/BottomMenuBar'
 import {addFavorite, removeFavorite} from '../favoriteSlice'
-import Ant from 'react-native-vector-icons/AntDesign'
 
 const ProductDetail = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -43,7 +49,7 @@ const ProductDetail = ({navigation, route}) => {
     const [listImages, setListImages] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [favorite, setFavorite] = useState(false)
-    const [ratingValue, setRatingValue] = useState(0)
+    const [rating, setRating] = useState({})
     const [isFollow, setIsFollow] = useState(false)
     const [isOwner, setIsOwner] = useState(false)
 
@@ -51,6 +57,10 @@ const ProductDetail = ({navigation, route}) => {
     const [isStore, setIsStore] = useState(false)
     const [modalBuyVisible, setModalBuyVisible] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
+    const [miniListReview, setMiniListReview] = useState([])
+
+    const [listReview, setListReview] = useState([])
+    const [listProduct, setListProduct] = useState([])
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -87,6 +97,8 @@ const ProductDetail = ({navigation, route}) => {
     //Get Product Detail
     useEffect(() => {
         getProduct()
+
+        getReview()
     }, [])
 
     const getProduct = () => {
@@ -100,7 +112,15 @@ const ProductDetail = ({navigation, route}) => {
                 if (res.status == 200) {
                     setProduct(res.data.product)
                     setListImages(res.data.product.detailImages)
-                    setRatingValue(res.data.product.rating.ratingValue)
+                    setRating(res.data.product.rating)
+
+                    getAPI({
+                        url: `product/category/${res.data.product.categoryId}`,
+                    }).then(
+                        res =>
+                            res.status === 200 &&
+                            setListProduct(res.data.products),
+                    )
 
                     res.data.product.peopleFavoriteThisProduct.forEach(id => {
                         id == currentUser._id && setFavorite(true)
@@ -181,8 +201,28 @@ const ProductDetail = ({navigation, route}) => {
             })
     }
 
+    const getReview = () => {
+        setModalLoading(true)
+        getAPI({url: `review/${_id}`})
+            .then(res => {
+                if (res.status === 200) {
+                    setMiniListReview([
+                        res.data.reviews[0],
+                        res.data.reviews[1],
+                        res.data.reviews[2],
+                    ])
+
+                    setListReview(res.data.reviews)
+
+                    setModalLoading(false)
+                }
+            })
+            .catch(err => console.log('Get Reviews: ', err))
+    }
+
     const onRefresh = () => {
         getProduct()
+        getReview()
 
         setTimeout(() => {
             setRefreshing(false)
@@ -526,35 +566,13 @@ const ProductDetail = ({navigation, route}) => {
                         {Intl.NumberFormat('en-US').format(product.price)} đ
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <Icon
-                            name="star"
-                            size={15}
-                            color="#FA8128"
-                            solid={1 <= ratingValue}
-                        />
-                        <Icon
-                            name="star"
-                            size={15}
-                            color="#FA8128"
-                            solid={2 <= ratingValue}
-                        />
-                        <Icon
-                            name="star"
-                            size={15}
-                            color="#FA8128"
-                            solid={3 <= ratingValue}
-                        />
-                        <Icon
-                            name="star"
-                            size={15}
-                            color="#FA8128"
-                            solid={4 <= ratingValue}
-                        />
-                        <Icon
-                            name="star"
-                            size={15}
-                            color="#FA8128"
-                            solid={5 <= ratingValue}
+                        <Rating
+                            type="custom"
+                            readonly
+                            startingValue={rating.ratingValue}
+                            imageSize={16}
+                            ratingColor="#FA8128"
+                            fractions={false}
                         />
                         <Text
                             style={{
@@ -562,11 +580,12 @@ const ProductDetail = ({navigation, route}) => {
                                 fontSize: 16,
                                 marginLeft: 5,
                             }}>
-                            {ratingValue} | Sold:{' '}
+                            {rating.ratingValue} | Sold:{' '}
                             {Intl.NumberFormat('en-US').format(
                                 product.soldCount,
                             )}
                         </Text>
+
                         <View style={{flex: 1}} />
 
                         {!isOwner && (
@@ -603,13 +622,255 @@ const ProductDetail = ({navigation, route}) => {
                     }}>
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Condition: </Text>
-                        <Text>{product.condition}</Text>
+                        <Text style={{color: 'black'}}>
+                            {product.condition}
+                        </Text>
                     </View>
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Description: </Text>
-                        <Text>{product.description}</Text>
+                        <Text style={{color: 'black'}}>
+                            {product.description}
+                        </Text>
                     </View>
                 </Card>
+
+                <Card
+                    containerStyle={{
+                        ...globalStyles.cardContainer,
+                        marginTop: 5,
+                    }}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-around',
+                            marginBottom: 5,
+                        }}>
+                        <View style={{alignItems: 'center'}}>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    fontWeight: '700',
+                                    fontSize: 20,
+                                    marginVertical: 10,
+                                }}>
+                                {rating.ratingValue}
+                            </Text>
+
+                            <Rating
+                                type="custom"
+                                readonly
+                                startingValue={rating.ratingValue}
+                                imageSize={20}
+                                ratingColor="#FA8128"
+                                fractions={false}
+                            />
+
+                            <Text
+                                style={{color: 'black'}}>{`(${Intl.NumberFormat(
+                                'en-US',
+                            ).format(rating.ratingCount)} reviews)`}</Text>
+                        </View>
+
+                        <Divider
+                            orientation="vertical"
+                            color={PRIMARY_COLOR}
+                            width={1}
+                        />
+
+                        {rating !== undefined && (
+                            <View>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            marginRight: 10,
+                                        }}>
+                                        5
+                                    </Text>
+                                    <Progress.Bar
+                                        animated={false}
+                                        progress={
+                                            rating.fiveStarCount /
+                                                rating.ratingCount || 0
+                                        }
+                                        color={PRIMARY_COLOR}
+                                        unfilledColor={SECONDARY_COLOR}
+                                        borderColor="white"
+                                        useNativeDriver={true}
+                                    />
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            marginRight: 10,
+                                        }}>
+                                        4
+                                    </Text>
+                                    <Progress.Bar
+                                        animated={false}
+                                        progress={
+                                            rating.fourStarCount /
+                                                rating.ratingCount || 0
+                                        }
+                                        color={PRIMARY_COLOR}
+                                        unfilledColor={SECONDARY_COLOR}
+                                        borderColor="white"
+                                    />
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            marginRight: 10,
+                                        }}>
+                                        3
+                                    </Text>
+                                    <Progress.Bar
+                                        animated={false}
+                                        progress={
+                                            rating.threeStarCount /
+                                                rating.ratingCount || 0
+                                        }
+                                        color={PRIMARY_COLOR}
+                                        unfilledColor={SECONDARY_COLOR}
+                                        borderColor="white"
+                                    />
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            marginRight: 10,
+                                        }}>
+                                        2
+                                    </Text>
+                                    <Progress.Bar
+                                        animated={false}
+                                        progress={
+                                            rating.twoStarCount /
+                                                rating.ratingCount || 0
+                                        }
+                                        color={PRIMARY_COLOR}
+                                        unfilledColor={SECONDARY_COLOR}
+                                        borderColor="white"
+                                    />
+                                </View>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Text
+                                        style={{
+                                            color: 'black',
+                                            marginRight: 10,
+                                        }}>
+                                        1
+                                    </Text>
+                                    <Progress.Bar
+                                        animated={false}
+                                        progress={
+                                            rating.oneStarCount /
+                                                rating.ratingCount || 0
+                                        }
+                                        height={10}
+                                        color={PRIMARY_COLOR}
+                                        unfilledColor={SECONDARY_COLOR}
+                                        borderColor="white"
+                                    />
+                                </View>
+                            </View>
+                        )}
+                    </View>
+
+                    <Divider width={1} color={PRIMARY_COLOR} />
+
+                    {miniListReview.map((review, index) => (
+                        <ReviewItemHorizontal
+                            key={index}
+                            navigation={navigation}
+                            review={review}
+                        />
+                    ))}
+
+                    {rating.ratingCount > 3 && (
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate('AllReview', {
+                                    listReview,
+                                })
+                            }
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginTop: 10,
+                            }}>
+                            <Text
+                                style={{
+                                    color: PRIMARY_COLOR,
+                                    fontSize: 16,
+                                    alignSelf: 'center',
+                                }}>
+                                See all {rating.ratingCount} reviews.
+                            </Text>
+
+                            <Ion
+                                name="chevron-forward-outline"
+                                size={20}
+                                color="black"
+                                style={{position: 'absolute', right: 10}}
+                            />
+                        </TouchableOpacity>
+                    )}
+                </Card>
+
+                {listProduct.length > 0 && (
+                    <View style={{marginBottom: 75, marginTop: 5}}>
+                        <Text
+                            style={{
+                                color: 'black',
+                                fontWeight: '700',
+                                fontSize: 18,
+                            }}>
+                            Product In Same Category
+                        </Text>
+
+                        <ScrollView
+                            horizontal
+                            style={{paddingVertical: 5}}
+                            showsHorizontalScrollIndicator={false}>
+                            {listProduct.map((item, index) => (
+                                <ProductItem
+                                    navigation={navigation}
+                                    key={index}
+                                    data={item}
+                                />
+                            ))}
+                        </ScrollView>
+                    </View>
+                )}
             </ScrollView>
             <Toast position="bottom" bottomOffset={70} />
 
