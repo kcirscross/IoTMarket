@@ -13,6 +13,7 @@ import {
     FollowingScreen,
     OrderDetailScreen,
     OrderScreen,
+    ReviewScreen,
     SettingStoreScreen,
     UpdateStoreScreen,
 } from './src/features/More'
@@ -20,6 +21,7 @@ import FavoriteScreen from './src/features/More/pages/FavoriteScreen'
 import MoreScreen from './src/features/More/pages/MoreScreen'
 import StoreScreen from './src/features/More/pages/StoreScreen'
 import {
+    AllReviewScreen,
     CartScreen,
     PaymentCartScreen,
     PaymentScreen,
@@ -214,6 +216,12 @@ export default function App() {
                     <Stack.Screen
                         name="Notification"
                         component={NotificationScreen}
+                    />
+                    <Stack.Screen name="Review" component={ReviewScreen} />
+
+                    <Stack.Screen
+                        name="AllReview"
+                        component={AllReviewScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
