@@ -1,6 +1,8 @@
 import {useIsFocused} from '@react-navigation/native'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Alert,
+    Image,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -66,38 +68,93 @@ const CartScreen = ({navigation}) => {
     }
 
     const handleClearAllClick = () => {
-        let i = 0
-        while (i <= listProducts.length - 1) {
-            setTimeout(async () => {
-                await patchAPI({
-                    url: 'user/removecart',
-                    data: {
-                        productId: listProducts[i - 1].productId._id,
-                        quantity: listProducts[i - 1].quantity,
-                    },
-                }).catch(err => console.log('Remove Cart: ', err))
-            }, 2000)
-            i++
-        }
+        let tempCartList = []
 
-        // tempList.map(product =>
-        //     setTimeout(() => {
-        //         patchAPI({url: 'user/removecart', data: product}).catch(err =>
-        //             console.log('Remove Cart: ', err),
-        //         )
-        //     }, 2000),
-        // )
+        listProducts.map(product =>
+            tempCartList.push({
+                productId: product.productId._id,
+                quantity: product.quantity,
+            }),
+        )
+
+        Alert.alert(
+            'Confirm remove all cart.',
+            'Do you want to remove all cart?',
+            [
+                {
+                    text: 'Yes',
+                    onPress: () => {
+                        setModalLoading(true)
+                        patchAPI({
+                            url: 'user/removecart/',
+                            data: tempCartList,
+                        })
+                            .then(res => {
+                                if (res.status === 200) {
+                                    setModalLoading(false)
+                                    Toast.show({
+                                        text1: 'Removed all cart.',
+                                        type: 'success',
+                                    })
+
+                                    setListProducts([])
+                                }
+                            })
+                            .catch(err => console.log('Delete all: ', err))
+                    },
+                },
+                {
+                    text: 'Cancel',
+                },
+            ],
+        )
+    }
+
+    const handleSelectAllClick = () => {
+        setIsCheckAll(true)
     }
 
     return (
-        <SafeAreaView style={{...globalStyles.container, paddingTop: 5}}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                paddingTop: 5,
+            }}>
             <ModalLoading visible={modalLoading} />
 
-            <TouchableOpacity
-                style={styles.touchStyle}
-                onPress={handleClearAllClick}>
-                <Text style={globalStyles.textButton}>Clear All</Text>
-            </TouchableOpacity>
+            {!modalLoading && listProducts.length === 0 && (
+                <View
+                    style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        marginTop: '50%',
+                    }}>
+                    <Image
+                        source={require('~/assets/images/notfound.png')}
+                        style={{
+                            width: 200,
+                            height: 200,
+                        }}
+                    />
+                    <Text
+                        style={{
+                            marginTop: 10,
+                            color: PRIMARY_COLOR,
+                            fontSize: 20,
+                            fontWeight: '700',
+                        }}>
+                        Your cart is empty.
+                    </Text>
+                </View>
+            )}
+
+            {listProducts.length > 0 && (
+                <TouchableOpacity
+                    style={styles.touchStyle}
+                    onPress={handleClearAllClick}>
+                    <Text style={globalStyles.textButton}>Clear All</Text>
+                </TouchableOpacity>
+            )}
 
             <Toast position="bottom" bottomOffset={70} />
 
