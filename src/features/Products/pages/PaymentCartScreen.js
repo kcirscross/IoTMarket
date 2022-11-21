@@ -1,7 +1,7 @@
 import {useIsFocused} from '@react-navigation/native'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
-import {Alert} from 'react-native'
 import {
+    Alert,
     Image,
     Modal,
     SafeAreaView,
@@ -122,7 +122,7 @@ const PaymentCartScreen = ({navigation, route}) => {
         }
     }
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView style={globalStyles.container}>
             <Card
                 containerStyle={{
@@ -219,7 +219,10 @@ const PaymentCartScreen = ({navigation, route}) => {
             </Card>
 
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <TouchableOpacity
                     onPress={() => setModalDeliveryVisible(true)}
                     style={{marginHorizontal: 5}}>
@@ -252,7 +255,10 @@ const PaymentCartScreen = ({navigation, route}) => {
             </Card>
 
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -481,6 +487,10 @@ const PaymentCartScreen = ({navigation, route}) => {
                 </View>
             </Modal>
         </SafeAreaView>
+    ) : (
+        <View>
+            <ModalLoading visible={modalLoading} />
+        </View>
     )
 }
 
