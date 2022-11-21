@@ -115,7 +115,7 @@ const PaymentScreen = ({navigation, route}) => {
         }
     }
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -197,7 +197,10 @@ const PaymentScreen = ({navigation, route}) => {
             </Card>
 
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <TouchableOpacity
                     onPress={() => setModalDeliveryVisible(true)}
                     style={{marginHorizontal: 5}}>
@@ -230,7 +233,10 @@ const PaymentScreen = ({navigation, route}) => {
             </Card>
 
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{
+                    ...globalStyles.cardContainer,
+                    marginTop: 5,
+                }}>
                 <View
                     style={{
                         flexDirection: 'row',
@@ -466,6 +472,10 @@ const PaymentScreen = ({navigation, route}) => {
                 </View>
             </Modal>
         </SafeAreaView>
+    ) : (
+        <View>
+            <ModalLoading visible={modalLoading} />
+        </View>
     )
 }
 

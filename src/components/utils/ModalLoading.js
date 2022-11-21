@@ -1,5 +1,5 @@
 import React from 'react'
-import {ActivityIndicator, Modal, StyleSheet} from 'react-native'
+import {ActivityIndicator, Modal, StyleSheet, Text, View} from 'react-native'
 import {PRIMARY_COLOR} from '../constants'
 
 const ModalLoading = ({visible}) => {
@@ -9,19 +9,33 @@ const ModalLoading = ({visible}) => {
             visible={visible}
             transparent={true}
             style={styles.modalStyle}>
-            <ActivityIndicator
+            <View
                 style={{
+                    position: 'absolute',
+                    top: '40%',
+                    alignSelf: 'center',
                     backgroundColor: 'white',
                     width: 200,
                     height: 200,
                     borderRadius: 10,
-                    position: 'absolute',
-                    top: '40%',
-                    alignSelf: 'center',
-                }}
-                size={'large'}
-                color={PRIMARY_COLOR}
-            />
+                    alignItems: 'center',
+                }}>
+                <ActivityIndicator
+                    style={{marginTop: '40%'}}
+                    size={'large'}
+                    color={PRIMARY_COLOR}
+                />
+                <Text
+                    style={{
+                        color: PRIMARY_COLOR,
+                        fontWeight: '700',
+                        fontSize: 18,
+                        alignSelf: 'center',
+                        marginVertical: 10,
+                    }}>
+                    Loading...
+                </Text>
+            </View>
         </Modal>
     )
 }

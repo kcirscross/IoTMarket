@@ -1,7 +1,15 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react'
-import {SafeAreaView, ScrollView, StyleSheet, View} from 'react-native'
+import {
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native'
 import {Tab, TabView} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
 import {getAPI} from '../../../components/utils/base_API'
@@ -13,6 +21,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
     const [listProductsSale, setlistProductsSale] = useState([])
     const [listProductsPriceDesc, setListProductsPriceDesc] = useState([])
     const [listProductsPriceAcs, setListProductsPriceAcs] = useState([])
+    const [modalLoading, setModalLoading] = useState(true)
 
     const [index, setIndex] = useState(0)
     const [filter, setFilter] = useState(true)
@@ -31,6 +40,7 @@ const FilterByCategoryScreen = ({navigation, route}) => {
 
     //Get List Products
     useEffect(() => {
+        setModalLoading(true)
         getAPI({
             url: `product/category/${route.params._id}`,
             params: {
@@ -50,23 +60,33 @@ const FilterByCategoryScreen = ({navigation, route}) => {
             },
         })
             .then(res => {
-                index == 0
-                    ? setListProducts(res.data.products)
-                    : index == 1
-                    ? setListProductsNew(res.data.products)
-                    : index == 2
-                    ? setlistProductsSale(res.data.products)
-                    : index == 3
-                    ? filter
-                        ? setListProductsPriceDesc(res.data.products)
+                if (res.status === 200) {
+                    index == 0
+                        ? setListProducts(res.data.products)
+                        : index == 1
+                        ? setListProductsNew(res.data.products)
+                        : index == 2
+                        ? setlistProductsSale(res.data.products)
+                        : index == 3
+                        ? filter
+                            ? setListProductsPriceDesc(res.data.products)
+                            : setListProductsPriceAcs(res.data.products)
                         : setListProductsPriceAcs(res.data.products)
-                    : setListProductsPriceAcs(res.data.products)
+                    setModalLoading(false)
+                }
             })
             .catch(err => console.log('Get List Products: ', err))
     }, [index, filter])
 
-    return (
+    return listProducts.length +
+        listProductsNew.length +
+        listProductsPriceAcs.length +
+        listProductsPriceDesc.length +
+        listProductsSale.length >
+        0 ? (
         <SafeAreaView style={{...globalStyles.container}}>
+            <ModalLoading visible={modalLoading} />
+
             {listProducts.length > 0 ? (
                 <View
                     style={{
@@ -75,7 +95,9 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                     }}>
                     <View style={styles.viewContainer}>
                         <Tab
-                            indicatorStyle={{backgroundColor: PRIMARY_COLOR}}
+                            indicatorStyle={{
+                                backgroundColor: PRIMARY_COLOR,
+                            }}
                             value={index}
                             onChange={setIndex}>
                             <Tab.Item
@@ -253,6 +275,30 @@ const FilterByCategoryScreen = ({navigation, route}) => {
                 <View />
             )}
         </SafeAreaView>
+    ) : (
+        <View
+            style={{
+                flex: 1,
+                alignItems: 'center',
+                marginTop: '50%',
+            }}>
+            <Image
+                source={require('~/assets/images/notfound.png')}
+                style={{
+                    width: 200,
+                    height: 200,
+                }}
+            />
+            <Text
+                style={{
+                    marginTop: 10,
+                    color: PRIMARY_COLOR,
+                    fontSize: 20,
+                    fontWeight: '700',
+                }}>
+                This category is empty.
+            </Text>
+        </View>
     )
 }
 

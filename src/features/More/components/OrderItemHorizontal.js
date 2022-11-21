@@ -8,8 +8,6 @@ import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
 import {getAPI, patchAPI, postAPI} from '../../../components/utils/base_API'
-import Toast from 'react-native-toast-message'
-import ModalLoading from '~/components/utils/ModalLoading'
 
 const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
     const [product, setProduct] = useState([])
@@ -17,11 +15,9 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
     const [isReview, setIsReview] = useState(false)
 
     const currentUser = useSelector(state => state.user)
-    const [modalLoading, setModalLoading] = useState(false)
 
     //Get Product Information
     useEffect(() => {
-        setModalLoading(true)
         getAPI({url: `product/${order.productsList[0].name}`})
             .then(res => {
                 if (res.status === 200) {
@@ -31,13 +27,11 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                         review === order.productsList[0].name &&
                             setIsReview(true)
                     })
-
-                    setModalLoading(false)
                 }
             })
             .catch(err => console.log('Get product: ', err))
 
-        if (order.shippingLogs[0] != undefined) {
+        if (order.shippingLogs.length > 0) {
             switch (order.shippingLogs[order.shippingLogs.length - 1].status) {
                 case 'ready_to_pick':
                     setStatusDelivery('Ready to pick')
@@ -59,12 +53,9 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
             {
                 text: 'Yes',
                 onPress: () => {
-                    setModalLoading(true)
                     postAPI({url: `order/receive/${order._id}`}).then(res => {
                         if (res.status === 200) {
                             sendIndex({index: 1, reload: true})
-
-                            setModalLoading(false)
                         }
                     })
                 },
@@ -96,7 +87,6 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                 ...globalStyles.cardContainer,
                 marginTop: 5,
             }}>
-            <ModalLoading visible={modalLoading} />
             <TouchableOpacity
                 onPress={() =>
                     navigation.navigate('OrderDetail', {_id: order._id})
@@ -182,7 +172,9 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                                 </Text>
                                 <Text style={{color: 'black'}}>
                                     {moment(
-                                        order.shippingLogs.update_date,
+                                        order.shippingLogs[
+                                            order.shippingLogs.length - 1
+                                        ].updated_date,
                                     ).format('HH:MM  DD - MM - YYYY ')}
                                 </Text>
                             </View>
