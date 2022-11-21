@@ -22,27 +22,25 @@ const WebViewPayment = ({navigation, route}) => {
                     if (
                         data.nativeEvent.data.search('vnp_TransactionStatus=00')
                     ) {
+                        route.params.from === 'cart' &&
+                            patchAPI({
+                                url: 'user/removecart/',
+                                data: route.params.data,
+                            })
+                                .then(res => {
+                                    console.log('Remove cart successful.')
+                                })
+                                .catch(err =>
+                                    console.log(
+                                        'Remove Cart After Payment: ',
+                                        err,
+                                    ),
+                                )
+
                         navigation.reset({
                             index: 1,
                             routes: [{name: 'BottomNavBar'}, {name: 'Order'}],
                         })
-
-                        // route.params.from === 'cart' &&
-                        //     route.params.data.forEach(async product => {
-                        //         await patchAPI({
-                        //             url: 'user/removecart',
-                        //             data: product,
-                        //         })
-                        //             .then(res => {
-                        //                 console.log(res.data)
-                        //             })
-                        //             .catch(err =>
-                        //                 console.log(
-                        //                     'Remove Cart After Payment: ',
-                        //                     err,
-                        //                 ),
-                        //             )
-                        //     })
                     } else {
                         navigation.goBack()
                     }
