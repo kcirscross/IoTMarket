@@ -4,20 +4,35 @@ import {Alert, Image, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {View} from 'react-native-animatable'
 import {Card, Divider} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
+import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
-import {getAPI, postAPI} from '../../../components/utils/base_API'
+import {getAPI, patchAPI, postAPI} from '../../../components/utils/base_API'
+import Toast from 'react-native-toast-message'
+import ModalLoading from '~/components/utils/ModalLoading'
 
 const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
     const [product, setProduct] = useState([])
     const [statusDelivery, setStatusDelivery] = useState('')
+    const [isReview, setIsReview] = useState(false)
+
+    const currentUser = useSelector(state => state.user)
+    const [modalLoading, setModalLoading] = useState(false)
 
     //Get Product Information
     useEffect(() => {
+        setModalLoading(true)
         getAPI({url: `product/${order.productsList[0].name}`})
             .then(res => {
                 if (res.status === 200) {
                     setProduct(res.data.product)
+
+                    currentUser.isReview.map(review => {
+                        review === order.productsList[0].name &&
+                            setIsReview(true)
+                    })
+
+                    setModalLoading(false)
                 }
             })
             .catch(err => console.log('Get product: ', err))
@@ -44,9 +59,12 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
             {
                 text: 'Yes',
                 onPress: () => {
+                    setModalLoading(true)
                     postAPI({url: `order/receive/${order._id}`}).then(res => {
                         if (res.status === 200) {
                             sendIndex({index: 1, reload: true})
+
+                            setModalLoading(false)
                         }
                     })
                 },
@@ -57,12 +75,28 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
         ])
     }
 
+    const handleAddCartClick = () => {
+        patchAPI({
+            url: 'user/addcart',
+            data: {
+                productId: product._id,
+                quantity: 1,
+            },
+        })
+            .then(res => res.status === 200 && navigation.navigate('Cart'))
+            .catch(err => {
+                console.log('Add Cart: ', err)
+                Alert.alert('Have something wrong.', 'Please try again later.')
+            })
+    }
+
     return (
         <Card
             containerStyle={{
                 ...globalStyles.cardContainer,
                 marginTop: 5,
             }}>
+            <ModalLoading visible={modalLoading} />
             <TouchableOpacity
                 onPress={() =>
                     navigation.navigate('OrderDetail', {_id: order._id})
@@ -185,9 +219,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                             )}
                         </Text>
                     )}
-
                     <View style={{flex: 1}} />
-
                     {statusDelivery != 'Delivered' && (
                         <TouchableOpacity
                             onPress={handleConfirmReceivedClick}
@@ -197,8 +229,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                             </Text>
                         </TouchableOpacity>
                     )}
-
-                    {statusDelivery == 'Delivered' && (
+                    {!isReview && statusDelivery === 'Delivered' && (
                         <TouchableOpacity
                             onPress={() =>
                                 navigation.navigate('Review', {
@@ -207,6 +238,13 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                             }
                             style={styles.touchStyle}>
                             <Text style={globalStyles.textButton}>Review</Text>
+                        </TouchableOpacity>
+                    )}
+                    {statusDelivery === 'Delivered' && (
+                        <TouchableOpacity
+                            style={{...styles.touchStyle, marginLeft: 10}}
+                            onPress={handleAddCartClick}>
+                            <Text style={styles.textStyle}>Buy Again</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -223,5 +261,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 10,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: '500',
+        fontSize: 18,
     },
 })

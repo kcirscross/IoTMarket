@@ -8,6 +8,7 @@ import {
     View,
 } from 'react-native'
 import {Avatar, Divider, Rating} from 'react-native-elements'
+import Video from 'react-native-video'
 import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
 import {getAPI} from '../../../components/utils/base_API'
 
@@ -94,18 +95,36 @@ const ReviewItemHorizontal = ({navigation, review}) => {
                         contentContainerStyle={{flexDirection: 'row'}}
                         horizontal
                         showsHorizontalScrollIndicator={false}>
-                        {review.videos.length > 0 && <Text>asdf</Text>}
+                        {review.videos.length > 0 && (
+                            <Image
+                                source={{uri: review.videos[0]}}
+                                style={{
+                                    width: 80,
+                                    height: 80,
+                                    backgroundColor: SECONDARY_COLOR,
+                                    borderRadius: 10,
+                                    marginHorizontal: 2,
+                                    borderColor: SECONDARY_COLOR,
+                                    borderWidth: 3,
+                                    margin: 5,
+                                }}
+                                resizeMethod="resize"
+                                resizeMode="contain"
+                            />
+                        )}
                         {review.images.length > 0 &&
                             review.images.map((image, index) => (
                                 <Image
                                     source={{uri: image}}
-                                    key={index}
                                     style={{
                                         width: 80,
                                         height: 80,
                                         backgroundColor: SECONDARY_COLOR,
                                         borderRadius: 10,
                                         marginHorizontal: 2,
+                                        borderColor: SECONDARY_COLOR,
+                                        borderWidth: 3,
+                                        margin: 5,
                                     }}
                                     resizeMethod="resize"
                                     resizeMode="contain"

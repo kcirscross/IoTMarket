@@ -1,6 +1,6 @@
 import firebase from '@react-native-firebase/app'
 import storage from '@react-native-firebase/storage'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Image,
     Keyboard,
@@ -14,21 +14,22 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native'
-import { Card, Input, Rating } from 'react-native-elements'
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker'
+import {Card, Input, Rating} from 'react-native-elements'
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Toast from 'react-native-toast-message'
 import Ant from 'react-native-vector-icons/AntDesign'
 import Ent from 'react-native-vector-icons/Entypo'
 import Ion from 'react-native-vector-icons/Ionicons'
 import Video from 'react-native-video'
-import { useSelector } from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
-import { globalStyles } from '../../../assets/styles/globalStyles'
-import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../components/constants'
-import { getAPI, postAPI } from '../../../components/utils/base_API'
+import {globalStyles} from '../../../assets/styles/globalStyles'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {getAPI, postAPI} from '../../../components/utils/base_API'
 import UploadImageItem from '../../Products/components/UploadImageItem'
+import {addReview} from '../../Users/userSlice'
 
-const ReviewScreen = ({ navigation, route }) => {
+const ReviewScreen = ({navigation, route}) => {
     const [product, setProduct] = useState([])
     const [rate, setRate] = useState(5)
     const review = ['Terrible', 'Bad', 'Okay', 'Good', 'Great']
@@ -41,11 +42,12 @@ const ReviewScreen = ({ navigation, route }) => {
     const [modalLoading, setModalLoading] = useState(false)
 
     const currentUser = useSelector(state => state.user)
+    const dispatch = useDispatch()
 
     useLayoutEffect(() => {
         navigation.setOptions({
             title: 'Review',
-            headerStyle: { backgroundColor: PRIMARY_COLOR },
+            headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
             headerBackTitleStyle: {
@@ -57,7 +59,7 @@ const ReviewScreen = ({ navigation, route }) => {
     //Get Product
     useEffect(() => {
         setModalLoading(true)
-        getAPI({ url: `product/${route.params._id}` })
+        getAPI({url: `product/${route.params._id}`})
             .then(res => {
                 if (res.status === 200) {
                     setProduct(res.data.product)
@@ -136,17 +138,19 @@ const ReviewScreen = ({ navigation, route }) => {
                                             index
                                         ].substring(
                                             listImages[index].lastIndexOf('/') +
-                                            1,
+                                                1,
                                         )}`,
                                     )
                                     .getDownloadURL()
                                 list.push(result)
-                            }).then(() => {
+                            })
+                            .then(() => {
                                 if (videoPath.length > 0) {
                                     storage()
                                         .ref(
                                             `${filePath}/video/${videoPath[0].substring(
-                                                videoPath[0].lastIndexOf('/') + 1,
+                                                videoPath[0].lastIndexOf('/') +
+                                                    1,
                                             )}`,
                                         )
                                         .putFile(videoPath[0])
@@ -155,61 +159,95 @@ const ReviewScreen = ({ navigation, route }) => {
                                                 .storage()
                                                 .ref(
                                                     `${filePath}/video/${videoPath[0].substring(
-                                                        videoPath[0].lastIndexOf('/') + 1,
+                                                        videoPath[0].lastIndexOf(
+                                                            '/',
+                                                        ) + 1,
                                                     )}`,
                                                 )
                                                 .getDownloadURL()
-                                                .then(uri =>
-                                                    videoUri = uri
-                                                ).then(() => postAPI({
-                                                    url: `review/${route.params._id}`, data: {
-                                                        content: contentReview,
-                                                        starPoints: rate,
-                                                        images: list,
-                                                        videos: videoUri
-                                                    }
-                                                })
-                                                    .then(res => {
-                                                        if (res.status === 200) {
-                                                            Toast.show({
-                                                                text1: 'Your review is uploaded.',
-                                                                type: 'success'
-                                                            })
-
-                                                            setTimeout(() => {
-                                                                navigation.replace('ProductDetail', { _id: route.params._id })
-                                                            }, 1000);
-                                                        }
+                                                .then(uri => (videoUri = uri))
+                                                .then(() =>
+                                                    postAPI({
+                                                        url: `review/${route.params._id}`,
+                                                        data: {
+                                                            content:
+                                                                contentReview,
+                                                            starPoints: rate,
+                                                            images: list,
+                                                            videos: videoUri,
+                                                        },
                                                     })
-                                                    .catch(err => console.log(err)))
+                                                        .then(res => {
+                                                            if (
+                                                                res.status ===
+                                                                200
+                                                            ) {
+                                                                Toast.show({
+                                                                    text1: 'Your review is uploaded.',
+                                                                    type: 'success',
+                                                                })
+
+                                                                dispatch(
+                                                                    addReview(
+                                                                        route
+                                                                            .params
+                                                                            ._id,
+                                                                    ),
+                                                                )
+
+                                                                setTimeout(
+                                                                    () => {
+                                                                        navigation.replace(
+                                                                            'ProductDetail',
+                                                                            {
+                                                                                _id: route
+                                                                                    .params
+                                                                                    ._id,
+                                                                            },
+                                                                        )
+                                                                    },
+                                                                    1000,
+                                                                )
+                                                            }
+                                                        })
+                                                        .catch(err =>
+                                                            console.log(err),
+                                                        ),
+                                                )
                                         })
                                 } else {
                                     postAPI({
-                                        url: `review/${route.params._id}`, data: {
+                                        url: `review/${route.params._id}`,
+                                        data: {
                                             content: contentReview,
                                             starPoints: rate,
                                             images: list,
-                                            videos: videoUri
-                                        }
+                                            videos: videoUri,
+                                        },
                                     })
                                         .then(res => {
                                             if (res.status === 200) {
                                                 Toast.show({
                                                     text1: 'Your review is uploaded.',
-                                                    type: 'success'
+                                                    type: 'success',
                                                 })
 
+                                                dispatch(
+                                                    addReview(route.params._id),
+                                                )
+
                                                 setTimeout(() => {
-                                                    navigation.replace('ProductDetail', { _id: route.params._id })
-                                                }, 1000);
+                                                    navigation.replace(
+                                                        'ProductDetail',
+                                                        {_id: route.params._id},
+                                                    )
+                                                }, 1000)
                                             }
                                         })
                                         .catch(err => console.log(err))
                                 }
                             })
                     })
-
-
                 } else {
                     if (videoPath.length > 0) {
                         storage()
@@ -229,35 +267,43 @@ const ReviewScreen = ({ navigation, route }) => {
                                     )
                                     .getDownloadURL()
                             })
-                            .then(uri => videoUri = uri)
-                            .then(() => postAPI({
-                                url: `review/${route.params._id}`, data: {
-                                    content: contentReview,
-                                    starPoints: rate,
-                                    images: list,
-                                    videos: videoUri
-                                }
-                            })
-                                .then(res => {
-                                    if (res.status === 200) {
-                                        Toast.show({
-                                            text1: 'Your review is uploaded.',
-                                            type: 'success'
-                                        })
-
-                                        setTimeout(() => {
-                                            navigation.replace('ProductDetail', { _id: route.params._id })
-                                        }, 1000);
-                                    }
+                            .then(uri => (videoUri = uri))
+                            .then(() =>
+                                postAPI({
+                                    url: `review/${route.params._id}`,
+                                    data: {
+                                        content: contentReview,
+                                        starPoints: rate,
+                                        images: list,
+                                        videos: videoUri,
+                                    },
                                 })
-                                .catch(err => console.log(err)))
+                                    .then(res => {
+                                        if (res.status === 200) {
+                                            dispatch(
+                                                addReview(route.params._id),
+                                            )
+
+                                            Toast.show({
+                                                text1: 'Your review is uploaded.',
+                                                type: 'success',
+                                            })
+
+                                            setTimeout(() => {
+                                                navigation.replace(
+                                                    'ProductDetail',
+                                                    {_id: route.params._id},
+                                                )
+                                            }, 1000)
+                                        }
+                                    })
+                                    .catch(err => console.log(err)),
+                            )
                     }
                 }
             } catch (error) {
                 console.log(error)
             }
-
-
         }
     }
 
@@ -267,21 +313,21 @@ const ReviewScreen = ({ navigation, route }) => {
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <KeyboardAvoidingView>
                         <ScrollView showsVerticalScrollIndicator={false}>
-
                             <Card
                                 containerStyle={{
                                     ...globalStyles.cardContainer,
                                     marginTop: 10,
                                 }}>
-                                <View style={{ flexDirection: 'row' }}>
+                                <View style={{flexDirection: 'row'}}>
                                     <Image
-                                        source={{ uri: product.thumbnailImage }}
-                                        style={{ width: 70, height: 70 }}
+                                        source={{uri: product.thumbnailImage}}
+                                        style={{width: 70, height: 70}}
                                         resizeMethod="resize"
                                         resizeMode="contain"
                                     />
 
-                                    <View style={{ marginTop: 10, marginLeft: 10 }}>
+                                    <View
+                                        style={{marginTop: 10, marginLeft: 10}}>
                                         <Text
                                             style={{
                                                 color: 'black',
@@ -290,7 +336,7 @@ const ReviewScreen = ({ navigation, route }) => {
                                             }}>
                                             {product.productName}
                                         </Text>
-                                        <Text style={{ color: 'black' }}>
+                                        <Text style={{color: 'black'}}>
                                             {product.description}
                                         </Text>
                                     </View>
@@ -358,7 +404,7 @@ const ReviewScreen = ({ navigation, route }) => {
                                             color={'black'}
                                             size={64}
                                         />
-                                        <Text style={{ color: 'black' }}>
+                                        <Text style={{color: 'black'}}>
                                             Add Picture: {listImages.length}/5
                                         </Text>
                                     </TouchableOpacity>
@@ -375,7 +421,7 @@ const ReviewScreen = ({ navigation, route }) => {
                                             color={'black'}
                                             size={64}
                                         />
-                                        <Text style={{ color: 'black' }}>
+                                        <Text style={{color: 'black'}}>
                                             Add Video: {videoPath.length}/1
                                         </Text>
                                     </TouchableOpacity>
@@ -396,10 +442,10 @@ const ReviewScreen = ({ navigation, route }) => {
                                                         SECONDARY_COLOR,
                                                     borderRadius: 10,
                                                     marginLeft: 0,
-                                                    marginRight: 8
+                                                    marginRight: 8,
                                                 }}>
                                                 <TouchableOpacity
-                                                    style={{ zIndex: 1 }}
+                                                    style={{zIndex: 1}}
                                                     onPress={() => {
                                                         setVideoPath([])
                                                     }}>
@@ -408,14 +454,15 @@ const ReviewScreen = ({ navigation, route }) => {
                                                         size={24}
                                                         color="black"
                                                         style={{
-                                                            position: 'absolute',
+                                                            position:
+                                                                'absolute',
                                                             right: 0,
                                                         }}
                                                     />
                                                 </TouchableOpacity>
 
                                                 <Video
-                                                    source={{ uri: videoPath[0] }}
+                                                    source={{uri: videoPath[0]}}
                                                     style={{
                                                         width: 150,
                                                         height: 120,
@@ -434,7 +481,8 @@ const ReviewScreen = ({ navigation, route }) => {
                                                         flexDirection: 'row',
                                                         position: 'absolute',
                                                         bottom: 0,
-                                                        backgroundColor: '#666666',
+                                                        backgroundColor:
+                                                            '#666666',
                                                         width: '100%',
                                                         opacity: 0.8,
                                                         alignItems: 'center',
@@ -472,7 +520,7 @@ const ReviewScreen = ({ navigation, route }) => {
 
                             <Input
                                 label="Your Review"
-                                labelStyle={{ color: 'black' }}
+                                labelStyle={{color: 'black'}}
                                 containerStyle={styles.textContainer}
                                 inputContainerStyle={{
                                     borderBottomWidth: 0,
@@ -492,7 +540,7 @@ const ReviewScreen = ({ navigation, route }) => {
                                 multiline={true}
                             />
 
-                            <View style={{ flex: 1 }} />
+                            <View style={{flex: 1}} />
 
                             <TouchableOpacity
                                 onPress={handleUploadReviewClick}
@@ -530,7 +578,7 @@ const ReviewScreen = ({ navigation, route }) => {
                                                 Choose your {typePick} from?
                                             </Text>
 
-                                            <View style={{ flex: 1 }} />
+                                            <View style={{flex: 1}} />
 
                                             <TouchableOpacity
                                                 onPress={() =>
@@ -596,9 +644,8 @@ const ReviewScreen = ({ navigation, route }) => {
                 </TouchableWithoutFeedback>
             ) : (
                 <ModalLoading visible={modalLoading} />
-            )
-            }
-        </SafeAreaView >
+            )}
+        </SafeAreaView>
     )
 }
 
