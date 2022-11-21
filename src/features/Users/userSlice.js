@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import {createSlice} from '@reduxjs/toolkit'
 
 export const userSlice = createSlice({
     name: 'user',
@@ -54,6 +54,13 @@ export const userSlice = createSlice({
             updatedUser.follows = listFollow.filter(id => id !== action.payload)
             return updatedUser
         },
+
+        addReview: (state, action) => {
+            updatedUser = state
+            updatedUser.isReview.push(action.payload)
+
+            return updatedUser
+        },
     },
 })
 
@@ -68,6 +75,7 @@ export const {
     updateOnlineStatus,
     addFollow,
     removeFollow,
+    addReview,
 } = userSlice.actions
 
 export default userSlice.reducer
