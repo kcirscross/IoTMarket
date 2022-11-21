@@ -85,35 +85,36 @@ const OrderDetailScreen = ({navigation, route}) => {
                             })
                             .catch(err => console.log('Get Product', err))
                     })
+                    setModalLoading(false)
                 }
             })
             .catch(err => console.log('Get Order: ', err))
     }, [])
 
-    // const handleAddCartClick = () => {
-    //     productList.map((product, index) => {
-    //         patchAPI({
-    //             url: 'user/addcart',
-    //             data: {
-    //                 productId: product.product._id,
-    //                 quantity: product.quantity,
-    //             },
-    //         })
-    //             .then(
-    //                 res =>
-    //                     res.status === 200 &&
-    //                     productList.length - 1 === index &&
-    //                     navigation.navigate('Cart'),
-    //             )
-    //             .catch(err => {
-    //                 console.log('Add Cart: ', err)
-    //                 Toast.show({
-    //                     type: 'error',
-    //                     text1: 'Out of product, please try again later.',
-    //                 })
-    //             })
-    //     })
-    // }
+    const handleAddCartClick = () => {
+        productList.map((product, index) => {
+            patchAPI({
+                url: 'user/addcart',
+                data: {
+                    productId: product.product._id,
+                    quantity: product.quantity,
+                },
+            })
+                .then(
+                    res =>
+                        res.status === 200 &&
+                        productList.length - 1 === index &&
+                        navigation.navigate('Cart'),
+                )
+                .catch(err => {
+                    console.log('Add Cart: ', err)
+                    Toast.show({
+                        type: 'error',
+                        text1: 'Out of product, please try again later.',
+                    })
+                })
+        })
+    }
 
     const handleConfirmReceivedClick = () => {
         Alert.alert('Confirm Received', 'Did you receive your product?', [
@@ -176,9 +177,11 @@ const OrderDetailScreen = ({navigation, route}) => {
                                 {statusDelivery}
                             </Text>
                             <Text style={{color: 'black'}}>
-                                {moment(order.shippingLogs.update_date).format(
-                                    'Do - MM - YYYY HH:MM',
-                                )}
+                                {moment(
+                                    order.shippingLogs[
+                                        order.shippingLogs.length - 1
+                                    ].updated_date,
+                                ).format('HH:MM  DD - MM - YYYY ')}
                             </Text>
                         </View>
                     </View>

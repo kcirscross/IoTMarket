@@ -37,12 +37,14 @@ const ProductItem = ({data, navigation}) => {
                             paddingLeft: 10,
                         }}>
                         <Text
+                            ellipsizeMode="tail"
+                            numberOfLines={2}
                             style={{
                                 fontWeight: '600',
                                 color: 'black',
                                 fontSize: 16,
                             }}>
-                            {productName}
+                            {productName + `\n`}
                         </Text>
 
                         <View

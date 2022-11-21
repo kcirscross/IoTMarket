@@ -10,6 +10,7 @@ import {
 import {Avatar, Badge, Card, Tab, TabView} from 'react-native-elements'
 import Toast from 'react-native-toast-message'
 import Ion from 'react-native-vector-icons/Ionicons'
+import Ant from 'react-native-vector-icons/AntDesign'
 import {useDispatch, useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
@@ -264,9 +265,45 @@ const StoreProfileScreen = ({navigation, route}) => {
                                         : PRIMARY_COLOR,
                                     marginRight: 5,
                                 }}>
-                                <Text style={{color: 'white'}}>
-                                    {isFollow ? '- Follow' : '+ Follow'}
-                                </Text>
+                                {isFollow ? (
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                        }}>
+                                        <Ant
+                                            name="minuscircleo"
+                                            size={14}
+                                            color="white"
+                                        />
+                                        <Text
+                                            style={{
+                                                color: 'white',
+                                                marginLeft: 5,
+                                            }}>
+                                            Follow
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                        }}>
+                                        <Ant
+                                            name="pluscircleo"
+                                            size={14}
+                                            color="white"
+                                        />
+                                        <Text
+                                            style={{
+                                                color: 'white',
+                                                marginLeft: 5,
+                                            }}>
+                                            Follow
+                                        </Text>
+                                    </View>
+                                )}
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -282,7 +319,9 @@ const StoreProfileScreen = ({navigation, route}) => {
                                     size={18}
                                     color="white"
                                 />
-                                <Text style={{color: 'white'}}> Chat</Text>
+                                <Text style={{color: 'white'}}>
+                                    {'  Chat  '}
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -755,6 +794,7 @@ const StoreProfileScreen = ({navigation, route}) => {
                             }}
                             style={{
                                 paddingVertical: 5,
+                                paddingBottom: 20,
                             }}>
                             {filter
                                 ? listProductsPriceDesc.map((data, index) => (
