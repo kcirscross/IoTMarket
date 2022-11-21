@@ -39,11 +39,13 @@ const ProductItemHorizontal = ({navigation, product, type, onPress}) => {
 
     const removeCart = amount => {
         patchAPI({
-            url: 'user/removecart',
-            data: {
-                productId: product.productId._id,
-                quantity: amount,
-            },
+            url: 'user/removecart/',
+            data: [
+                {
+                    productId: product.productId._id,
+                    quantity: amount,
+                },
+            ],
         })
             .then(res => {
                 if (res.status === 200) {
