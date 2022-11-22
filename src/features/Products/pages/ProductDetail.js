@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Alert,
     Dimensions,
     Image,
     RefreshControl,
@@ -22,6 +23,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
+    AlertForSignIn,
     API_URL,
     AVATAR_BORDER,
     convertTime,
@@ -74,7 +76,11 @@ const ProductDetail = ({navigation, route}) => {
             headerRight: () => (
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Favorite')}
+                        onPress={() => {
+                            Object.keys(currentUser).length !== 0
+                                ? navigation.navigate('Favorite')
+                                : AlertForSignIn()
+                        }}
                         style={{
                             marginRight: 5,
                         }}>
@@ -86,7 +92,11 @@ const ProductDetail = ({navigation, route}) => {
                         />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Cart')}>
+                        onPress={() => {
+                            Object.keys(currentUser).length !== 0
+                                ? navigation.navigate('Cart')
+                                : AlertForSignIn()
+                        }}>
                         <Ion name="cart-outline" size={30} color="white" />
                     </TouchableOpacity>
                 </View>
@@ -234,86 +244,92 @@ const ProductDetail = ({navigation, route}) => {
     }
 
     const handleAddCartClick = () => {
-        patchAPI({
-            url: 'user/addcart',
-            data: {
-                productId: _id,
-                quantity: 1,
-            },
-        })
-            .then(
-                res =>
-                    res.status === 200 &&
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Added to cart.',
-                    }),
-            )
-            .catch(err => console.log('Add Cart: ', err))
+        Object.keys(currentUser).length !== 0
+            ? patchAPI({
+                  url: 'user/addcart',
+                  data: {
+                      productId: _id,
+                      quantity: 1,
+                  },
+              })
+                  .then(
+                      res =>
+                          res.status === 200 &&
+                          Toast.show({
+                              type: 'success',
+                              text1: 'Added to cart.',
+                          }),
+                  )
+                  .catch(err => console.log('Add Cart: ', err))
+            : AlertForSignIn()
     }
 
     const handleFavoriteClick = () => {
-        !favorite
-            ? patchAPI({url: `user/favorite/${_id}`})
-                  .then(res => {
-                      if (res.status === 200) {
-                          setFavorite(!favorite)
+        Object.keys(currentUser).length !== 0
+            ? !favorite
+                ? patchAPI({url: `user/favorite/${_id}`})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setFavorite(!favorite)
 
-                          Toast.show({
-                              type: 'success',
-                              text1: 'Added to your favorite.',
-                          })
+                              Toast.show({
+                                  type: 'success',
+                                  text1: 'Added to your favorite.',
+                              })
 
-                          dispatch(addFavorite(product))
-                      }
-                  })
-                  .catch(err => console.log('Add Favorite: ', err))
-            : patchAPI({url: `user/unfavorite/${_id}`})
-                  .then(res => {
-                      if (res.status === 200) {
-                          setFavorite(false)
+                              dispatch(addFavorite(product))
+                          }
+                      })
+                      .catch(err => console.log('Add Favorite: ', err))
+                : patchAPI({url: `user/unfavorite/${_id}`})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setFavorite(false)
 
-                          Toast.show({
-                              type: 'success',
-                              text1: 'Removed from your favorite.',
-                          })
+                              Toast.show({
+                                  type: 'success',
+                                  text1: 'Removed from your favorite.',
+                              })
 
-                          dispatch(removeFavorite(product._id))
-                      }
-                  })
-                  .catch(err => console.log('Remove Favorite: ', err))
+                              dispatch(removeFavorite(product._id))
+                          }
+                      })
+                      .catch(err => console.log('Remove Favorite: ', err))
+            : AlertForSignIn()
     }
 
     const handleFollowClick = () => {
-        !isFollow
-            ? patchAPI({url: `user/follow/${productOwner.storeId}`})
-                  .then(res => {
-                      if (res.status === 200) {
-                          setIsFollow(true)
+        Object.keys(currentUser) !== 0
+            ? !isFollow
+                ? patchAPI({url: `user/follow/${productOwner.storeId}`})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setIsFollow(true)
 
-                          Toast.show({
-                              type: 'success',
-                              text1: 'Followed',
-                          })
+                              Toast.show({
+                                  type: 'success',
+                                  text1: 'Followed',
+                              })
 
-                          dispatch(addFollow(productOwner.storeId))
-                      }
-                  })
-                  .catch(err => console.log('Follow: ', err))
-            : patchAPI({url: `unfollow/${productOwner.storeId}`})
-                  .then(res => {
-                      if (res.status === 200) {
-                          setIsFollow(false)
+                              dispatch(addFollow(productOwner.storeId))
+                          }
+                      })
+                      .catch(err => console.log('Follow: ', err))
+                : patchAPI({url: `unfollow/${productOwner.storeId}`})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setIsFollow(false)
 
-                          Toast.show({
-                              type: 'success',
-                              text1: 'Unfollowed',
-                          })
+                              Toast.show({
+                                  type: 'success',
+                                  text1: 'Unfollowed',
+                              })
 
-                          dispatch(removeFollow(productOwner.storeId))
-                      }
-                  })
-                  .catch(err => console.log('Unfollow: ', err))
+                              dispatch(removeFollow(productOwner.storeId))
+                          }
+                      })
+                      .catch(err => console.log('Unfollow: ', err))
+            : AlertForSignIn()
     }
 
     const setVisible = isVisible => {

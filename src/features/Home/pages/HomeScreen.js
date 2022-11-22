@@ -1,6 +1,7 @@
 import {useIsFocused} from '@react-navigation/native'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Dimensions,
     FlatList,
     RefreshControl,
     SafeAreaView,
@@ -10,11 +11,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
-import {Badge, Input} from 'react-native-elements'
+import {Badge, SearchBar} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import {AlertForSignIn, PRIMARY_COLOR} from '../../../components/constants'
 import {getAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../../Products/components'
 import {CategoryItem} from '../components'
@@ -28,6 +29,9 @@ const HomeScreen = ({navigation}) => {
     const [total, setTotal] = useState(0)
     const isFocus = useIsFocused()
     const [loading, setLoading] = useState(true)
+    const [searchValue, setSearchValue] = useState('')
+
+    let diviceWidth = Dimensions.get('window').width
 
     //Get Products and Categories, Get Total of Notification
     useEffect(() => {
@@ -39,14 +43,15 @@ const HomeScreen = ({navigation}) => {
             res => res.status === 200 && setListCategories(res.data.categories),
         )
 
-        getAPI({url: 'noti'})
-            .then(res => {
-                if (res.status === 200) {
-                    setTotal(res.data.notifications.length)
-                    setLoading(false)
-                }
-            })
-            .catch(err => console.log('Get Notification: ', err))
+        Object.keys(currentUser).length !== 0 &&
+            getAPI({url: 'noti'})
+                .then(res => {
+                    if (res.status === 200) {
+                        setTotal(res.data.notifications.length)
+                        setLoading(false)
+                    }
+                })
+                .catch(err => console.log('Get Notification: ', err))
     }, [isFocus])
 
     const onRefresh = () => {
@@ -68,59 +73,88 @@ const HomeScreen = ({navigation}) => {
             headerTitle: () => (
                 <View
                     style={{
-                        width: 315,
                         alignItems: 'center',
-                        justifyContent: 'center',
                         flexDirection: 'row',
+                        width: diviceWidth,
                     }}>
-                    <Input
+                    <SearchBar
                         placeholder="Search..."
-                        inputContainerStyle={{
+                        onChangeText={text => setSearchValue(text)}
+                        value={searchValue}
+                        containerStyle={{
+                            backgroundColor: PRIMARY_COLOR,
+                            borderColor: PRIMARY_COLOR,
+                            borderTopWidth: 0,
                             borderBottomWidth: 0,
+                            flex: 1,
+                            padding: 0,
+                            margin: 0,
+                            marginTop: 5,
+                            alignItems: 'center',
                         }}
-                        style={{
+                        inputContainerStyle={{
                             backgroundColor: 'white',
-                            borderRadius: 10,
-                            marginTop: 25,
+                            borderColor: PRIMARY_COLOR,
+                            height: '90%',
+                            alignItems: 'center',
+                        }}
+                        inputStyle={{
+                            color: 'black',
                         }}
                     />
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Cart')}
+
+                    <View
                         style={{
-                            marginLeft: 5,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            flex: 0.3,
                         }}>
-                        <Ion name="cart-outline" size={30} color="white" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{marginLeft: 10}}
-                        onPress={() => navigation.navigate('Notification')}>
-                        <Ion
-                            name="notifications-outline"
-                            size={26}
-                            color="white"
-                        />
-                        <Badge
-                            value={
-                                <Text
-                                    style={{
-                                        alignSelf: 'center',
-                                        justifyContent: 'center',
-                                        color: 'white',
-                                        fontSize: 12,
-                                    }}>
-                                    {total < 100 ? total : '99+'}
-                                </Text>
-                            }
-                            status="error"
-                            containerStyle={{
-                                position: 'absolute',
-                                bottom: -5,
-                                right: -5,
-                                padding: 2,
-                                display: total <= 0 ? 'none' : 'flex',
+                        <TouchableOpacity
+                            onPress={() => {
+                                Object.keys(currentUser).length !== 0
+                                    ? navigation.navigate('Cart')
+                                    : AlertForSignIn()
                             }}
-                        />
-                    </TouchableOpacity>
+                            style={{
+                                marginLeft: 5,
+                            }}>
+                            <Ion name="cart-outline" size={30} color="white" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{marginLeft: 10}}
+                            onPress={() => {
+                                Object.keys(currentUser).length !== 0
+                                    ? navigation.navigate('Notification')
+                                    : AlertForSignIn()
+                            }}>
+                            <Ion
+                                name="notifications-outline"
+                                size={26}
+                                color="white"
+                            />
+                            <Badge
+                                value={
+                                    <Text
+                                        style={{
+                                            alignSelf: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontSize: 12,
+                                        }}>
+                                        {total < 100 ? total : '99+'}
+                                    </Text>
+                                }
+                                status="error"
+                                containerStyle={{
+                                    position: 'absolute',
+                                    bottom: -5,
+                                    right: -5,
+                                    padding: 2,
+                                    display: total <= 0 ? 'none' : 'flex',
+                                }}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             ),
         })

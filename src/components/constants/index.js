@@ -1,3 +1,5 @@
+import {Alert} from 'react-native'
+
 const PRIMARY_COLOR = '#63A1FF'
 const SECONDARY_COLOR = '#F7F8F8'
 const API_URL = 'https://iotmarket.herokuapp.com/api/v1'
@@ -23,6 +25,18 @@ const convertTime = ms => {
     }
 }
 
+const AlertForSignIn = () => {
+    Alert.alert('You must sign in for this function.', 'Go to sign in?', [
+        {
+            text: 'Yes',
+            onPress: () => navigation.navigate('SignIn'),
+        },
+        {
+            text: 'Cancel',
+        },
+    ])
+}
+
 export {
     PRIMARY_COLOR,
     SECONDARY_COLOR,
@@ -31,4 +45,5 @@ export {
     AVATAR_BORDER,
     convertTime,
     WEB_CLIENT_ID,
+    AlertForSignIn,
 }

@@ -22,6 +22,7 @@ import {
 import {getAPI, patchAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../../Products/components'
 import {addFollow, removeFollow} from '../userSlice'
+import ModalLoading from '~/components/utils/ModalLoading'
 
 const StoreProfileScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -32,11 +33,10 @@ const StoreProfileScreen = ({navigation, route}) => {
     const storeInfo = route.params.store
     const ownerInfo = route.params.ownerInfo
     const [isFollow, setIsFollow] = useState(true)
-
     const [loading, setLoading] = useState(true)
-
     const [index, setIndex] = useState(0)
     const [filter, setFilter] = useState(true)
+    const [modalLoading, setModalLoading] = useState(true)
 
     const [listProducts, setlistProducts] = useState([])
     const [listProductsNew, setListProductsNew] = useState([])
@@ -124,6 +124,7 @@ const StoreProfileScreen = ({navigation, route}) => {
                               : setListProductsPriceAsc(res.data.products)
 
                           setLoading(false)
+                          setModalLoading(false)
                       }
                   })
                   .catch(err => console.log('Get Store Items: ', err))
@@ -160,6 +161,7 @@ const StoreProfileScreen = ({navigation, route}) => {
                               : setListProductsPriceAsc(res.data.products)
 
                           setLoading(false)
+                          setModalLoading(false)
                       }
                   })
                   .catch(err => console.log('Get User Items: ', err))
@@ -817,7 +819,9 @@ const StoreProfileScreen = ({navigation, route}) => {
             </SafeAreaView>
         )
     ) : (
-        <View />
+        <View>
+            <ModalLoading visible={modalLoading} />
+        </View>
     )
 }
 

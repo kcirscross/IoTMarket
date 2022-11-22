@@ -1,11 +1,19 @@
 import React from 'react'
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
+import {useSelector} from 'react-redux'
+import {AlertForSignIn} from '../../../components/constants'
 
 const CategoryItemHorizontal = ({category, navigation}) => {
+    const currentUser = useSelector(state => state.user)
+
     return (
         <TouchableOpacity
-            onPress={() => navigation.navigate('UploadDetail', category)}
+            onPress={() => {
+                Object.keys(currentUser).length !== 0
+                    ? navigation.navigate('UploadDetail', category)
+                    : AlertForSignIn()
+            }}
             style={{
                 flexDirection: 'row',
                 alignItems: 'center',

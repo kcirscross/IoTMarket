@@ -1,5 +1,12 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react'
-import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native'
+import {
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
 import {Avatar, Badge, Card, Tab, TabView} from 'react-native-elements'
 import Toast from 'react-native-toast-message'
 import Ion from 'react-native-vector-icons/Ionicons'
@@ -7,6 +14,7 @@ import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
+    AlertForSignIn,
     AVATAR_BORDER,
     convertTime,
     PRIMARY_COLOR,
@@ -44,44 +52,46 @@ const ProfileScreen = ({navigation, route}) => {
     }, [])
 
     useEffect(() => {
-        getAPI({
-            url: 'product/me',
-            params: {
-                sortBy: `${
-                    index == 0
-                        ? 'pop'
-                        : index == 1
-                        ? 'new'
-                        : index == 2
-                        ? 'sale'
-                        : index == 3
-                        ? filter
-                            ? 'pricedesc'
-                            : 'priceacs'
-                        : ''
-                }`,
-            },
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    index == 0
-                        ? setMyProductsList(res.data.products)
-                        : index == 1
-                        ? setMyProductListNew(res.data.products)
-                        : index == 2
-                        ? setMyProductListSale(res.data.products)
-                        : index == 3
-                        ? filter
-                            ? setMyProductLisPriceDesc(res.data.products)
-                            : setMyProductLisPriceAsc(res.data.products)
-                        : setMyProductLisPriceAsc(res.data.products)
-                }
-            })
-            .catch(err => console.log('Get Products: ', err))
+        Object.keys(currentUser).length !== 0
+            ? getAPI({
+                  url: 'product/me',
+                  params: {
+                      sortBy: `${
+                          index == 0
+                              ? 'pop'
+                              : index == 1
+                              ? 'new'
+                              : index == 2
+                              ? 'sale'
+                              : index == 3
+                              ? filter
+                                  ? 'pricedesc'
+                                  : 'priceacs'
+                              : ''
+                      }`,
+                  },
+              })
+                  .then(res => {
+                      if (res.status === 200) {
+                          index == 0
+                              ? setMyProductsList(res.data.products)
+                              : index == 1
+                              ? setMyProductListNew(res.data.products)
+                              : index == 2
+                              ? setMyProductListSale(res.data.products)
+                              : index == 3
+                              ? filter
+                                  ? setMyProductLisPriceDesc(res.data.products)
+                                  : setMyProductLisPriceAsc(res.data.products)
+                              : setMyProductLisPriceAsc(res.data.products)
+                      }
+                  })
+                  .catch(err => console.log('Get Products: ', err))
+            : AlertForSignIn()
     }, [index, filter])
 
     useEffect(() => {
-        if (isCurrentStore) {
+        if (isCurrentStore && Object.keys(currentUser).length !== 0) {
             setModalLoading(true)
 
             getAPI({url: `store/${route.params[0]}`})
@@ -161,7 +171,11 @@ const ProfileScreen = ({navigation, route}) => {
                                     : currentUser.fullName}
                             </Text>
 
-                            <Text style={{color: 'black', marginLeft: 10}}>
+                            <Text
+                                style={{
+                                    color: 'black',
+                                    marginLeft: 10,
+                                }}>
                                 {currentUser.onlineStatus == 'Online'
                                     ? 'Online'
                                     : convertTime(
@@ -176,7 +190,11 @@ const ProfileScreen = ({navigation, route}) => {
                                     marginLeft: 10,
                                 }}>
                                 <Ion name="star" color="#FA8128" size={16} />
-                                <Text style={{color: 'black', marginLeft: 5}}>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        marginLeft: 5,
+                                    }}>
                                     {storeInfo.rating}/5{'     '}|
                                 </Text>
 
@@ -186,7 +204,11 @@ const ProfileScreen = ({navigation, route}) => {
                                     color={PRIMARY_COLOR}
                                     size={16}
                                 />
-                                <Text style={{color: 'black', marginLeft: 5}}>
+                                <Text
+                                    style={{
+                                        color: 'black',
+                                        marginLeft: 5,
+                                    }}>
                                     {storeInfo.followers.length} Followers
                                 </Text>
                             </View>
@@ -215,7 +237,9 @@ const ProfileScreen = ({navigation, route}) => {
                         marginTop: 5,
                     }}>
                     <Tab
-                        indicatorStyle={{backgroundColor: PRIMARY_COLOR}}
+                        indicatorStyle={{
+                            backgroundColor: PRIMARY_COLOR,
+                        }}
                         value={index}
                         onChange={setIndex}>
                         <Tab.Item
@@ -405,9 +429,20 @@ const ProfileScreen = ({navigation, route}) => {
         <SafeAreaView
             style={{
                 ...globalStyles.container,
-                opacity: modalLoading ? 0.3 : 1,
             }}>
-            <ModalLoading visible={modalLoading} />
+            {Object.keys(currentUser).length !== 0 ? (
+                <ModalLoading visible={modalLoading} />
+            ) : (
+                <TouchableOpacity
+                    onPress={() => navigation.replace('SignIn')}
+                    style={{
+                        ...globalStyles.button,
+                        alignSelf: 'center',
+                        marginTop: '100%',
+                    }}>
+                    <Text style={globalStyles.textButton}>Go to Sign In</Text>
+                </TouchableOpacity>
+            )}
         </SafeAreaView>
     )
 }
