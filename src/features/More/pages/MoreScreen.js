@@ -41,11 +41,11 @@ const MoreScreen = ({navigation}) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerShown: false,
+            headerShown: Object.keys(currentUser).length === 0,
             headerStyle: {
                 backgroundColor: PRIMARY_COLOR,
             },
-            headerTitle: '',
+            headerTitle: Object.keys(currentUser).length !== 0 ? '' : 'Setting',
         })
     }, [])
 
@@ -67,7 +67,7 @@ const MoreScreen = ({navigation}) => {
 
                                 navigation.reset({
                                     index: 0,
-                                    routes: [{name: 'SignIn'}],
+                                    routes: [{name: 'Splash'}],
                                 })
                             }
                         })
@@ -81,7 +81,7 @@ const MoreScreen = ({navigation}) => {
         ])
     }
 
-    return (
+    return Object.keys(currentUser).length !== 0 ? (
         <SafeAreaView style={globalStyles.container}>
             <TouchableOpacity
                 onPress={() => navigation.navigate('ChangeInfo')}
@@ -196,6 +196,18 @@ const MoreScreen = ({navigation}) => {
                     size={24}
                 />
                 <Text style={styles.textStyle}>Sign Out</Text>
+            </TouchableOpacity>
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView style={globalStyles.container}>
+            <TouchableOpacity
+                onPress={() => navigation.replace('SignIn')}
+                style={{
+                    ...globalStyles.button,
+                    alignSelf: 'center',
+                    marginTop: '100%',
+                }}>
+                <Text style={globalStyles.textButton}>Go to Sign In</Text>
             </TouchableOpacity>
         </SafeAreaView>
     )

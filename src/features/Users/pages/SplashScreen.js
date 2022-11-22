@@ -88,7 +88,7 @@ const SplashScreen = ({navigation}) => {
                         })
             } else {
                 setTimeout(() => {
-                    navigation.replace('SignIn')
+                    navigation.replace('BottomNavBar')
                 }, 2000)
             }
         } catch (error) {

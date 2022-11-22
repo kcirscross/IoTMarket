@@ -13,7 +13,7 @@ const getAPI = async ({url, params, data}) => {
         url: `${API_URL}/${url}`,
         params: params,
         headers: {
-            authorization: `Bearer ${token}`,
+            authorization: token !== undefined ? `Bearer ${token}` : '',
         },
         data: data,
     })
@@ -37,7 +37,7 @@ const patchAPI = async ({url, params, data}) => {
         url: `${API_URL}/${url}`,
         params: params,
         headers: {
-            authorization: `Bearer ${token}`,
+            authorization: token !== undefined ? `Bearer ${token}` : '',
         },
         data: data,
     })
@@ -64,7 +64,7 @@ const postAPI = async ({url, params, data}) => {
         url: `${API_URL}/${url}`,
         params: params,
         headers: {
-            authorization: `Bearer ${token}`,
+            authorization: token !== undefined ? `Bearer ${token}` : '',
             deviceTokenFCM: tokenFCM,
         },
         data: data,

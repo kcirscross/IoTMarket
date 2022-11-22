@@ -2,8 +2,13 @@ import React, {useEffect, useState} from 'react'
 import {Image, Modal, StyleSheet, Text, TouchableOpacity} from 'react-native'
 import {View} from 'react-native-animatable'
 import Ion from 'react-native-vector-icons/Ionicons'
+import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {
+    AlertForSignIn,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR,
+} from '../../../components/constants'
 
 const ModalChooseQuantity = ({
     navigation,
@@ -13,6 +18,8 @@ const ModalChooseQuantity = ({
     onPress,
 }) => {
     const [quantity, setQuantity] = useState(1)
+
+    const currentUser = useSelector(state => state.user)
 
     useEffect(() => {
         if (quantity < 1) {
@@ -83,12 +90,16 @@ const ModalChooseQuantity = ({
 
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.navigate('Payment', {
-                            product,
-                            productOwner,
-                            quantity,
-                        })
-                        setQuantity(0)
+                        if (Object.keys(currentUser).length !== 0) {
+                            navigation.navigate('Payment', {
+                                product,
+                                productOwner,
+                                quantity,
+                            })
+                            setQuantity(0)
+                        } else {
+                            AlertForSignIn()
+                        }
                     }}
                     style={{
                         ...globalStyles.button,
