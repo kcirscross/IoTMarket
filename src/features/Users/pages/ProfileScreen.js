@@ -87,7 +87,7 @@ const ProfileScreen = ({navigation, route}) => {
                       }
                   })
                   .catch(err => console.log('Get Products: ', err))
-            : AlertForSignIn()
+            : AlertForSignIn({navigation})
     }, [index, filter])
 
     useEffect(() => {

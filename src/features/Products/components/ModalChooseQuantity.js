@@ -98,7 +98,7 @@ const ModalChooseQuantity = ({
                             })
                             setQuantity(0)
                         } else {
-                            AlertForSignIn()
+                            AlertForSignIn({navigation})
                         }
                     }}
                     style={{

@@ -79,7 +79,7 @@ const ProductDetail = ({navigation, route}) => {
                         onPress={() => {
                             Object.keys(currentUser).length !== 0
                                 ? navigation.navigate('Favorite')
-                                : AlertForSignIn()
+                                : AlertForSignIn({navigation})
                         }}
                         style={{
                             marginRight: 5,
@@ -95,7 +95,7 @@ const ProductDetail = ({navigation, route}) => {
                         onPress={() => {
                             Object.keys(currentUser).length !== 0
                                 ? navigation.navigate('Cart')
-                                : AlertForSignIn()
+                                : AlertForSignIn({navigation})
                         }}>
                         <Ion name="cart-outline" size={30} color="white" />
                     </TouchableOpacity>
@@ -261,7 +261,7 @@ const ProductDetail = ({navigation, route}) => {
                           }),
                   )
                   .catch(err => console.log('Add Cart: ', err))
-            : AlertForSignIn()
+            : AlertForSignIn({navigation})
     }
 
     const handleFavoriteClick = () => {
@@ -295,7 +295,7 @@ const ProductDetail = ({navigation, route}) => {
                           }
                       })
                       .catch(err => console.log('Remove Favorite: ', err))
-            : AlertForSignIn()
+            : AlertForSignIn({navigation})
     }
 
     const handleFollowClick = () => {
@@ -329,7 +329,7 @@ const ProductDetail = ({navigation, route}) => {
                           }
                       })
                       .catch(err => console.log('Unfollow: ', err))
-            : AlertForSignIn()
+            : AlertForSignIn({navigation})
     }
 
     const setVisible = isVisible => {

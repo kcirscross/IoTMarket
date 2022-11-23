@@ -12,7 +12,7 @@ const CategoryItemHorizontal = ({category, navigation}) => {
             onPress={() => {
                 Object.keys(currentUser).length !== 0
                     ? navigation.navigate('UploadDetail', category)
-                    : AlertForSignIn()
+                    : AlertForSignIn({navigation})
             }}
             style={{
                 flexDirection: 'row',

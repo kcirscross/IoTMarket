@@ -25,7 +25,7 @@ const convertTime = ms => {
     }
 }
 
-const AlertForSignIn = () => {
+const AlertForSignIn = ({navigation}) => {
     Alert.alert('You must sign in for this function.', 'Go to sign in?', [
         {
             text: 'Yes',

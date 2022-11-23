@@ -113,7 +113,7 @@ const HomeScreen = ({navigation}) => {
                             onPress={() => {
                                 Object.keys(currentUser).length !== 0
                                     ? navigation.navigate('Cart')
-                                    : AlertForSignIn()
+                                    : AlertForSignIn({navigation})
                             }}
                             style={{
                                 marginLeft: 5,
@@ -125,7 +125,7 @@ const HomeScreen = ({navigation}) => {
                             onPress={() => {
                                 Object.keys(currentUser).length !== 0
                                     ? navigation.navigate('Notification')
-                                    : AlertForSignIn()
+                                    : AlertForSignIn({navigation})
                             }}>
                             <Ion
                                 name="notifications-outline"
