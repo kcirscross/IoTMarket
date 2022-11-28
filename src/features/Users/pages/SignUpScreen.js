@@ -94,13 +94,20 @@ const SignUpScreen = ({navigation}) => {
                 })
                     .then(res => {
                         if (res.status === 200) {
-                            Alert.alert('Sign up successfully.')
-
                             storeToken(res.data.token)
 
                             dispatch(signIn(res.data.data))
 
-                            navigation.replace('BottomNavBar')
+                            Alert.alert('Sign up successfully.', '', [
+                                {
+                                    text: 'OK',
+                                    onPress: () =>
+                                        navigation.replace('BottomNavBar'),
+                                },
+                                {
+                                    text: 'Cancel',
+                                },
+                            ])
                         }
                     })
                     .catch(err => {
