@@ -106,7 +106,7 @@ const ModalChooseQuantity = ({
                         alignSelf: 'center',
                         marginBottom: 20,
                     }}>
-                    <Text style={globalStyles.textButton}>PAY</Text>
+                    <Text style={globalStyles.textButton}>ORDER</Text>
                 </TouchableOpacity>
             </View>
         </Modal>

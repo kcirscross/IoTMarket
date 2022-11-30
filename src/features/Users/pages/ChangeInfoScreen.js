@@ -347,9 +347,7 @@ const ChangeInfoScreen = ({navigation}) => {
                                 defaultValue={currentUser.fullName}
                                 label="Full Name"
                                 labelStyle={styles.labelStyle}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                inputContainerStyle={styles.inputContainer}
                                 renderErrorMessage={false}
                                 editable={false}
                             />
@@ -363,9 +361,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             defaultValue={currentUser.phoneNumber}
                             label="Phone Number"
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             keyboardType={'phone-pad'}
                             renderErrorMessage={
                                 !REGEX_PHONE_NUMBER.test(phoneNumber)
@@ -416,9 +412,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             }
                             label="Address"
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             multiline={true}
                             renderErrorMessage={false}
                             editable={false}
@@ -538,9 +532,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             label="Gender"
                             defaultValue={currentUser.gender}
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             renderErrorMessage={false}
                             editable={false}
                             rightIcon={
@@ -563,9 +555,7 @@ const ChangeInfoScreen = ({navigation}) => {
                             label="Change Password"
                             labelStyle={styles.labelStyle}
                             defaultValue={'********'}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             renderErrorMessage={false}
                             editable={false}
                             rightIcon={
@@ -592,9 +582,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 
-    textContainer: {
+    inputContainer: {
         ...globalStyles.input,
         width: '100%',
+        marginTop: 0,
+        borderBottomWidth: 0,
+        paddingVertical: 5,
+    },
+    textContainer: {
+        marginTop: 10,
+        paddingHorizontal: 0,
     },
     modalView: {
         backgroundColor: 'white',

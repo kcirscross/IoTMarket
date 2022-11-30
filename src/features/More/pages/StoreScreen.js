@@ -27,6 +27,7 @@ import {
     API_URL,
     AVATAR_BORDER,
     PRIMARY_COLOR,
+    SECONDARY_COLOR,
 } from '../../../components/constants'
 import {getAPI} from '../../../components/utils/base_API'
 
@@ -52,6 +53,7 @@ const StoreScreen = ({navigation}) => {
     const [chosenStreet, setChosenStreet] = useState('')
 
     const [modalLoading, setModalLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const [displayName, setDisplayName] = useState('')
     const [description, setDescription] = useState('')
@@ -194,6 +196,7 @@ const StoreScreen = ({navigation}) => {
         } else {
             try {
                 setModalLoading(true)
+                setIsLoading(true)
 
                 //Upload Image
                 await storage()
@@ -230,6 +233,7 @@ const StoreScreen = ({navigation}) => {
                                                 .then(res => {
                                                     if (res.status == 200) {
                                                         setModalLoading(false)
+                                                        setIsLoading(false)
                                                         Toast.show({
                                                             type: 'success',
                                                             text1: 'Please wait Admin approve your request.',
@@ -238,6 +242,7 @@ const StoreScreen = ({navigation}) => {
                                                 })
                                                 .catch(err => {
                                                     setModalLoading(false)
+                                                    setIsLoading(false)
                                                     console.log(
                                                         err.response.data,
                                                     )
@@ -256,6 +261,7 @@ const StoreScreen = ({navigation}) => {
                                     )
                                 } catch (error) {
                                     setModalLoading(false)
+                                    setIsLoading(false)
                                     console.log(
                                         'Error Upload Image ',
                                         error.message,
@@ -265,6 +271,7 @@ const StoreScreen = ({navigation}) => {
                     })
             } catch (error) {
                 setModalLoading(false)
+                setIsLoading(false)
                 console.log('Error Upload Image: ', error)
             }
         }
@@ -310,22 +317,25 @@ const StoreScreen = ({navigation}) => {
     useEffect(() => {
         if (currentUser.storeId != undefined) {
             setModalLoading(true)
+            setIsLoading(true)
             getAPI({url: `store/${currentUser.storeId}`})
                 .then(res => {
                     if (res.status === 200) {
                         setStoreInfo(res.data.store)
                         setFollowers(res.data.store.followers.length)
                         setModalLoading(false)
+                        setIsLoading(false)
                     }
                 })
                 .catch(err => {
                     setModalLoading(false)
+                    setIsLoading(false)
                     console.log('Get Store: ', err)
                 })
         }
     }, [isFocus])
 
-    return !modalLoading ? (
+    return !isLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -340,8 +350,6 @@ const StoreScreen = ({navigation}) => {
                     }}>
                     <ModalLoading visible={modalLoading} />
 
-                    <Toast position="bottom" bottomOffset={70} />
-
                     <Modal
                         animationType="slide"
                         transparent={true}
@@ -351,14 +359,34 @@ const StoreScreen = ({navigation}) => {
                                 flex: 1,
                             }}>
                             <View style={styles.modalView}>
-                                <Text
+                                <View
                                     style={{
-                                        ...styles.labelStyle,
-                                        fontSize: 18,
-                                        marginLeft: -10,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
                                     }}>
-                                    Choose your image from?
-                                </Text>
+                                    <Text
+                                        style={{
+                                            ...styles.labelStyle,
+                                            fontSize: 18,
+                                            marginLeft: -10,
+                                        }}>
+                                        Choose your image from?
+                                    </Text>
+
+                                    <View style={{flex: 1}} />
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setModalAvatarVisible(false)
+                                        }>
+                                        <Ion
+                                            name="close-circle-outline"
+                                            size={30}
+                                            color="black"
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
@@ -368,26 +396,40 @@ const StoreScreen = ({navigation}) => {
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Gallery
                                     </Text>
+
+                                    <Ion
+                                        name="images-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={() => {
                                         setModalAvatarVisible(false)
                                         pickImageFromCamera()
                                     }}
-                                    style={styles.touchModalView}>
+                                    style={{
+                                        ...styles.touchModalView,
+                                        marginTop: 10,
+                                    }}>
                                     <Text
                                         style={{
                                             ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
+                                            fontSize: 18,
                                         }}>
                                         Camera
                                     </Text>
+
+                                    <Ion
+                                        name="camera-outline"
+                                        size={64}
+                                        color={PRIMARY_COLOR}
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </SafeAreaView>
@@ -413,7 +455,7 @@ const StoreScreen = ({navigation}) => {
                                             : {uri: shopImage}
                                     }
                                     avatarStyle={{
-                                        borderColor: 'black',
+                                        borderColor: AVATAR_BORDER,
                                         borderWidth: 1,
                                     }}
                                 />
@@ -435,9 +477,7 @@ const StoreScreen = ({navigation}) => {
                                 containerStyle={styles.textContainer}
                                 label="Store Name (At least 15 characters)"
                                 labelStyle={styles.labelStyle}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                inputContainerStyle={styles.inputContainer}
                                 renderErrorMessage={false}
                                 onChangeText={text => setDisplayName(text)}
                             />
@@ -447,9 +487,7 @@ const StoreScreen = ({navigation}) => {
                                 containerStyle={styles.textContainer}
                                 label="Store Description (At least 15 character)"
                                 labelStyle={styles.labelStyle}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                inputContainerStyle={styles.inputContainer}
                                 renderErrorMessage={false}
                                 onChangeText={text => setDescription(text)}
                             />
@@ -460,9 +498,7 @@ const StoreScreen = ({navigation}) => {
                                     containerStyle={styles.textContainer}
                                     label="Detail Address"
                                     labelStyle={styles.labelStyle}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    inputContainerStyle={styles.inputContainer}
                                     renderErrorMessage={false}
                                     onChangeText={text => setChosenStreet(text)}
                                 />
@@ -490,8 +526,11 @@ const StoreScreen = ({navigation}) => {
                                         getDistrict(item.value)
                                         setChosenCity(item.label)
                                     }}
-                                    style={{marginTop: 5}}
+                                    style={styles.dropStyle}
                                     zIndex={3}
+                                    dropDownContainerStyle={{
+                                        borderColor: SECONDARY_COLOR,
+                                    }}
                                 />
                             </View>
                             <View
@@ -516,8 +555,11 @@ const StoreScreen = ({navigation}) => {
                                         getWard(item.value)
                                         setChosenDistrict(item.label)
                                     }}
-                                    style={{marginTop: 5}}
+                                    style={styles.dropStyle}
                                     zIndex={2}
+                                    dropDownContainerStyle={{
+                                        borderColor: SECONDARY_COLOR,
+                                    }}
                                 />
                             </View>
                             <View
@@ -538,11 +580,14 @@ const StoreScreen = ({navigation}) => {
                                     setOpen={setOpenWard}
                                     setValue={setValueWard}
                                     setItems={setItemsWard}
-                                    style={{marginTop: 5}}
+                                    style={styles.dropStyle}
                                     zIndex={1}
                                     onSelectItem={item =>
                                         setChosenWard(item.label)
                                     }
+                                    dropDownContainerStyle={{
+                                        borderColor: SECONDARY_COLOR,
+                                    }}
                                 />
                             </View>
 
@@ -639,6 +684,7 @@ const StoreScreen = ({navigation}) => {
                     )}
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
+            <Toast position="bottom" bottomOffset={70} />
         </SafeAreaView>
     ) : (
         <SafeAreaView
@@ -659,8 +705,8 @@ const styles = StyleSheet.create({
         fontWeight: 'normal',
     },
     textContainer: {
-        ...globalStyles.input,
-        width: '100%',
+        marginTop: 10,
+        paddingHorizontal: 0,
     },
     modalView: {
         backgroundColor: 'white',
@@ -674,7 +720,22 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     touchModalView: {
-        flexDirection: 'row',
         alignItems: 'center',
+    },
+    inputContainer: {
+        ...globalStyles.input,
+        width: '100%',
+        marginTop: 0,
+        borderBottomWidth: 0,
+        paddingVertical: 5,
+    },
+    dropStyle: {
+        backgroundColor: 'white',
+        shadowColor: PRIMARY_COLOR,
+        elevation: 10,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        borderColor: SECONDARY_COLOR,
     },
 })
