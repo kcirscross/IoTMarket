@@ -11,7 +11,9 @@ import {
     View,
 } from 'react-native'
 import {Card, Divider} from 'react-native-elements'
+import Toast from 'react-native-toast-message'
 import Ion from 'react-native-vector-icons/Ionicons'
+import Material from 'react-native-vector-icons/MaterialIcons'
 import {useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
@@ -70,92 +72,97 @@ const PaymentCartScreen = ({navigation, route}) => {
     }, [isFocus])
 
     const handlePaymentClick = () => {
-        if (deleveryMethod) {
-            Alert.alert(
-                'Confirm Order',
-                'You will pay when received product.',
-                [
-                    {
-                        text: 'Yes',
-                        onPress: () => {
-                            setModalLoading(true)
+        if (Object.keys(currentUser.address).length !== 0) {
+            if (deleveryMethod) {
+                Alert.alert(
+                    'Confirm Order',
+                    'You will pay when received product.',
+                    [
+                        {
+                            text: 'Yes',
+                            onPress: () => {
+                                setModalLoading(true)
 
-                            postAPI({
-                                url: 'user/buy',
-                                params: {
-                                    isCodQuery: true,
-                                },
+                                postAPI({
+                                    url: 'user/buy',
+                                    params: {
+                                        isCodQuery: true,
+                                    },
+                                    data: listOrder,
+                                })
+                                    .then(res => {
+                                        if (res.status === 200) {
+                                            setModalLoading(false)
+                                            navigation.replace('Order')
+                                        }
+                                    })
+                                    .catch(err => console.log('Payment: ', err))
+                            },
+                        },
+                        {
+                            text: 'Cancel',
+                        },
+                    ],
+                )
+            } else {
+                setModalLoading(true)
+
+                postAPI({
+                    url: 'user/buy',
+                    data: listOrder,
+                })
+                    .then(res => {
+                        if (res.status === 200) {
+                            setModalLoading(false)
+                            navigation.navigate('WebViewPayment', {
+                                url: res.data.vnpUrl,
+                                from: 'cart',
                                 data: listOrder,
                             })
-                                .then(res => {
-                                    if (res.status === 200) {
-                                        setModalLoading(false)
-                                        navigation.replace('Order')
-                                    }
-                                })
-                                .catch(err => console.log('Payment: ', err))
-                        },
-                    },
-                    {
-                        text: 'Cancel',
-                    },
-                ],
-            )
+                        }
+                    })
+                    .catch(err => console.log('Payment: ', err))
+            }
         } else {
-            setModalLoading(true)
-
-            postAPI({
-                url: 'user/buy',
-                data: listOrder,
-            })
-                .then(res => {
-                    if (res.status === 200) {
-                        setModalLoading(false)
-                        navigation.navigate('WebViewPayment', {
-                            url: res.data.vnpUrl,
-                            from: 'cart',
-                            data: listOrder,
-                        })
-                    }
-                })
-                .catch(err => console.log('Payment: ', err))
+            Toast.show({text1: 'Please fill in your address.', type: 'error'})
         }
     }
 
     return !modalLoading ? (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                opacity: modalDeliveryVisible + modalLoading ? 0.3 : 1,
+            }}>
             <Card
                 containerStyle={{
                     ...globalStyles.cardContainer,
                     marginTop: 10,
                 }}>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate('ChangeInfo')}
-                    style={{flexDirection: 'row'}}>
-                    <Ion
-                        name="location-outline"
-                        color={PRIMARY_COLOR}
-                        size={30}
-                    />
+                    onPress={() => navigation.navigate('ChangeInfo')}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Ion
+                            name="location-outline"
+                            color={PRIMARY_COLOR}
+                            size={30}
+                        />
+                        <Text style={styles.titleStyle}>Address</Text>
+                    </View>
 
-                    <View style={{marginLeft: 10}}>
-                        <Text style={{color: 'black', fontSize: 18}}>
-                            Receive Address
-                        </Text>
+                    <View style={{flexDirection: 'row', marginLeft: 10}}>
                         <Text
                             style={{
                                 color: 'black',
-                            }}>{`\n${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street}\n${currentUser.address.ward}, ${currentUser.address.district}\n${currentUser.address.city}`}</Text>
+                            }}>{`${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street},\n${currentUser.address.ward}, ${currentUser.address.district},\n${currentUser.address.city}.`}</Text>
+                        <View style={{flex: 1}} />
+                        <Ion
+                            name="chevron-forward-outline"
+                            size={24}
+                            color="black"
+                            style={{alignSelf: 'center'}}
+                        />
                     </View>
-
-                    <View style={{flex: 1}} />
-
-                    <Ion
-                        name="chevron-forward-outline"
-                        size={24}
-                        color="black"
-                        style={{alignSelf: 'center'}}
-                    />
                 </TouchableOpacity>
             </Card>
 
@@ -164,6 +171,11 @@ const PaymentCartScreen = ({navigation, route}) => {
                     ...globalStyles.cardContainer,
                     marginTop: 5,
                 }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Ion name="cart-outline" size={30} color={PRIMARY_COLOR} />
+                    <Text style={styles.titleStyle}>Product List</Text>
+                </View>
+
                 {route.params.map((item, index) => (
                     <View key={index}>
                         <View
@@ -226,7 +238,14 @@ const PaymentCartScreen = ({navigation, route}) => {
                 <TouchableOpacity
                     onPress={() => setModalDeliveryVisible(true)}
                     style={{marginHorizontal: 5}}>
-                    <Text style={styles.titleStyle}>Delivery Method</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Material
+                            name="local-shipping"
+                            size={26}
+                            color={PRIMARY_COLOR}
+                        />
+                        <Text style={styles.titleStyle}>Delivery Method</Text>
+                    </View>
 
                     <View style={{flexDirection: 'row'}}>
                         <View>
@@ -267,7 +286,7 @@ const PaymentCartScreen = ({navigation, route}) => {
                     }}>
                     <Ion
                         name="reader-outline"
-                        size={24}
+                        size={30}
                         color={PRIMARY_COLOR}
                     />
                     <Text style={{...styles.titleStyle, marginLeft: 10}}>
@@ -377,11 +396,13 @@ const PaymentCartScreen = ({navigation, route}) => {
                 <TouchableOpacity
                     onPress={handlePaymentClick}
                     style={styles.orderStyle}>
-                    <Text style={globalStyles.textButton}>ORDER</Text>
+                    <Text style={globalStyles.textButton}>CHECKOUT</Text>
                 </TouchableOpacity>
             </View>
 
             <ModalLoading visible={modalLoading} />
+
+            <Toast position="bottom" bottomOffset={70} />
 
             <Modal
                 transparent={true}
@@ -518,6 +539,7 @@ const styles = StyleSheet.create({
         color: PRIMARY_COLOR,
         fontWeight: '600',
         fontSize: 18,
+        marginLeft: 10,
     },
     modalView: {
         position: 'absolute',

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React, {useLayoutEffect} from 'react'
+import React, {useLayoutEffect, useState} from 'react'
 import {
     Alert,
     Image,
@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
 import {useDispatch, useSelector} from 'react-redux'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {PRIMARY_COLOR} from '../../../components/constants'
 import {patchAPI, postAPI} from '../../../components/utils/base_API'
@@ -23,17 +24,32 @@ const MoreScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
     const dispatch = useDispatch()
 
-    const deleteRememberAccount = () => {
+    const [modalLoading, setModalLoading] = useState(false)
+
+    const deleteRememberAccount = async () => {
         patchAPI({
             url: 'user/changeonlinestatus',
             data: {status: 'Offline'},
         })
             .then(async res => {
                 if (res.status === 200) {
-                    await AsyncStorage.removeItem('account')
-                    await AsyncStorage.removeItem('password')
-                    await AsyncStorage.removeItem('accountType')
+                    const account = await AsyncStorage.removeItem('account')
+                    const password = await AsyncStorage.removeItem('password')
+                    const accountType = await AsyncStorage.removeItem(
+                        'accountType',
+                    )
                     await AsyncStorage.removeItem('token')
+
+                    if (
+                        account === null &&
+                        password === null &&
+                        accountType === null
+                    ) {
+                        navigation.reset({
+                            index: 0,
+                            routes: [{name: 'Splash'}],
+                        })
+                    }
                 }
             })
             .catch(err => console.log('Logout: ', err))
@@ -54,21 +70,19 @@ const MoreScreen = ({navigation}) => {
             {
                 text: 'Yes',
                 onPress: () => {
+                    setModalLoading(true)
                     postAPI({
                         url: 'auth/logout',
                         data: {email: currentUser.email},
                     })
-                        .then(res => {
+                        .then(async res => {
                             if (res.status === 200) {
                                 const action = signOut()
                                 res.status == 200 && dispatch(action)
 
-                                deleteRememberAccount()
+                                await deleteRememberAccount()
 
-                                navigation.reset({
-                                    index: 0,
-                                    routes: [{name: 'Splash'}],
-                                })
+                                setModalLoading(false)
                             }
                         })
                         .catch(err => console.log('Logout: ', err))
@@ -83,6 +97,8 @@ const MoreScreen = ({navigation}) => {
 
     return Object.keys(currentUser).length !== 0 ? (
         <SafeAreaView style={globalStyles.container}>
+            <ModalLoading visible={modalLoading} />
+
             <TouchableOpacity
                 onPress={() => navigation.navigate('ChangeInfo')}
                 style={{

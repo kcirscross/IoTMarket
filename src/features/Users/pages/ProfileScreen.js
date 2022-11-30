@@ -31,7 +31,8 @@ const ProfileScreen = ({navigation, route}) => {
     const [myProductListSale, setMyProductListSale] = useState([])
     const [myProductLisPriceDesc, setMyProductLisPriceDesc] = useState([])
     const [myProductLisPriceAsc, setMyProductLisPriceAsc] = useState([])
-    const [modalLoading, setModalLoading] = useState(true)
+    const [modalLoading, setModalLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [index, setIndex] = useState(0)
     const [filter, setFilter] = useState(true)
     const isCurrentStore =
@@ -52,63 +53,70 @@ const ProfileScreen = ({navigation, route}) => {
     }, [])
 
     useEffect(() => {
-        Object.keys(currentUser).length !== 0
-            ? getAPI({
-                  url: 'product/me',
-                  params: {
-                      sortBy: `${
-                          index == 0
-                              ? 'pop'
-                              : index == 1
-                              ? 'new'
-                              : index == 2
-                              ? 'sale'
-                              : index == 3
-                              ? filter
-                                  ? 'pricedesc'
-                                  : 'priceacs'
-                              : ''
-                      }`,
-                  },
-              })
-                  .then(res => {
-                      if (res.status === 200) {
-                          index == 0
-                              ? setMyProductsList(res.data.products)
-                              : index == 1
-                              ? setMyProductListNew(res.data.products)
-                              : index == 2
-                              ? setMyProductListSale(res.data.products)
-                              : index == 3
-                              ? filter
-                                  ? setMyProductLisPriceDesc(res.data.products)
-                                  : setMyProductLisPriceAsc(res.data.products)
-                              : setMyProductLisPriceAsc(res.data.products)
-                      }
-                  })
-                  .catch(err => console.log('Get Products: ', err))
-            : AlertForSignIn({navigation})
+        Object.keys(currentUser).length !== 0 &&
+            getAPI({
+                url: 'product/me',
+                params: {
+                    sortBy: `${
+                        index == 0
+                            ? 'pop'
+                            : index == 1
+                            ? 'new'
+                            : index == 2
+                            ? 'sale'
+                            : index == 3
+                            ? filter
+                                ? 'pricedesc'
+                                : 'priceacs'
+                            : ''
+                    }`,
+                },
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        index == 0
+                            ? setMyProductsList(res.data.products)
+                            : index == 1
+                            ? setMyProductListNew(res.data.products)
+                            : index == 2
+                            ? setMyProductListSale(res.data.products)
+                            : index == 3
+                            ? filter
+                                ? setMyProductLisPriceDesc(res.data.products)
+                                : setMyProductLisPriceAsc(res.data.products)
+                            : setMyProductLisPriceAsc(res.data.products)
+                    }
+                })
+                .catch(err => console.log('Get Products: ', err))
     }, [index, filter])
 
     useEffect(() => {
-        if (isCurrentStore && Object.keys(currentUser).length !== 0) {
+        if (
+            currentUser.storeId !== undefined &&
+            isCurrentStore &&
+            Object.keys(currentUser).length !== 0
+        ) {
+            console.log('first')
             setModalLoading(true)
+            setIsLoading(true)
 
             getAPI({url: `store/${route.params[0]}`})
                 .then(res => {
                     if (res.status === 200) {
                         setStoreInfo(res.data.store)
                         setModalLoading(false)
+                        setIsLoading(false)
                     }
                 })
                 .catch(err => {
                     setModalLoading(false)
+                    setIsLoading(false)
                     console.log('Get Store: ', err)
                 })
         }
     }, [])
 
-    return !modalLoading ? (
+    return !isLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -430,6 +438,17 @@ const ProfileScreen = ({navigation, route}) => {
             style={{
                 ...globalStyles.container,
             }}>
+            {currentUser.storeId === undefined && (
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Store')}
+                    style={{
+                        ...globalStyles.button,
+                        alignSelf: 'center',
+                        marginTop: '100%',
+                    }}>
+                    <Text style={globalStyles.textButton}>Regis New Store</Text>
+                </TouchableOpacity>
+            )}
             {Object.keys(currentUser).length !== 0 ? (
                 <ModalLoading visible={modalLoading} />
             ) : (

@@ -642,6 +642,14 @@ const ProductDetail = ({navigation, route}) => {
                             {product.condition}
                         </Text>
                     </View>
+
+                    <View style={styles.viewStyle}>
+                        <Text style={styles.textStyle}>Number in stock: </Text>
+                        <Text style={{color: 'black'}}>
+                            {product.numberInStock}
+                        </Text>
+                    </View>
+
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Description: </Text>
                         <Text style={{color: 'black'}}>
@@ -822,13 +830,21 @@ const ProductDetail = ({navigation, route}) => {
 
                     <Divider width={1} color={PRIMARY_COLOR} />
 
-                    {miniListReview.map((review, index) => (
-                        <ReviewItemHorizontal
-                            key={index}
-                            navigation={navigation}
-                            review={review}
-                        />
-                    ))}
+                    {rating.ratingCount > 3
+                        ? miniListReview.map((review, index) => (
+                              <ReviewItemHorizontal
+                                  key={index}
+                                  navigation={navigation}
+                                  review={review}
+                              />
+                          ))
+                        : listReview.map((review, index) => (
+                              <ReviewItemHorizontal
+                                  key={index}
+                                  navigation={navigation}
+                                  review={review}
+                              />
+                          ))}
 
                     {rating.ratingCount > 3 && (
                         <TouchableOpacity

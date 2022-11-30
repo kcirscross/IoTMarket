@@ -211,8 +211,12 @@ const ChangeAddressScreen = ({navigation, route}) => {
                             }}
                             style={styles.dropStyle}
                             zIndex={3}
+                            dropDownContainerStyle={{
+                                borderColor: SECONDARY_COLOR,
+                            }}
                         />
                     </View>
+
                     <View
                         style={{
                             marginTop: 10,
@@ -241,8 +245,12 @@ const ChangeAddressScreen = ({navigation, route}) => {
                             }}
                             style={styles.dropStyle}
                             zIndex={2}
+                            dropDownContainerStyle={{
+                                borderColor: SECONDARY_COLOR,
+                            }}
                         />
                     </View>
+
                     <View
                         style={{
                             marginTop: 10,
@@ -266,34 +274,30 @@ const ChangeAddressScreen = ({navigation, route}) => {
                             style={styles.dropStyle}
                             zIndex={1}
                             onSelectItem={item => setChosenWard(item.label)}
+                            dropDownContainerStyle={{
+                                borderColor: SECONDARY_COLOR,
+                            }}
                         />
                     </View>
-                    <View>
-                        <Text style={styles.textStyle}>
-                            Please fill in your detail address.
-                        </Text>
-                        <Input
-                            placeholder="Your detail address."
-                            containerStyle={{
-                                width: '100%',
-                                paddingHorizontal: 0,
-                            }}
-                            defaultValue={chosenStreet}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                                backgroundColor: SECONDARY_COLOR,
-                                padding: 5,
-                                borderRadius: 10,
-                            }}
-                            inputStyle={{
-                                padding: 0,
-                                fontSize: 16,
-                                ...styles.textStyle,
-                            }}
-                            renderErrorMessage={false}
-                            onChangeText={text => setChosenStreet(text)}
-                        />
-                    </View>
+
+                    <Input
+                        label="Please fill in your address."
+                        placeholder="Your detail address."
+                        containerStyle={{
+                            marginTop: 10,
+                            paddingHorizontal: 0,
+                        }}
+                        defaultValue={chosenStreet}
+                        inputContainerStyle={styles.textContainer}
+                        labelStyle={styles.labelStyle}
+                        inputStyle={{
+                            padding: 0,
+                            fontSize: 16,
+                            ...styles.textStyle,
+                        }}
+                        renderErrorMessage={false}
+                        onChangeText={text => setChosenStreet(text)}
+                    />
 
                     <TouchableOpacity
                         onPress={handleUpdateAddressClick}
@@ -317,5 +321,24 @@ const styles = StyleSheet.create({
     textStyle: {
         color: 'black',
     },
-    dropStyle: {marginTop: 5, backgroundColor: SECONDARY_COLOR},
+    labelStyle: {
+        color: 'black',
+        fontWeight: 'normal',
+    },
+    dropStyle: {
+        backgroundColor: 'white',
+        shadowColor: PRIMARY_COLOR,
+        elevation: 10,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        borderColor: SECONDARY_COLOR,
+    },
+    textContainer: {
+        ...globalStyles.input,
+        width: '100%',
+        marginTop: 0,
+        borderBottomWidth: 0,
+        paddingVertical: 5,
+    },
 })
