@@ -9,7 +9,7 @@ import {PRIMARY_COLOR} from '../../../components/constants'
 import {getAPI} from '../../../components/utils/base_API'
 import OrderItemHorizontal from '../components/OrderItemHorizontal'
 
-const OrderScreen = ({navigation}) => {
+const OrderScreen = ({navigation, route}) => {
     const [listOrders, setListOrders] = useState([])
     const [modalLoading, setModalLoading] = useState(true)
     const [index, setIndex] = useState(0)
@@ -30,17 +30,44 @@ const OrderScreen = ({navigation}) => {
 
     useEffect(() => {
         setModalLoading(true)
-        getAPI({url: 'order/buyer'})
-            .then(res => {
-                if (res.status === 200) {
-                    setListOrders(res.data.orders)
+
+        if (Object.keys(route.params).length > 1) {
+            route.params.from == 'buyer'
+                ? getAPI({url: 'order/buyer'})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setListOrders(res.data.orders)
+                              setModalLoading(false)
+                          }
+                      })
+                      .catch(err => {
+                          setModalLoading(false)
+                          console.log('Get order', err)
+                      })
+                : getAPI({url: 'order/seller'})
+                      .then(res => {
+                          if (res.status === 200) {
+                              setListOrders(res.data.orders)
+                              setModalLoading(false)
+                          }
+                      })
+                      .catch(err => {
+                          setModalLoading(false)
+                          console.log('Get order', err)
+                      })
+        } else {
+            getAPI({url: 'order/buyer'})
+                .then(res => {
+                    if (res.status === 200) {
+                        setListOrders(res.data.orders)
+                        setModalLoading(false)
+                    }
+                })
+                .catch(err => {
                     setModalLoading(false)
-                }
-            })
-            .catch(err => {
-                setModalLoading(false)
-                console.log('Get order', err)
-            })
+                    console.log('Get order', err)
+                })
+        }
     }, [reload, isFocus])
 
     const setData = data => {
@@ -49,7 +76,7 @@ const OrderScreen = ({navigation}) => {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView style={{...globalStyles.container, paddingBottom: 10}}>
             <ModalLoading visible={modalLoading} />
 
             <View>

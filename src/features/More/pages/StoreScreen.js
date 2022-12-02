@@ -4,6 +4,7 @@ import {useIsFocused} from '@react-navigation/native'
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Modal,
@@ -14,8 +15,9 @@ import {
     TouchableWithoutFeedback,
     View,
 } from 'react-native'
+import {LineChart} from 'react-native-chart-kit'
 import DropDownPicker from 'react-native-dropdown-picker'
-import {Avatar, Card, Input} from 'react-native-elements'
+import {Avatar, Card, Divider, Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
 import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
@@ -63,6 +65,11 @@ const StoreScreen = ({navigation}) => {
 
     const [storeInfo, setStoreInfo] = useState([])
     const [followers, setFollowers] = useState(0)
+    const [countShipping, setCountShipping] = useState(0)
+    const [countDelivered, setCountDelivered] = useState(0)
+
+    const [revenue, setRevenue] = useState([])
+    const [topProducts, setTopProducts] = useState([])
 
     const getCity = async () => {
         let list = []
@@ -149,31 +156,41 @@ const StoreScreen = ({navigation}) => {
                             }}>
                             <Icon name="cog" size={24} color="white" />
                         </TouchableOpacity>
-
-                        <TouchableOpacity
-                        // onPress={() => navigation.navigate('Cart')}
-                        >
-                            <Ion
-                                name="notifications-outline"
-                                size={26}
-                                color="white"
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('Chats')}>
-                            <Ion
-                                name="chatbubble-ellipses-outline"
-                                size={24}
-                                color="white"
-                            />
-                        </TouchableOpacity>
                     </View>
                 ),
         })
     }, [])
 
+    const getOrder = () => {
+        setModalLoading(true)
+
+        getAPI({url: 'order/seller'})
+            .then(res => {
+                if (res.status === 200) {
+                    let countDel = 0
+                    let countShip = 0
+                    res.data.orders.map((order, index) => {
+                        order.shippingLogs[order.shippingLogs.length - 1]
+                            .status === 'delivered'
+                            ? countDel++
+                            : countShip++
+
+                        if (index === res.data.orders.length - 1) {
+                            setCountDelivered(countDel)
+                            setCountShipping(countShip)
+                        }
+                    })
+
+                    setModalLoading(false)
+                }
+            })
+            .catch(err => console.log('Get Order: ', err))
+    }
+
     useEffect(() => {
         getCity()
+
+        getOrder()
     }, [])
 
     const handleCreateStoreClick = async uri => {
@@ -313,9 +330,23 @@ const StoreScreen = ({navigation}) => {
         )
     }
 
+    //Handle data for chart
+    const handleRevenue = dataRevenue => {
+        let labels = []
+        let datasets = []
+        dataRevenue.length !== 0 &&
+            dataRevenue.map((month, index) => {
+                labels.push(month._id.month.toString())
+                datasets.push(month.total_monthly_revenue_ / 100)
+
+                index == dataRevenue.length - 1 &&
+                    setRevenue({labels: labels, datasets: [{data: datasets}]})
+            })
+    }
+
     //Get Store Infomation if Exist
     useEffect(() => {
-        if (currentUser.storeId != undefined) {
+        if (currentUser.storeId !== undefined) {
             setModalLoading(true)
             setIsLoading(true)
             getAPI({url: `store/${currentUser.storeId}`})
@@ -323,6 +354,18 @@ const StoreScreen = ({navigation}) => {
                     if (res.status === 200) {
                         setStoreInfo(res.data.store)
                         setFollowers(res.data.store.followers.length)
+
+                        getAPI({
+                            url: `store/report/${res.data.store._id}`,
+                        })
+                            .then(res => {
+                                if (res.status === 200) {
+                                    handleRevenue(res.data.revenue)
+                                    setTopProducts(res.data.topFiveSoldProduct)
+                                }
+                            })
+                            .catch(err => console.log('Repror: ', err))
+
                         setModalLoading(false)
                         setIsLoading(false)
                     }
@@ -334,6 +377,89 @@ const StoreScreen = ({navigation}) => {
                 })
         }
     }, [isFocus])
+
+    const data = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+            {
+                data: [
+                    200000, 4500000, 28000000, 800000000, 99000000, 43000000,
+                ],
+            },
+        ],
+    }
+
+    const chartConfig = {
+        backgroundGradientFrom: 'white',
+        backgroundGradientFromOpacity: 0.5,
+        backgroundGradientTo: 'white',
+        backgroundGradientToOpacity: 1,
+        color: (opacity = 1) => `rgba(0, 101, 255, ${opacity})`,
+        strokeWidth: 2,
+        barPercentage: 0.5,
+        useShadowColorFromDataset: false,
+        style: {
+            borderRadius: 16,
+        },
+    }
+
+    const graphStyle = {
+        marginVertical: 8,
+        ...chartConfig.style,
+    }
+
+    const formatYLabel = yLabel => {
+        let yLabelNew = Math.round(yLabel)
+        if (yLabelNew / 1000000 > 1) {
+            yLabelNew = yLabelNew / 1000000 + 'M'
+        } else if (yLabelNew / 1000 > 1) {
+            yLabelNew = yLabelNew / 1000 + 'K'
+        }
+        return yLabelNew
+    }
+
+    const formatXLabel = xLabel => {
+        switch (xLabel) {
+            case '1':
+                return 'Jan'
+
+            case '2':
+                return 'Feb'
+
+            case '3':
+                return 'Mar'
+
+            case '4':
+                return 'Apr'
+
+            case '5':
+                return 'May'
+
+            case '6':
+                return 'Jun'
+
+            case '7':
+                return 'Jul'
+
+            case '8':
+                return 'Aug'
+
+            case '9':
+                return 'Sep'
+
+            case '10':
+                return 'Oct'
+
+            case '11':
+                return 'Nov'
+
+            case '12':
+                return 'Dec'
+
+            default:
+                return ''
+        }
+    }
 
     return !isLoading ? (
         <SafeAreaView
@@ -607,80 +733,266 @@ const StoreScreen = ({navigation}) => {
                             </TouchableOpacity>
                         </View>
                     ) : (
-                        <Card
-                            containerStyle={{
-                                ...globalStyles.cardContainer,
-                                marginTop: 10,
-                            }}>
-                            <View
-                                style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
+                        <View>
+                            <Card
+                                containerStyle={{
+                                    ...globalStyles.cardContainer,
+                                    marginTop: 10,
                                 }}>
-                                <Avatar
-                                    rounded
-                                    size={65}
-                                    source={
-                                        storeInfo.shopImage == ''
-                                            ? require('~/assets/images/logo.jpg')
-                                            : {uri: storeInfo.shopImage}
-                                    }
-                                    avatarStyle={{
-                                        borderColor: AVATAR_BORDER,
-                                        borderWidth: 1,
-                                    }}
-                                />
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Avatar
+                                        rounded
+                                        size={65}
+                                        source={
+                                            storeInfo.shopImage == ''
+                                                ? require('~/assets/images/logo.jpg')
+                                                : {uri: storeInfo.shopImage}
+                                        }
+                                        avatarStyle={{
+                                            borderColor: AVATAR_BORDER,
+                                            borderWidth: 1,
+                                        }}
+                                    />
 
-                                <View style={{marginLeft: 10, flex: 1}}>
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 20,
-                                            fontWeight: 'bold',
-                                        }}>
-                                        {storeInfo.displayName}
+                                    <View style={{marginLeft: 10, flex: 1}}>
+                                        <Text
+                                            style={{
+                                                ...styles.labelStyle,
+                                                fontSize: 20,
+                                                fontWeight: 'bold',
+                                            }}>
+                                            {storeInfo.displayName}
+                                        </Text>
+
+                                        <View
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                marginTop: 5,
+                                            }}>
+                                            <Text style={{color: 'black'}}>
+                                                {followers} Follow
+                                            </Text>
+
+                                            <View style={{flex: 1}} />
+
+                                            <TouchableOpacity
+                                                onPress={() =>
+                                                    navigation.navigate(
+                                                        'Profile',
+                                                        {
+                                                            0:
+                                                                currentUser.storeId !=
+                                                                undefined
+                                                                    ? currentUser.storeId
+                                                                    : currentUser._id,
+                                                        },
+                                                    )
+                                                }
+                                                style={{
+                                                    borderWidth: 1,
+                                                    borderColor: PRIMARY_COLOR,
+                                                    padding: 5,
+                                                    borderRadius: 10,
+                                                }}>
+                                                <Text
+                                                    style={{
+                                                        ...styles.labelStyle,
+                                                        color: PRIMARY_COLOR,
+                                                    }}>
+                                                    See My Store
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Card>
+
+                            <Card
+                                containerStyle={{
+                                    ...globalStyles.cardContainer,
+                                    marginTop: 5,
+                                }}>
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        navigation.navigate('Order', {
+                                            from: 'seller',
+                                        })
+                                    }
+                                    style={{
+                                        alignSelf: 'flex-end',
+                                        alignItems: 'center',
+                                        flexDirection: 'row',
+                                        marginVertical: 5,
+                                    }}>
+                                    <Text style={{color: 'black'}}>
+                                        Order History
+                                    </Text>
+                                    <Ion
+                                        name="chevron-forward-outline"
+                                        size={24}
+                                        color="black"
+                                    />
+                                </TouchableOpacity>
+
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-around',
+                                        marginBottom: 5,
+                                    }}>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            navigation.navigate('Order', {
+                                                from: 'seller',
+                                            })
+                                        }
+                                        style={styles.touchView}>
+                                        <Text
+                                            style={{
+                                                color: 'black',
+                                                fontWeight: '600',
+                                                fontSize: 16,
+                                            }}>
+                                            {countShipping}
+                                        </Text>
+                                        <Text style={{color: 'black'}}>
+                                            Shipping
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            navigation.navigate('Order', {
+                                                from: 'seller',
+                                            })
+                                        }
+                                        style={styles.touchView}>
+                                        <Text
+                                            style={{
+                                                color: 'black',
+                                                fontWeight: '600',
+                                                fontSize: 16,
+                                            }}>
+                                            {countDelivered}
+                                        </Text>
+                                        <Text style={{color: 'black'}}>
+                                            Delivered
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </Card>
+
+                            {Object.keys(revenue).length > 0 && (
+                                <Card
+                                    containerStyle={{
+                                        ...globalStyles.cardContainer,
+                                        marginTop: 5,
+                                    }}>
+                                    <Text style={styles.chartTitle}>
+                                        Revenue of last 6 months
                                     </Text>
 
+                                    <LineChart
+                                        data={revenue}
+                                        style={graphStyle}
+                                        formatYLabel={yLabel =>
+                                            formatYLabel(yLabel)
+                                        }
+                                        formatXLabel={xLabel =>
+                                            formatXLabel(xLabel)
+                                        }
+                                        width={360}
+                                        height={220}
+                                        chartConfig={chartConfig}
+                                    />
+                                </Card>
+                            )}
+
+                            <Card
+                                containerStyle={{
+                                    ...globalStyles.cardContainer,
+                                    marginTop: 5,
+                                }}>
+                                <Text style={styles.chartTitle}>
+                                    Top 5 Sold Products
+                                </Text>
+
+                                {topProducts.map((product, index) => (
                                     <View
+                                        key={index}
                                         style={{
                                             flexDirection: 'row',
                                             alignItems: 'center',
-                                            marginTop: 5,
+                                            justifyContent: 'space-around',
                                         }}>
-                                        <Text style={{color: 'black'}}>
-                                            {followers} Follow
+                                        <Text
+                                            style={{
+                                                color: PRIMARY_COLOR,
+                                                fontWeight: '600',
+                                            }}>
+                                            {`Top ${index + 1}`}
                                         </Text>
 
-                                        <View style={{flex: 1}} />
+                                        <Divider
+                                            color={PRIMARY_COLOR}
+                                            orientation="vertical"
+                                            width={1}
+                                            style={{marginVertical: 15}}
+                                        />
 
-                                        <TouchableOpacity
-                                            onPress={() =>
-                                                navigation.navigate('Profile', {
-                                                    0:
-                                                        currentUser.storeId !=
-                                                        undefined
-                                                            ? currentUser.storeId
-                                                            : currentUser._id,
-                                                })
-                                            }
+                                        <Image
+                                            source={{
+                                                uri: product.thumbnailImage,
+                                            }}
                                             style={{
-                                                borderWidth: 1,
-                                                borderColor: PRIMARY_COLOR,
-                                                padding: 5,
-                                                borderRadius: 10,
+                                                width: 80,
+                                                height: 80,
+                                            }}
+                                            resizeMethod="resize"
+                                            resizeMode="contain"
+                                        />
+
+                                        <Divider
+                                            color={PRIMARY_COLOR}
+                                            orientation="vertical"
+                                            width={1}
+                                            style={{marginVertical: 15}}
+                                        />
+
+                                        <Text
+                                            style={{
+                                                color: 'black',
+                                                fontSize: 16,
+                                                fontWeight: '600',
                                             }}>
-                                            <Text
-                                                style={{
-                                                    ...styles.labelStyle,
-                                                    color: PRIMARY_COLOR,
-                                                }}>
-                                                See My Store
-                                            </Text>
-                                        </TouchableOpacity>
+                                            {product.productName}
+                                        </Text>
+
+                                        <Divider
+                                            color={PRIMARY_COLOR}
+                                            orientation="vertical"
+                                            width={1}
+                                            style={{marginVertical: 15}}
+                                        />
+
+                                        <Text
+                                            style={{
+                                                color: 'black',
+                                                fontSize: 16,
+                                                fontWeight: '600',
+                                            }}>
+                                            {product.soldCount}
+                                        </Text>
                                     </View>
-                                </View>
-                            </View>
-                        </Card>
+                                ))}
+                            </Card>
+                        </View>
                     )}
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
@@ -737,5 +1049,18 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 3,
         borderColor: SECONDARY_COLOR,
+    },
+
+    touchView: {
+        backgroundColor: SECONDARY_COLOR,
+        borderRadius: 10,
+        padding: 30,
+        alignItems: 'center',
+    },
+    chartTitle: {
+        alignSelf: 'center',
+        fontSize: 18,
+        color: PRIMARY_COLOR,
+        fontWeight: '600',
     },
 })

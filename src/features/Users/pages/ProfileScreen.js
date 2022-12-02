@@ -96,7 +96,6 @@ const ProfileScreen = ({navigation, route}) => {
             isCurrentStore &&
             Object.keys(currentUser).length !== 0
         ) {
-            console.log('first')
             setModalLoading(true)
             setIsLoading(true)
 

@@ -157,7 +157,7 @@ const MoreScreen = ({navigation}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-                onPress={() => navigation.navigate('Order')}
+                onPress={() => navigation.navigate('Order', {from: 'buyer'})}
                 style={styles.container}>
                 <Image
                     source={require('~/assets/images/buy.png')}

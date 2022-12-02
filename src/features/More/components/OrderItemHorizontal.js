@@ -15,6 +15,9 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
     const [isReview, setIsReview] = useState(false)
 
     const currentUser = useSelector(state => state.user)
+    const isMyProduct =
+        order.ownerId === currentUser._id ||
+        order.ownerId === currentUser.storeId
 
     //Get Product Information
     useEffect(() => {
@@ -42,7 +45,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                     break
 
                 default:
-                    ''
+                    setStatusDelivery('Confirming')
                     break
             }
         }
@@ -212,7 +215,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                         </Text>
                     )}
                     <View style={{flex: 1}} />
-                    {statusDelivery != 'Delivered' && (
+                    {!isMyProduct && statusDelivery != 'Delivered' && (
                         <TouchableOpacity
                             onPress={handleConfirmReceivedClick}
                             style={styles.touchStyle}>
@@ -221,18 +224,22 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                             </Text>
                         </TouchableOpacity>
                     )}
-                    {!isReview && statusDelivery === 'Delivered' && (
-                        <TouchableOpacity
-                            onPress={() =>
-                                navigation.navigate('Review', {
-                                    _id: order.productsList[0].name,
-                                })
-                            }
-                            style={styles.touchStyle}>
-                            <Text style={globalStyles.textButton}>Review</Text>
-                        </TouchableOpacity>
-                    )}
-                    {statusDelivery === 'Delivered' && (
+                    {!isMyProduct &&
+                        !isReview &&
+                        statusDelivery === 'Delivered' && (
+                            <TouchableOpacity
+                                onPress={() =>
+                                    navigation.navigate('Review', {
+                                        _id: order.productsList[0].name,
+                                    })
+                                }
+                                style={styles.touchStyle}>
+                                <Text style={globalStyles.textButton}>
+                                    Review
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    {!isMyProduct && statusDelivery === 'Delivered' && (
                         <TouchableOpacity
                             style={{...styles.touchStyle, marginLeft: 10}}
                             onPress={handleAddCartClick}>

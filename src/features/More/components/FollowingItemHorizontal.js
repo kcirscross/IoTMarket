@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { Avatar, Badge, Card } from 'react-native-elements'
-import { useDispatch, useSelector } from 'react-redux'
-import { globalStyles } from '../../../assets/styles/globalStyles'
+import React, {useEffect, useState} from 'react'
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import {Avatar, Badge, Card} from 'react-native-elements'
+import Ant from 'react-native-vector-icons/AntDesign'
+import Ion from 'react-native-vector-icons/Ionicons'
+import {useDispatch, useSelector} from 'react-redux'
+import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     AVATAR_BORDER,
     convertTime,
-    PRIMARY_COLOR
+    PRIMARY_COLOR,
 } from '../../../components/constants'
-import { getAPI, patchAPI } from '../../../components/utils/base_API'
-import { addFollow, removeFollow } from '../../Users/userSlice'
+import {getAPI, patchAPI} from '../../../components/utils/base_API'
+import {addFollow, removeFollow} from '../../Users/userSlice'
 
 const FollowingItemHorizontal = ({navigation, store}) => {
     const [isFollow, setIsFollow] = useState(true)
@@ -92,15 +94,35 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                     />
                 </View>
 
-                <View style={{marginLeft: 10}}>
+                <View style={{marginLeft: 10, flex: 1}}>
                     <Text
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
                         style={{
                             ...styles.labelStyle,
                             fontSize: 20,
                             fontWeight: 'bold',
+                            flex: 1,
                         }}>
                         {store.displayName}
                     </Text>
+
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
+                        <Ion name="star" color="#FA8128" size={16} />
+                        <Text style={{color: 'black', marginLeft: 5}}>
+                            {store.rating}/5{'     '}|
+                        </Text>
+
+                        <Text>{'     '}</Text>
+                        <Ion name="person" color={PRIMARY_COLOR} size={16} />
+                        <Text style={{color: 'black', marginLeft: 5}}>
+                            {store.followers.length} Followers
+                        </Text>
+                    </View>
 
                     <Text style={{color: 'black'}}>
                         {ownerInfo.onlineStatus == 'Online'
@@ -109,8 +131,6 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                     </Text>
                 </View>
 
-                <View style={{flex: 1}} />
-
                 <TouchableOpacity
                     onPress={handleFollowClick}
                     style={{
@@ -118,9 +138,37 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                         borderRadius: 10,
                         backgroundColor: isFollow ? 'red' : PRIMARY_COLOR,
                     }}>
-                    <Text style={{color: 'white'}}>
-                        {isFollow ? '- Follow' : '+ Follow'}
-                    </Text>
+                    {isFollow ? (
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <Ant name="minuscircleo" size={14} color="white" />
+                            <Text
+                                style={{
+                                    color: 'white',
+                                    marginLeft: 5,
+                                }}>
+                                Follow
+                            </Text>
+                        </View>
+                    ) : (
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <Ant name="pluscircleo" size={14} color="white" />
+                            <Text
+                                style={{
+                                    color: 'white',
+                                    marginLeft: 5,
+                                }}>
+                                Follow
+                            </Text>
+                        </View>
+                    )}
                 </TouchableOpacity>
             </TouchableOpacity>
         </Card>

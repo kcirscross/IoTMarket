@@ -1,6 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import moment from 'moment'
 import React from 'react'
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
 import {Card} from 'react-native-elements'
 import Font5 from 'react-native-vector-icons/FontAwesome5'
 import MateIcon from 'react-native-vector-icons/MaterialIcons'
@@ -11,7 +12,27 @@ const NotiItemHorizontal = ({navigation, noti}) => {
     const handleNotiClick = () => {
         postAPI({url: `noti/${noti._id}`})
             .then(res => {
-                res.status === 200 && navigation.navigate(noti.route)
+                if (res.status === 200) {
+                    noti.route !== 'Store'
+                        ? navigation.navigate(noti.route)
+                        : Alert.alert(
+                              'Please restart application to update your store.',
+                              '',
+                              [
+                                  {
+                                      text: 'OK',
+                                      onPress: () =>
+                                          navigation.reset({
+                                              index: 0,
+                                              routes: [{name: 'Splash'}],
+                                          }),
+                                  },
+                                  {
+                                      text: 'Cancel',
+                                  },
+                              ],
+                          )
+                }
             })
             .catch(err => console.log('Noti: ', err))
     }
@@ -29,7 +50,7 @@ const NotiItemHorizontal = ({navigation, noti}) => {
                 {noti.route === 'Order' ? (
                     <Font5 name="money-check-alt" size={36} color="green" />
                 ) : (
-                    <MateIcon name="storefront" size={36} color="yello" />
+                    <MateIcon name="storefront" size={36} color="#f7cd4d" />
                 )}
                 <View style={{marginLeft: 10}}>
                     <Text
