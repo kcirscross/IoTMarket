@@ -208,7 +208,11 @@ export default function App() {
                         name="WebViewPayment"
                         component={WebViewPayment}
                     />
-                    <Stack.Screen name="Order" component={OrderScreen} />
+                    <Stack.Screen
+                        name="Order"
+                        component={OrderScreen}
+                        initialParams={[{from: 'buyer'}]}
+                    />
                     <Stack.Screen
                         name="OrderDetail"
                         component={OrderDetailScreen}

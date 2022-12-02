@@ -454,8 +454,10 @@ const ProductDetail = ({navigation, route}) => {
                                 />
                             </View>
 
-                            <View>
+                            <View style={{flex: 1}}>
                                 <Text
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
                                     style={{
                                         fontWeight: 'bold',
                                         color: 'black',
@@ -476,7 +478,6 @@ const ProductDetail = ({navigation, route}) => {
                                           )}
                                 </Text>
                             </View>
-                            <View style={{flex: 1}} />
                             {!isOwner && (
                                 <View
                                     style={{
