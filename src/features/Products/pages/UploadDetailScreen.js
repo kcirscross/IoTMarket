@@ -34,7 +34,7 @@ import UploadImageItem from '../components/UploadImageItem'
 const UploadDetailScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
     const [listImages, setListImages] = useState([])
-    const [modalLoading, setModalLoading] = useState(false)
+    const [modalLoading, setModalLoading] = useState(true)
     const [modalPhotos, setModalPhotos] = useState(false)
 
     const [productName, setProductName] = useState('')
@@ -77,9 +77,14 @@ const UploadDetailScreen = ({navigation, route}) => {
     const [valueSubCategory, setValueSubCategory] = useState(null)
     const [chosenSubCategory, setChosenSubCategory] = useState('')
 
+    const isEdit = route.params.isEdit
+    const product = route.params.product
+    const [defaultSubCategory, setDefaultSubCategory] = useState('')
+    const [firstLoading, setFirstLoading] = useState(true)
+
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: route.params.categoryName,
+            title: route.params.category.categoryName,
             headerStyle: {backgroundColor: PRIMARY_COLOR},
             headerTintColor: 'white',
             headerShown: true,
@@ -94,20 +99,47 @@ const UploadDetailScreen = ({navigation, route}) => {
         let listSub = []
         axios({
             method: 'get',
-            url: `${API_URL}/subcategory/${route.params._id}`,
+            url: `${API_URL}/subcategory/${route.params.category._id}`,
         })
             .then(res => {
                 if (res.status == 200) {
-                    res.data.subcategories.forEach(sub =>
+                    res.data.subcategories.forEach(sub => {
                         listSub.push({
                             label: sub.subcategoryName,
                             value: sub._id,
-                        }),
-                    )
+                        })
+                        isEdit &&
+                            sub._id === product.subcategoryId &&
+                            setDefaultSubCategory(sub)
+                    })
                     setListSubCategory(listSub)
+
+                    setModalLoading(false)
+                    setFirstLoading(false)
                 }
             })
             .catch(error => console.log('SubCategory: ', error))
+    }, [])
+
+    //Set Variable if in Edit mode
+    useEffect(() => {
+        if (isEdit) {
+            setListImages(product.detailImages)
+            setChosenSubCategory(defaultSubCategory._id)
+            setProductName(product.productName)
+            setProductDescription(product.description)
+            setProductPrice(product.price)
+            setProductAmount(product.numberInStock)
+            setChosenCondition(product.condition)
+            setWeightBeforeBoxed(product.weight)
+            setHeightBeforeBoxed(product.height)
+            setWidthBeforeBoxed(product.width)
+            setLengthBeforeBoxed(product.length)
+            setWeightAfterBoxed(product.weightAfterBoxing)
+            setHeightAfterBoxed(product.heightAfterBoxing)
+            setWidthAfterBoxed(product.widthAfterBoxing)
+            setLengthAfterBoxed(product.lengthAfterBoxing)
+        }
     }, [])
 
     let getData = childData => {
@@ -188,7 +220,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     productName: productName,
                                     subcategoryId: chosenSubCategory,
                                     description: productDescription,
-                                    categoryId: route.params._id,
+                                    categoryId: category._id,
                                     detailImages: list,
                                     video: '',
                                     weight: parseFloat(weightBeforeBoxed),
@@ -204,7 +236,10 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     lengthAfterBoxing:
                                         parseFloat(lengthAfterBoxed),
                                     price: productPrice,
-                                    numberInStock: parseFloat(productAmount),
+                                    numberInStock:
+                                        currentUser.storeId !== undefined
+                                            ? parseFloat(productAmount)
+                                            : 1,
                                     condition: chosenCondition,
                                 },
                             })
@@ -270,7 +305,29 @@ const UploadDetailScreen = ({navigation, route}) => {
         }
     }
 
-    return (
+    const handleUpdateClick = () => {
+        if (
+            productName == '' ||
+            productDescription == '' ||
+            productPrice == '' ||
+            productAmount == '' ||
+            heightBeforeBoxed == '' ||
+            weightBeforeBoxed == '' ||
+            widthBeforeBoxed == '' ||
+            lengthBeforeBoxed == '' ||
+            heightAfterBoxed == '' ||
+            weightAfterBoxed == '' ||
+            widthAfterBoxed == '' ||
+            lengthAfterBoxed == '' ||
+            chosenCondition == ''
+        ) {
+            console.log('a')
+        } else {
+            console.log('b')
+        }
+    }
+
+    return !firstLoading ? (
         <SafeAreaView
             style={{
                 ...globalStyles.container,
@@ -278,9 +335,8 @@ const UploadDetailScreen = ({navigation, route}) => {
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView behavior="padding">
+                    <ModalLoading visible={modalLoading} />
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        <ModalLoading visible={modalLoading} />
-
                         <Modal
                             animationType="slide"
                             transparent={true}
@@ -383,7 +439,11 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 setValue={setValueSubCategory}
                                 setItems={setListSubCategory}
                                 listMode={'SCROLLVIEW'}
-                                placeholder="Select a sub category"
+                                placeholder={
+                                    isEdit
+                                        ? defaultSubCategory.subcategoryName
+                                        : 'Select a sub category'
+                                }
                                 onSelectItem={item =>
                                     setChosenSubCategory(item.value)
                                 }
@@ -426,14 +486,9 @@ const UploadDetailScreen = ({navigation, route}) => {
 
                             <Input
                                 label="Name"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 10,
-                                    width: '100%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                containerStyle={styles.textContainer}
+                                inputContainerStyle={styles.inputContainer}
+                                defaultValue={isEdit && product.productName}
                                 inputStyle={{
                                     paddingVertical: 0,
                                     fontSize: 16,
@@ -448,14 +503,9 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 label="Description"
                                 multiline={true}
                                 numberOfLines={10}
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '100%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                defaultValue={isEdit && product.description}
+                                containerStyle={styles.textContainer}
+                                inputContainerStyle={styles.inputContainer}
                                 inputStyle={{
                                     paddingVertical: 0,
                                     fontSize: 16,
@@ -472,14 +522,9 @@ const UploadDetailScreen = ({navigation, route}) => {
                             <Input
                                 label="Price (VND)"
                                 keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '100%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
+                                containerStyle={styles.textContainer}
+                                inputContainerStyle={styles.inputContainer}
+                                defaultValue={isEdit && product.price}
                                 inputStyle={{
                                     paddingVertical: 0,
                                     fontSize: 16,
@@ -490,26 +535,28 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 onChangeText={text => setProductPrice(text)}
                             />
 
-                            <Input
-                                label="Number in Stock"
-                                keyboardType="number-pad"
-                                containerStyle={{
-                                    ...globalStyles.input,
-                                    marginTop: 5,
-                                    width: '100%',
-                                }}
-                                inputContainerStyle={{
-                                    borderBottomWidth: 0,
-                                }}
-                                inputStyle={{
-                                    paddingVertical: 0,
-                                    fontSize: 16,
-                                    ...styles.textStyle,
-                                }}
-                                labelStyle={styles.labelStyle}
-                                renderErrorMessage={false}
-                                onChangeText={text => setProductAmount(text)}
-                            />
+                            {currentUser.storeId !== undefined && (
+                                <Input
+                                    label="Number in Stock"
+                                    keyboardType="number-pad"
+                                    defaultValue={
+                                        isEdit &&
+                                        product.numberInStock.toString()
+                                    }
+                                    containerStyle={styles.textContainer}
+                                    inputContainerStyle={styles.inputContainer}
+                                    inputStyle={{
+                                        paddingVertical: 0,
+                                        fontSize: 16,
+                                        ...styles.textStyle,
+                                    }}
+                                    labelStyle={styles.labelStyle}
+                                    renderErrorMessage={false}
+                                    onChangeText={text =>
+                                        setProductAmount(text)
+                                    }
+                                />
+                            )}
 
                             <Text
                                 style={{
@@ -528,7 +575,11 @@ const UploadDetailScreen = ({navigation, route}) => {
                                 setValue={setValueCondition}
                                 setItems={setItemsCondition}
                                 listMode={'SCROLLVIEW'}
-                                placeholder="Select a condition"
+                                placeholder={
+                                    isEdit
+                                        ? product.condition
+                                        : 'Select a condition'
+                                }
                                 style={styles.dropStyle}
                                 dropDownContainerStyle={{
                                     borderColor: SECONDARY_COLOR,
@@ -557,13 +608,14 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Weight (gram)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 0,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit && product.weight.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -579,14 +631,15 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Height  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 0,
                                         marginLeft: 20,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit && product.height.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -609,13 +662,14 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Width (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 5,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit && product.width.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -631,14 +685,15 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Length  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 5,
                                         marginLeft: 20,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit && product.length.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -670,13 +725,15 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Weight  (gram)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 0,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit &&
+                                        product.weightAfterBoxing.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -693,14 +750,16 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Height  (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 0,
                                         marginLeft: 20,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit &&
+                                        product.heightAfterBoxing.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -723,13 +782,15 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Width (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 5,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit &&
+                                        product.widthAfterBoxing.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -746,14 +807,16 @@ const UploadDetailScreen = ({navigation, route}) => {
                                     label="Length (cm)"
                                     keyboardType="number-pad"
                                     containerStyle={{
-                                        ...globalStyles.input,
-                                        marginTop: 5,
+                                        ...styles.textContainer,
                                         width: '40%',
+                                        marginTop: 5,
                                         marginLeft: 20,
                                     }}
-                                    inputContainerStyle={{
-                                        borderBottomWidth: 0,
-                                    }}
+                                    defaultValue={
+                                        isEdit &&
+                                        product.lengthAfterBoxing.toString()
+                                    }
+                                    inputContainerStyle={styles.inputContainer}
                                     inputStyle={{
                                         paddingVertical: 0,
                                         fontSize: 16,
@@ -768,21 +831,39 @@ const UploadDetailScreen = ({navigation, route}) => {
                             </View>
                         </View>
 
-                        <TouchableOpacity
-                            onPress={handleUploadClick}
-                            style={{
-                                ...globalStyles.button,
-                                alignSelf: 'center',
-                                marginBottom: 20,
-                            }}>
-                            <Text style={globalStyles.textButton}>
-                                Upload Product
-                            </Text>
-                        </TouchableOpacity>
+                        {isEdit ? (
+                            <TouchableOpacity
+                                onPress={handleUpdateClick}
+                                style={{
+                                    ...globalStyles.button,
+                                    alignSelf: 'center',
+                                    marginBottom: 20,
+                                }}>
+                                <Text style={globalStyles.textButton}>
+                                    Update Product
+                                </Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                onPress={handleUploadClick}
+                                style={{
+                                    ...globalStyles.button,
+                                    alignSelf: 'center',
+                                    marginBottom: 20,
+                                }}>
+                                <Text style={globalStyles.textButton}>
+                                    Upload Product
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                         <Toast position="bottom" bottomOffset={80} />
                     </ScrollView>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView>
+            <ModalLoading visible={modalLoading} />
         </SafeAreaView>
     )
 }
@@ -823,5 +904,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 3,
         borderColor: SECONDARY_COLOR,
+    },
+    textContainer: {
+        marginTop: 10,
+        paddingHorizontal: 0,
+    },
+    inputContainer: {
+        ...globalStyles.input,
+        width: '100%',
+        marginTop: 0,
+        borderBottomWidth: 0,
+        paddingVertical: 5,
     },
 })
