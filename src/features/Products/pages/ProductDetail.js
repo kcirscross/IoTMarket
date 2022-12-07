@@ -1,9 +1,9 @@
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
-    Alert,
     Dimensions,
     Image,
+    Modal,
     RefreshControl,
     SafeAreaView,
     ScrollView,
@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message'
 import Ant from 'react-native-vector-icons/AntDesign'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
+import Material from 'react-native-vector-icons/MaterialIcons'
 import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
@@ -54,15 +55,14 @@ const ProductDetail = ({navigation, route}) => {
     const [rating, setRating] = useState({})
     const [isFollow, setIsFollow] = useState(false)
     const [isOwner, setIsOwner] = useState(false)
-
     const [storeInfo, setStoreInfo] = useState([])
     const [isStore, setIsStore] = useState(false)
     const [modalBuyVisible, setModalBuyVisible] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [miniListReview, setMiniListReview] = useState([])
-
     const [listReview, setListReview] = useState([])
     const [listProduct, setListProduct] = useState([])
+    const [modalEdit, setModalEdit] = useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -75,34 +75,49 @@ const ProductDetail = ({navigation, route}) => {
             },
             headerRight: () => (
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            Object.keys(currentUser).length !== 0
-                                ? navigation.navigate('Favorite')
-                                : AlertForSignIn({navigation})
-                        }}
-                        style={{
-                            marginRight: 5,
-                        }}>
-                        <Icon
-                            name="heart"
-                            size={24}
-                            color="white"
-                            solid={true}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => {
-                            Object.keys(currentUser).length !== 0
-                                ? navigation.navigate('Cart')
-                                : AlertForSignIn({navigation})
-                        }}>
-                        <Ion name="cart-outline" size={30} color="white" />
-                    </TouchableOpacity>
+                    {!isOwner && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                Object.keys(currentUser).length !== 0
+                                    ? navigation.navigate('Favorite')
+                                    : AlertForSignIn({navigation})
+                            }}
+                            style={{
+                                marginRight: 5,
+                            }}>
+                            <Icon
+                                name="heart"
+                                size={24}
+                                color="white"
+                                solid={true}
+                            />
+                        </TouchableOpacity>
+                    )}
+
+                    {!isOwner && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                Object.keys(currentUser).length !== 0
+                                    ? navigation.navigate('Cart')
+                                    : AlertForSignIn({navigation})
+                            }}>
+                            <Ion name="cart-outline" size={30} color="white" />
+                        </TouchableOpacity>
+                    )}
+
+                    {isOwner && (
+                        <TouchableOpacity onPress={() => setModalEdit(true)}>
+                            <Material
+                                name="more-vert"
+                                size={30}
+                                color="white"
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
             ),
         })
-    }, [])
+    }, [isOwner])
 
     //Get Product Detail
     useEffect(() => {
@@ -160,7 +175,7 @@ const ProductDetail = ({navigation, route}) => {
                                     url: `${API_URL}/user/${res.data.store.ownerId}`,
                                 })
                                     .then(res => {
-                                        if (res.status == 200) {
+                                        if (res.status === 200) {
                                             setProductOwner(res.data.userInfo)
                                             currentUser.follows.forEach(
                                                 id =>
@@ -169,8 +184,8 @@ const ProductDetail = ({navigation, route}) => {
                                                             .storeId &&
                                                     setIsFollow(true),
                                             )
+                                            setModalLoading(false)
                                         }
-                                        setModalLoading(false)
                                     })
                                     .catch(error => {
                                         console.log(error.response)
@@ -188,15 +203,15 @@ const ProductDetail = ({navigation, route}) => {
                             url: `${API_URL}/user/${res.data.product.ownerId}`,
                         })
                             .then(res => {
-                                if (res.status == 200) {
+                                if (res.status === 200) {
                                     setProductOwner(res.data.userInfo)
                                     currentUser.follows.forEach(
                                         id =>
                                             id == res.data.userInfo.storeId &&
                                             setIsFollow(true),
                                     )
+                                    setModalLoading(false)
                                 }
-                                setModalLoading(false)
                             })
                             .catch(error => {
                                 console.log(error.response)
@@ -334,6 +349,28 @@ const ProductDetail = ({navigation, route}) => {
 
     const setVisible = isVisible => {
         setModalBuyVisible(isVisible)
+    }
+
+    const handleDeleteClick = () => {
+        console.log(product)
+    }
+
+    const handleEditClick = () => {
+        getAPI({url: 'category'})
+            .then(res => {
+                if (res.status === 200) {
+                    res.data.categories.forEach(category => {
+                        category._id === product.categoryId &&
+                            navigation.navigate('UploadDetail', {
+                                category: category,
+                                isEdit: true,
+                                product: product,
+                            })
+                    })
+                    setModalEdit(false)
+                }
+            })
+            .catch(err => console.log('Get Sub: ', err))
     }
 
     return !modalLoading ? (
@@ -653,7 +690,15 @@ const ProductDetail = ({navigation, route}) => {
 
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Description: </Text>
-                        <Text style={{color: 'black'}}>
+                        <Text
+                            numberOfLines={
+                                !modalLoading
+                                    ? 1
+                                    : Math.round(
+                                          product.description.length / 60,
+                                      )
+                            }
+                            style={{color: 'black'}}>
                             {product.description}
                         </Text>
                     </View>
@@ -831,7 +876,7 @@ const ProductDetail = ({navigation, route}) => {
 
                     <Divider width={1} color={PRIMARY_COLOR} />
 
-                    {rating.ratingCount > 3
+                    {rating.ratingCount < 4
                         ? miniListReview.map((review, index) => (
                               <ReviewItemHorizontal
                                   key={index}
@@ -905,7 +950,30 @@ const ProductDetail = ({navigation, route}) => {
                     </View>
                 )}
             </ScrollView>
+
             <Toast position="bottom" bottomOffset={70} />
+
+            <Modal visible={modalEdit} animationType="none" transparent={true}>
+                <Card containerStyle={styles.modalEdit}>
+                    <TouchableOpacity
+                        onPress={handleEditClick}
+                        style={styles.touchEdit}>
+                        <Text style={styles.textEdit}>Edit</Text>
+                        <Material name="edit" size={20} color="black" />
+                    </TouchableOpacity>
+
+                    <Divider color={PRIMARY_COLOR} size={2} />
+
+                    <TouchableOpacity
+                        style={styles.touchEdit}
+                        onPress={handleDeleteClick}>
+                        <Text style={{...styles.textEdit, color: 'red'}}>
+                            Delete
+                        </Text>
+                        <Material name="delete-outline" size={20} color="red" />
+                    </TouchableOpacity>
+                </Card>
+            </Modal>
 
             {!isOwner && (
                 <BottomMenuBar
@@ -945,5 +1013,24 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 3,
         marginVertical: 10,
+    },
+    modalEdit: {
+        ...globalStyles.cardContainer,
+        position: 'absolute',
+        top: '9%',
+        right: '2%',
+        width: 120,
+        flex: 1,
+    },
+    touchEdit: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 5,
+    },
+    textEdit: {
+        color: 'black',
+        fontWeight: '500',
+        fontSize: 16,
     },
 })

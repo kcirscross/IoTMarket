@@ -11,7 +11,7 @@ const CategoryItemHorizontal = ({category, navigation}) => {
         <TouchableOpacity
             onPress={() => {
                 Object.keys(currentUser).length !== 0
-                    ? navigation.navigate('UploadDetail', category)
+                    ? navigation.navigate('UploadDetail', {category: category})
                     : AlertForSignIn({navigation})
             }}
             style={{

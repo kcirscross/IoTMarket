@@ -31,7 +31,7 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                       }
                   })
                   .catch(err => console.log('Follow: ', err))
-            : patchAPI({url: `user/follow/${store._id}`})
+            : patchAPI({url: `user/unfollow/${store._id}`})
                   .then(res => {
                       if (res.status === 200) {
                           dispatch(removeFollow(store._id))
