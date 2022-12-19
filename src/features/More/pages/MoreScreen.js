@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native'
-import {Avatar, Divider} from 'react-native-elements'
+import {Avatar, Card} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons'
@@ -99,120 +99,161 @@ const MoreScreen = ({navigation}) => {
         <SafeAreaView style={globalStyles.container}>
             <ModalLoading visible={modalLoading} />
 
-            <TouchableOpacity
-                onPress={() => navigation.navigate('ChangeInfo')}
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 10,
-                }}>
-                <Avatar
-                    rounded
-                    size={64}
-                    source={{uri: currentUser.avatar}}
-                    avatarStyle={{
-                        borderWidth: 1,
-                        borderColor: 'gray',
-                    }}
-                />
-                <View
+            <Card
+                containerStyle={{...globalStyles.cardContainer, marginTop: 10}}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('ChangeInfo')}
                     style={{
-                        marginLeft: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginTop: 10,
                     }}>
-                    <Text
+                    <Avatar
+                        rounded
+                        size={64}
+                        source={{uri: currentUser.avatar}}
+                        avatarStyle={{
+                            borderWidth: 1,
+                            borderColor: 'gray',
+                        }}
+                    />
+                    <View
                         style={{
-                            fontWeight: 'bold',
-                            fontSize: 20,
-                            color: 'black',
+                            marginLeft: 10,
                         }}>
-                        {currentUser.fullName || ''}
-                    </Text>
-                    <Text>
-                        Following:{' '}
-                        {currentUser.follows != undefined
-                            ? currentUser.follows.length
-                            : 0}
-                    </Text>
-                </View>
-            </TouchableOpacity>
+                        <Text
+                            style={{
+                                fontWeight: 'bold',
+                                fontSize: 20,
+                                color: 'black',
+                            }}>
+                            {currentUser.fullName || ''}
+                        </Text>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                            }}>
+                            <Ion
+                                name="people-outline"
+                                size={25}
+                                color={'blue'}
+                                style={{marginRight: 10}}
+                            />
+                            <Text style={{color: 'black'}}>
+                                Following:{' '}
+                                {currentUser.follows != undefined
+                                    ? currentUser.follows.length
+                                    : 0}
+                            </Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            </Card>
 
-            <Divider width={1} color={PRIMARY_COLOR} style={{marginTop: 10}} />
-
-            <TouchableOpacity
-                onPress={() => navigation.navigate('Store')}
-                style={styles.container}>
-                <MaterialIcon name="storefront" size={28} color="#f7cd4d" />
-                <Text style={styles.textStyle}>My Store</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={() => navigation.navigate('Following')}
-                style={styles.container}>
-                <Ion name="people-outline" size={28} color={'blue'} />
-                <Text style={styles.textStyle}>Following</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={() => navigation.navigate('Order', {from: 'buyer'})}
-                style={styles.container}>
-                <Image
-                    source={require('~/assets/images/buy.png')}
-                    style={{
-                        tintColor: 'red',
-                    }}
-                />
-                <Text style={styles.textStyle}>My Order</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.container}
-                onPress={() => navigation.navigate('Cart')}>
-                <Ion name="cart-outline" size={25} color={PRIMARY_COLOR} />
-                <Text style={styles.textStyle}>My Cart</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.container}
-                onPress={() => navigation.navigate('Favorite')}>
-                <Icon name="heart" color={'#FF4122'} solid={true} size={24} />
-                <Text style={styles.textStyle}>Favorite Products</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={() => navigation.navigate('ChangeInfo')}
-                style={styles.container}>
-                <Icon
-                    name="info-circle"
-                    color={'#45B8FE'}
-                    solid={true}
-                    size={24}
-                />
-                <Text style={styles.textStyle}>Change Your Infomation</Text>
-                <View style={{flex: 1}} />
-                <Ion name="chevron-forward-outline" size={24} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={handleSignOutClick}
-                style={styles.container}>
-                <Icon
-                    name="sign-out-alt"
-                    color={'black'}
-                    solid={true}
-                    size={24}
-                />
-                <Text style={styles.textStyle}>Sign Out</Text>
-            </TouchableOpacity>
+            <Card
+                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Store')}
+                    style={styles.container}>
+                    <MaterialIcon name="storefront" size={28} color="#f7cd4d" />
+                    <Text style={styles.textStyle}>My Store</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('Following')}
+                    style={styles.container}>
+                    <Ion name="people-outline" size={28} color={'blue'} />
+                    <Text style={styles.textStyle}>Following</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() =>
+                        navigation.navigate('Order', {from: 'buyer'})
+                    }
+                    style={styles.container}>
+                    <Image
+                        source={require('~/assets/images/buy.png')}
+                        style={{
+                            tintColor: 'red',
+                        }}
+                    />
+                    <Text style={styles.textStyle}>My Order</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.container}
+                    onPress={() => navigation.navigate('Cart')}>
+                    <Ion name="cart-outline" size={25} color={PRIMARY_COLOR} />
+                    <Text style={styles.textStyle}>My Cart</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.container}
+                    onPress={() => navigation.navigate('Favorite')}>
+                    <Icon
+                        name="heart"
+                        color={'#FF4122'}
+                        solid={true}
+                        size={24}
+                    />
+                    <Text style={styles.textStyle}>Favorite Products</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('ChangeInfo')}
+                    style={styles.container}>
+                    <Icon
+                        name="info-circle"
+                        color={'#45B8FE'}
+                        solid={true}
+                        size={24}
+                    />
+                    <Text style={styles.textStyle}>Account Infomation</Text>
+                    <View style={{flex: 1}} />
+                    <Ion
+                        name="chevron-forward-outline"
+                        size={24}
+                        color="black"
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={handleSignOutClick}
+                    style={styles.container}>
+                    <Icon
+                        name="sign-out-alt"
+                        color={'black'}
+                        solid={true}
+                        size={24}
+                    />
+                    <Text style={styles.textStyle}>Sign Out</Text>
+                </TouchableOpacity>
+            </Card>
         </SafeAreaView>
     ) : (
         <SafeAreaView style={globalStyles.container}>

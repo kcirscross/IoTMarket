@@ -9,9 +9,10 @@ import {
 } from 'react-native'
 import {Avatar, Badge, Card, Tab, TabView} from 'react-native-elements'
 import Toast from 'react-native-toast-message'
-import Ion from 'react-native-vector-icons/Ionicons'
 import Ant from 'react-native-vector-icons/AntDesign'
+import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
+import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
     AVATAR_BORDER,
@@ -22,7 +23,6 @@ import {
 import {getAPI, patchAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../../Products/components'
 import {addFollow, removeFollow} from '../userSlice'
-import ModalLoading from '~/components/utils/ModalLoading'
 
 const StoreProfileScreen = ({navigation, route}) => {
     const currentUser = useSelector(state => state.user)
@@ -306,24 +306,6 @@ const StoreProfileScreen = ({navigation, route}) => {
                                         </Text>
                                     </View>
                                 )}
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={{
-                                    ...styles.touchStyle,
-                                    backgroundColor: PRIMARY_COLOR,
-                                    marginRight: 5,
-                                    flexDirection: 'row',
-                                    marginTop: 5,
-                                }}>
-                                <Ion
-                                    name="chatbubble-ellipses-outline"
-                                    size={18}
-                                    color="white"
-                                />
-                                <Text style={{color: 'white'}}>
-                                    {'  Chat  '}
-                                </Text>
                             </TouchableOpacity>
                         </View>
                     </View>

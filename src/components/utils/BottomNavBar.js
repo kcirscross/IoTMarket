@@ -1,30 +1,30 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import React from 'react'
-import {StyleSheet, TouchableOpacity, View} from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import MaterialCom from 'react-native-vector-icons/MaterialCommunityIcons'
-import {useSelector} from 'react-redux'
-import {ChatsScreen} from '~/features/Chats'
-import {HomeScreen} from '~/features/Home'
-import {MoreScreen} from '~/features/More'
-import {UploadProductScreen} from '~/features/Products'
+import { useSelector } from 'react-redux'
+import { HomeScreen } from '~/features/Home'
+import { MoreScreen } from '~/features/More'
+import { UploadProductScreen } from '~/features/Products'
+import { OrderScreen } from '../../features/More'
 import ProfileScreen from '../../features/Users/pages/ProfileScreen'
-import {PRIMARY_COLOR} from '../constants'
+import { PRIMARY_COLOR } from '../constants'
 
 const Tab = createBottomTabNavigator()
 
 const screenOptions = () => ({
     tabBarStyle: {
         backgroundColor: 'white',
-        height: 65,
+        height: 60,
         justifyContent: 'center',
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
     },
     tabBarShowLabel: false,
     tabBarHideOnKeyboard: true,
-    headerStyle: {backgroundColor: PRIMARY_COLOR},
+    headerStyle: { backgroundColor: PRIMARY_COLOR },
     headerTitleStyle: {
         color: 'white',
     },
@@ -33,7 +33,7 @@ const screenOptions = () => ({
     headerShown: false,
 })
 
-const CustomTabBarButton = ({children, onPress}) => (
+const CustomTabBarButton = ({ children, onPress }) => (
     <TouchableOpacity
         style={{
             top: -15,
@@ -63,7 +63,7 @@ const BottomNavBar = () => {
                 name="Home"
                 component={HomeScreen}
                 options={{
-                    tabBarIcon: ({focused}) => (
+                    tabBarIcon: ({ focused }) => (
                         <View style={styles.viewContainer}>
                             <Ion
                                 name={focused ? 'home' : 'home-outline'}
@@ -84,7 +84,7 @@ const BottomNavBar = () => {
                             : currentUser._id,
                 }}
                 options={{
-                    tabBarIcon: ({focused}) => (
+                    tabBarIcon: ({ focused }) => (
                         <View style={styles.viewContainer}>
                             <MaterialCom
                                 name={
@@ -92,7 +92,7 @@ const BottomNavBar = () => {
                                         ? 'storefront'
                                         : 'storefront-outline'
                                 }
-                                size={focused ? 42 : 32}
+                                size={focused ? 40 : 32}
                                 color={focused ? PRIMARY_COLOR : '#323232'}
                             />
                         </View>
@@ -103,7 +103,7 @@ const BottomNavBar = () => {
                 name="UploadProduct"
                 component={UploadProductScreen}
                 options={{
-                    tabBarIcon: ({focused}) => (
+                    tabBarIcon: ({ focused }) => (
                         <Icon
                             name="plus-circle"
                             size={62}
@@ -114,12 +114,13 @@ const BottomNavBar = () => {
                 }}
             />
             <Tab.Screen
-                name="Chats"
-                component={ChatsScreen}
+                name="Order"
+                component={OrderScreen}
+                initialParams={[{ from: 'buyer' }]}
                 options={{
-                    tabBarIcon: ({focused}) => (
+                    tabBarIcon: ({ focused }) => (
                         <Ion
-                            name={focused ? 'chatbox' : 'chatbox-outline'}
+                            name={focused ? 'reader' : 'reader-outline'}
                             size={focused ? 40 : 30}
                             color={focused ? PRIMARY_COLOR : 'black'}
                             solid={true}
@@ -131,9 +132,9 @@ const BottomNavBar = () => {
                 name="More"
                 component={MoreScreen}
                 options={{
-                    tabBarIcon: ({focused}) => (
-                        <MaterialCom
-                            name={focused ? 'cog' : 'cog-outline'}
+                    tabBarIcon: ({ focused }) => (
+                        <Ion
+                            name={focused ? 'settings' : 'settings-outline'}
                             size={focused ? 42 : 32}
                             color={focused ? PRIMARY_COLOR : '#323232'}
                         />

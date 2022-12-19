@@ -1,6 +1,9 @@
+import {firebase} from '@react-native-firebase/messaging'
+import {useIsFocused} from '@react-navigation/native'
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
+    Alert,
     Dimensions,
     Image,
     Modal,
@@ -31,7 +34,7 @@ import {
     PRIMARY_COLOR,
     SECONDARY_COLOR,
 } from '../../../components/constants'
-import {getAPI, patchAPI} from '../../../components/utils/base_API'
+import {deleteAPI, getAPI, patchAPI} from '../../../components/utils/base_API'
 import {addFollow, removeFollow} from '../../Users/userSlice'
 import {
     ProductItem,
@@ -48,7 +51,7 @@ const ProductDetail = ({navigation, route}) => {
     const _id = route.params._id
     const [product, setProduct] = useState([])
     const [productOwner, setProductOwner] = useState([])
-    const [modalLoading, setModalLoading] = useState(false)
+    const [modalLoading, setModalLoading] = useState(true)
     const [listImages, setListImages] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [favorite, setFavorite] = useState(false)
@@ -63,6 +66,8 @@ const ProductDetail = ({navigation, route}) => {
     const [listReview, setListReview] = useState([])
     const [listProduct, setListProduct] = useState([])
     const [modalEdit, setModalEdit] = useState(false)
+    const [bucketPath, setBucketPath] = useState('')
+    const isFocus = useIsFocused()
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -124,7 +129,7 @@ const ProductDetail = ({navigation, route}) => {
         getProduct()
 
         getReview()
-    }, [])
+    }, [isFocus])
 
     const getProduct = () => {
         setModalLoading(true)
@@ -136,7 +141,10 @@ const ProductDetail = ({navigation, route}) => {
             .then(res => {
                 if (res.status == 200) {
                     setProduct(res.data.product)
+
+                    setBucketPath(res.data.product.detailImages.shift())
                     setListImages(res.data.product.detailImages)
+
                     setRating(res.data.product.rating)
 
                     getAPI({
@@ -184,9 +192,9 @@ const ProductDetail = ({navigation, route}) => {
                                                             .storeId &&
                                                     setIsFollow(true),
                                             )
-                                            setModalLoading(false)
                                         }
                                     })
+                                    .then(() => setModalLoading(false))
                                     .catch(error => {
                                         console.log(error.response)
                                         setModalLoading(false)
@@ -352,7 +360,36 @@ const ProductDetail = ({navigation, route}) => {
     }
 
     const handleDeleteClick = () => {
-        console.log(product)
+        Alert.alert('Delete this product?', '', [
+            {
+                text: 'Yes',
+                onPress: () => {
+                    setModalLoading(true)
+                    deleteAPI({url: `product/${product._id}`})
+                        .then(async res => {
+                            if (res.status === 200) {
+                                await firebase
+                                    .storage()
+                                    .ref(bucketPath)
+                                    .list()
+                                    .then(result => {
+                                        result.items.forEach(item =>
+                                            console.log(item.delete()),
+                                        )
+                                    })
+                                    .then(() => {
+                                        setModalLoading(false)
+                                        navigation.goBack()
+                                    })
+                            }
+                        })
+                        .catch(err => console.log('Delete:', err))
+                },
+            },
+            {
+                text: 'No',
+            },
+        ])
     }
 
     const handleEditClick = () => {
@@ -365,6 +402,7 @@ const ProductDetail = ({navigation, route}) => {
                                 category: category,
                                 isEdit: true,
                                 product: product,
+                                bucketPath: bucketPath,
                             })
                     })
                     setModalEdit(false)
@@ -572,25 +610,6 @@ const ProductDetail = ({navigation, route}) => {
                                             )}
                                         </TouchableOpacity>
                                     )}
-                                    <TouchableOpacity
-                                        style={{
-                                            ...styles.touchStyle,
-                                            backgroundColor: PRIMARY_COLOR,
-                                            marginRight: 5,
-                                            flexDirection: 'row',
-                                            marginTop: 5,
-                                            paddingHorizontal: 10,
-                                        }}>
-                                        <Ion
-                                            name="chatbubble-ellipses-outline"
-                                            size={18}
-                                            color="white"
-                                        />
-                                        <Text style={{color: 'white'}}>
-                                            {' '}
-                                            Chat
-                                        </Text>
-                                    </TouchableOpacity>
                                 </View>
                             )}
                         </View>
@@ -687,15 +706,20 @@ const ProductDetail = ({navigation, route}) => {
                             {product.numberInStock}
                         </Text>
                     </View>
+                </Card>
 
+                <Card
+                    containerStyle={{
+                        ...globalStyles.cardContainer,
+                        marginTop: 5,
+                    }}>
                     <View style={styles.viewStyle}>
-                        <Text style={styles.textStyle}>Description: </Text>
                         <Text
                             numberOfLines={
-                                !modalLoading
+                                modalLoading
                                     ? 1
                                     : Math.round(
-                                          product.description.length / 60,
+                                          product.description.length / 45,
                                       )
                             }
                             style={{color: 'black'}}>
@@ -876,7 +900,7 @@ const ProductDetail = ({navigation, route}) => {
 
                     <Divider width={1} color={PRIMARY_COLOR} />
 
-                    {rating.ratingCount < 4
+                    {listReview.length < 4
                         ? miniListReview.map((review, index) => (
                               <ReviewItemHorizontal
                                   key={index}

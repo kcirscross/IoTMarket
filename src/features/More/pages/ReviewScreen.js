@@ -113,7 +113,6 @@ const ReviewScreen = ({navigation, route}) => {
             })
         } else {
             //Upload image or video to Firebase
-
             const filePath = `reviews/${route.params._id}/${currentUser._id}`
             let list = []
             let videoUri = ''
@@ -174,7 +173,7 @@ const ReviewScreen = ({navigation, route}) => {
                                                                 contentReview,
                                                             starPoints: rate,
                                                             images: list,
-                                                            videos: videoUri,
+                                                            videoUri: videoUri,
                                                         },
                                                     })
                                                         .then(res => {
@@ -547,6 +546,7 @@ const ReviewScreen = ({navigation, route}) => {
                                 style={{
                                     ...globalStyles.button,
                                     alignSelf: 'center',
+                                    marginBottom: 10,
                                 }}>
                                 <Text style={globalStyles.textButton}>
                                     Upload Review

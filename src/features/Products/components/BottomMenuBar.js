@@ -1,9 +1,8 @@
-import React from 'react'
-import {useEffect} from 'react'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import {Divider} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {PRIMARY_COLOR} from '../../../components/constants'
 import ModalChooseQuantity from './ModalChooseQuantity'
 
 const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
@@ -29,8 +28,9 @@ const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
                 bottom: 0,
                 height: 50,
                 flexDirection: 'row',
-                width: '100%',
-                justifyContent: 'space-between',
+                width: '105%',
+                justifyContent: 'center',
+                alignItems: 'center',
                 borderTopEndRadius: 10,
                 borderTopLeftRadius: 10,
                 borderTopColor: 'white',
@@ -41,9 +41,10 @@ const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
                 onPress={handleCallClick}
                 style={{
                     flexDirection: 'row',
-                    width: '25%',
                     justifyContent: 'center',
                     alignItems: 'center',
+                    flex: 1,
+                    height: '100%',
                 }}>
                 <Icon name="phone-alt" size={24} color={PRIMARY_COLOR} />
                 <Text
@@ -56,11 +57,19 @@ const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
                 </Text>
             </TouchableOpacity>
 
+            <Divider
+                width={1}
+                color={PRIMARY_COLOR}
+                orientation="vertical"
+                style={{marginVertical: 10}}
+            />
+
             <TouchableOpacity
                 onPress={handleSmsClick}
                 style={{
                     flexDirection: 'row',
-                    width: '30%',
+                    flex: 1,
+                    height: '100%',
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}>
@@ -76,36 +85,14 @@ const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-                style={{
-                    flexDirection: 'row',
-                    width: '25%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                <Icon
-                    name="comment-alt"
-                    size={24}
-                    color={PRIMARY_COLOR}
-                    solid={true}
-                />
-                <Text
-                    style={{
-                        color: PRIMARY_COLOR,
-                        marginLeft: 5,
-                        fontWeight: 'bold',
-                    }}>
-                    Chat
-                </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
                 onPress={() => {
                     setModalBuy(true)
                     onPress(true)
                 }}
                 style={{
                     flexDirection: 'row',
-                    width: '25%',
+                    flex: 1,
+                    height: '100%',
                     backgroundColor: PRIMARY_COLOR,
                     justifyContent: 'center',
                     alignItems: 'center',

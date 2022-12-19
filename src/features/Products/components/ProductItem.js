@@ -5,14 +5,13 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native'
-import {Card} from 'react-native-elements'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR} from '../../../components/constants'
+import { Card } from 'react-native-elements'
+import { globalStyles } from '../../../assets/styles/globalStyles'
 
-const ProductItem = ({data, navigation}) => {
-    const {price, productName, thumbnailImage, soldCount} = data
+const ProductItem = ({ data, navigation }) => {
+    const { price, productName, thumbnailImage, soldCount } = data
 
     return (
         <View
@@ -23,10 +22,10 @@ const ProductItem = ({data, navigation}) => {
             <Card containerStyle={globalStyles.cardContainer}>
                 <TouchableOpacity
                     onPress={() =>
-                        navigation.navigate('ProductDetail', {_id: data._id})
+                        navigation.push('ProductDetail', { _id: data._id })
                     }>
                     <Image
-                        source={{uri: thumbnailImage}}
+                        source={{ uri: thumbnailImage }}
                         resizeMode="contain"
                         resizeMethod="resize"
                         style={styles.imageStyle}
@@ -60,9 +59,9 @@ const ProductItem = ({data, navigation}) => {
                                 {Intl.NumberFormat('en-US').format(price)} đ
                             </Text>
 
-                            <View style={{flex: 1}} />
+                            <View style={{ flex: 1 }} />
 
-                            <Text style={{color: 'black'}}>
+                            <Text style={{ color: 'black' }}>
                                 Sold:{' '}
                                 {Intl.NumberFormat('en-US').format(soldCount)}
                             </Text>

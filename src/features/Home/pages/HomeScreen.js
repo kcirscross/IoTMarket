@@ -3,6 +3,7 @@ import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Dimensions,
     FlatList,
+    Image,
     RefreshControl,
     SafeAreaView,
     ScrollView,
@@ -171,8 +172,8 @@ const HomeScreen = ({navigation}) => {
                     />
                 }>
                 {/* Ads view */}
-                <TouchableOpacity style={styles.adsView}>
-                    <Text
+                <View>
+                    {/* <Text
                         style={{
                             fontSize: 24,
                             color: 'white',
@@ -187,8 +188,19 @@ const HomeScreen = ({navigation}) => {
                         }}>
                         Get a big discount with a very limited time, what are
                         you waiting for shop now!
-                    </Text>
-                </TouchableOpacity>
+                    </Text> */}
+                    <Image
+                        source={require('~/assets/images/discount.jpg')}
+                        style={{
+                            width: '100%',
+                            height: 190,
+                            borderRadius: 10,
+                            marginTop: 10,
+                        }}
+                        resizeMethod="resize"
+                        resizeMode="contain"
+                    />
+                </View>
 
                 {/* List Categories */}
                 <Text style={globalStyles.textTitle}>Categories</Text>

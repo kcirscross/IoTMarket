@@ -85,7 +85,6 @@ const OrderDetailScreen = ({navigation, route}) => {
                             })
                             .catch(err => console.log('Get Product', err))
                     })
-                    setModalLoading(false)
                 }
             })
             .catch(err => console.log('Get Order: ', err))
@@ -148,13 +147,7 @@ const OrderDetailScreen = ({navigation, route}) => {
                     }}>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                         <Ion name="bus" size={24} color={PRIMARY_COLOR} />
-                        <Text
-                            style={{
-                                color: 'black',
-                                fontWeight: '600',
-                                marginLeft: 10,
-                                fontSize: 16,
-                            }}>
+                        <Text style={styles.titleStyle}>
                             Delivery Information
                         </Text>
                     </View>
@@ -196,16 +189,17 @@ const OrderDetailScreen = ({navigation, route}) => {
                         <Ion
                             name="location-outline"
                             color={PRIMARY_COLOR}
-                            size={30}
+                            size={28}
                         />
 
-                        <View style={{marginLeft: 10}}>
-                            <Text style={{color: 'black', fontSize: 18}}>
+                        <View>
+                            <Text style={{...styles.titleStyle}}>
                                 Receive Address
                             </Text>
                             <Text
                                 style={{
                                     color: 'black',
+                                    marginLeft: 10,
                                 }}>{`\n${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street}\n${currentUser.address.ward}, ${currentUser.address.district}\n${currentUser.address.city}`}</Text>
                         </View>
 
@@ -218,6 +212,14 @@ const OrderDetailScreen = ({navigation, route}) => {
                         ...globalStyles.cardContainer,
                         marginTop: 5,
                     }}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Ion
+                            name="cart-outline"
+                            size={30}
+                            color={PRIMARY_COLOR}
+                        />
+                        <Text style={styles.titleStyle}>Product List</Text>
+                    </View>
                     {productList.map((item, index) => (
                         <View key={index}>
                             <View
@@ -281,16 +283,6 @@ const OrderDetailScreen = ({navigation, route}) => {
                     justifyContent: 'space-evenly',
                     width: '105%',
                 }}>
-                <TouchableOpacity style={styles.touchStyle}>
-                    <Ion
-                        name="chatbubble-ellipses-outline"
-                        color="white"
-                        size={24}
-                    />
-
-                    <Text style={styles.textStyle}>Contact Store</Text>
-                </TouchableOpacity>
-
                 {statusDelivery === 'Delivered' ? (
                     <TouchableOpacity
                         style={styles.touchStyle}
@@ -335,6 +327,13 @@ const styles = StyleSheet.create({
     textStyle: {
         color: 'white',
         fontWeight: '500',
+        fontSize: 18,
+        marginLeft: 10,
+    },
+
+    titleStyle: {
+        color: PRIMARY_COLOR,
+        fontWeight: '600',
         fontSize: 18,
         marginLeft: 10,
     },
