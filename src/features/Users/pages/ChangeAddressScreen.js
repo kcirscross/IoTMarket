@@ -181,9 +181,7 @@ const ChangeAddressScreen = ({navigation, route}) => {
                 opacity: modalLoading ? 0.5 : 1,
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    style={{height: '100%', width: '100%'}}>
+                <KeyboardAvoidingView style={{height: '100%', width: '100%'}}>
                     <ModalLoading visible={modalLoading} />
                     <View
                         style={{

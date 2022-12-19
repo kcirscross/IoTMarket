@@ -152,7 +152,6 @@ const SignInScreen = ({navigation}) => {
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
-                    behavior="padding"
                     style={{
                         ...styles.container,
                         width: '100%',
@@ -238,7 +237,7 @@ const SignInScreen = ({navigation}) => {
 
                     <View
                         style={{
-                            marginTop: 50,
+                            marginTop: 20,
                             width: '100%',
                             alignItems: 'center',
                         }}>
@@ -277,7 +276,7 @@ const SignInScreen = ({navigation}) => {
                                 flexDirection: 'row',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                marginTop: 50,
+                                marginTop: 10,
                             }}>
                             <Text>Don't have an account? </Text>
 
@@ -301,7 +300,6 @@ const SignInScreen = ({navigation}) => {
                                 style={{
                                     ...globalStyles.textButton,
                                     color: '#FF8164',
-                                    marginTop: 10,
                                 }}>
                                 Forgot Password?
                             </Text>
@@ -333,6 +331,6 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 10,
     },
 })

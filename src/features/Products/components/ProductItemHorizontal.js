@@ -134,6 +134,7 @@ const ProductItemHorizontal = ({navigation, product, type, onPress}) => {
                     style={{
                         width: 100,
                         height: 80,
+                        alignSelf: 'center',
                     }}
                     resizeMethod="resize"
                     resizeMode="contain"

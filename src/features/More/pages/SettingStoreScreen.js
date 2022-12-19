@@ -86,7 +86,11 @@ const SettingStoreScreen = ({navigation}) => {
 
     return (
         <SafeAreaView
-            style={{...globalStyles.container, opacity: modalActive ? 0.3 : 1}}>
+            style={{
+                ...globalStyles.container,
+                opacity: modalActive ? 0.3 : 1,
+                backgroundColor: 'white',
+            }}>
             <Modal
                 transparent={true}
                 visible={modalActive}

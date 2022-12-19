@@ -6,6 +6,7 @@ import {
     KeyboardAvoidingView,
     Modal,
     SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -250,7 +251,6 @@ const UpdateStoreScreen = ({navigation, route}) => {
 
     return (
         <SafeAreaView
-            onTouchStart={() => setModalAvatarVisible(false)}
             style={{
                 ...globalStyles.container,
                 opacity: modalAvatarVisible + modalLoading ? 0.3 : 1,
@@ -351,170 +351,187 @@ const UpdateStoreScreen = ({navigation, route}) => {
                         </SafeAreaView>
                     </Modal>
 
-                    <Text style={{...styles.labelStyle, fontSize: 20}}>
-                        Store Logo
-                    </Text>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <Text style={{...styles.labelStyle, fontSize: 20}}>
+                            Store Logo
+                        </Text>
 
-                    <TouchableOpacity
-                        onPress={() => setModalAvatarVisible(true)}
-                        style={{
-                            alignItems: 'center',
-                        }}>
-                        <Avatar
-                            rounded
-                            size={100}
-                            source={
-                                shopImage == ''
-                                    ? {uri: storeInfo.shopImage}
-                                    : {uri: shopImage}
-                            }
-                            avatarStyle={{
-                                borderColor: AVATAR_BORDER,
-                                borderWidth: 1,
-                            }}
-                        />
-
-                        <Icon
-                            name="camera"
-                            size={24}
-                            color="black"
+                        <TouchableOpacity
+                            onPress={() => setModalAvatarVisible(true)}
                             style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                right: '38%',
+                                alignItems: 'center',
+                            }}>
+                            <Avatar
+                                rounded
+                                size={100}
+                                source={
+                                    shopImage == ''
+                                        ? {uri: storeInfo.shopImage}
+                                        : {uri: shopImage}
+                                }
+                                avatarStyle={{
+                                    borderColor: AVATAR_BORDER,
+                                    borderWidth: 1,
+                                }}
+                            />
+
+                            <Icon
+                                name="camera"
+                                size={24}
+                                color="black"
+                                style={{
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    right: '38%',
+                                }}
+                            />
+                        </TouchableOpacity>
+
+                        <Input
+                            placeholder="Store Name"
+                            containerStyle={styles.textContainer}
+                            defaultValue={storeInfo.displayName}
+                            label="Store Name (At least 15 characters)"
+                            labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
                             }}
+                            renderErrorMessage={false}
+                            onChangeText={text => setDisplayName(text)}
                         />
-                    </TouchableOpacity>
 
-                    <Input
-                        placeholder="Store Name"
-                        containerStyle={styles.textContainer}
-                        defaultValue={storeInfo.displayName}
-                        label="Store Name (At least 15 characters)"
-                        labelStyle={styles.labelStyle}
-                        inputContainerStyle={{
-                            borderBottomWidth: 0,
-                        }}
-                        renderErrorMessage={false}
-                        onChangeText={text => setDisplayName(text)}
-                    />
-
-                    <Input
-                        placeholder="Store Description"
-                        multiline
-                        containerStyle={styles.textContainer}
-                        defaultValue={storeInfo.description}
-                        label="Store Description (At least 15 character)"
-                        labelStyle={styles.labelStyle}
-                        inputContainerStyle={{
-                            borderBottomWidth: 0,
-                        }}
-                        renderErrorMessage={false}
-                        onChangeText={text => setDescription(text)}
-                    />
-
-                    <Input
-                        placeholder="Detail Address"
-                        containerStyle={styles.textContainer}
-                        defaultValue={storeInfo.address.street}
-                        label="Detail Address"
-                        labelStyle={styles.labelStyle}
-                        inputContainerStyle={{
-                            borderBottomWidth: 0,
-                        }}
-                        renderErrorMessage={false}
-                        onChangeText={text => setChosenStreet(text)}
-                    />
-
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.labelStyle}>Choose your city.</Text>
-
-                        <DropDownPicker
-                            open={openCity}
-                            value={valueCity}
-                            items={itemsCity}
-                            placeholder={storeInfo.address.city}
-                            labelStyle={{
-                                color: 'black',
+                        <Input
+                            placeholder="Store Description"
+                            multiline
+                            containerStyle={styles.textContainer}
+                            defaultValue={storeInfo.description}
+                            label="Store Description (At least 15 character)"
+                            labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
                             }}
-                            setOpen={setOpenCity}
-                            setValue={setValueCity}
-                            setItems={setItemsCity}
-                            onSelectItem={item => {
-                                getDistrict(item.value)
-                                setChosenCity(item.label)
-                            }}
-                            style={styles.dropStyle}
-                            zIndex={3}
+                            renderErrorMessage={false}
+                            onChangeText={text => setDescription(text)}
                         />
-                    </View>
 
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.labelStyle}>
-                            Choose your district.
-                        </Text>
-
-                        <DropDownPicker
-                            open={openDistrict}
-                            value={valueDistrict}
-                            items={itemsDistrict}
-                            placeholder={storeInfo.address.district}
-                            labelStyle={{
-                                color: 'black',
+                        <Input
+                            placeholder="Detail Address"
+                            containerStyle={styles.textContainer}
+                            defaultValue={storeInfo.address.street}
+                            label="Detail Address"
+                            labelStyle={styles.labelStyle}
+                            inputContainerStyle={{
+                                borderBottomWidth: 0,
                             }}
-                            setOpen={setOpenDistrict}
-                            setValue={setValueDistrict}
-                            setItems={setItemsDistrict}
-                            onSelectItem={item => {
-                                getWard(item.value)
-                                setChosenDistrict(item.label)
-                            }}
-                            style={styles.dropStyle}
-                            zIndex={2}
+                            renderErrorMessage={false}
+                            onChangeText={text => setChosenStreet(text)}
                         />
-                    </View>
 
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.labelStyle}>Choose your ward.</Text>
+                        <View
+                            style={{
+                                marginTop: 10,
+                            }}>
+                            <Text style={styles.labelStyle}>
+                                Choose your city.
+                            </Text>
 
-                        <DropDownPicker
-                            open={openWard}
-                            value={valueWard}
-                            items={itemsWard}
-                            labelStyle={{
-                                color: 'black',
-                            }}
-                            placeholder={storeInfo.address.ward}
-                            setOpen={setOpenWard}
-                            setValue={setValueWard}
-                            setItems={setItemsWard}
-                            style={styles.dropStyle}
-                            zIndex={1}
-                            onSelectItem={item => setChosenWard(item.label)}
-                        />
-                    </View>
+                            <DropDownPicker
+                                open={openCity}
+                                value={valueCity}
+                                items={itemsCity}
+                                placeholder={storeInfo.address.city}
+                                labelStyle={{
+                                    color: 'black',
+                                }}
+                                setOpen={setOpenCity}
+                                setValue={setValueCity}
+                                setItems={setItemsCity}
+                                onSelectItem={item => {
+                                    getDistrict(item.value)
+                                    setChosenCity(item.label)
+                                }}
+                                style={styles.dropStyle}
+                                zIndex={3}
+                                listMode="SCROLLVIEW"
+                                dropDownContainerStyle={{
+                                    borderColor: SECONDARY_COLOR,
+                                }}
+                            />
+                        </View>
 
-                    <TouchableOpacity
-                        onPress={() => handleUpdateStore(shopImage)}
-                        style={{
-                            ...globalStyles.button,
-                            position: 'absolute',
-                            bottom: 10,
-                            alignSelf: 'center',
-                        }}>
-                        <Text style={globalStyles.textButton}>
-                            Update Store
-                        </Text>
-                    </TouchableOpacity>
+                        <View
+                            style={{
+                                marginTop: 10,
+                            }}>
+                            <Text style={styles.labelStyle}>
+                                Choose your district.
+                            </Text>
+
+                            <DropDownPicker
+                                open={openDistrict}
+                                value={valueDistrict}
+                                items={itemsDistrict}
+                                placeholder={storeInfo.address.district}
+                                labelStyle={{
+                                    color: 'black',
+                                }}
+                                setOpen={setOpenDistrict}
+                                setValue={setValueDistrict}
+                                setItems={setItemsDistrict}
+                                onSelectItem={item => {
+                                    getWard(item.value)
+                                    setChosenDistrict(item.label)
+                                }}
+                                style={styles.dropStyle}
+                                zIndex={2}
+                                listMode="SCROLLVIEW"
+                                dropDownContainerStyle={{
+                                    borderColor: SECONDARY_COLOR,
+                                }}
+                            />
+                        </View>
+
+                        <View
+                            style={{
+                                marginTop: 10,
+                            }}>
+                            <Text style={styles.labelStyle}>
+                                Choose your ward.
+                            </Text>
+
+                            <DropDownPicker
+                                open={openWard}
+                                value={valueWard}
+                                items={itemsWard}
+                                labelStyle={{
+                                    color: 'black',
+                                }}
+                                placeholder={storeInfo.address.ward}
+                                setOpen={setOpenWard}
+                                setValue={setValueWard}
+                                setItems={setItemsWard}
+                                style={styles.dropStyle}
+                                zIndex={1}
+                                onSelectItem={item => setChosenWard(item.label)}
+                                dropDownContainerStyle={{
+                                    borderColor: SECONDARY_COLOR,
+                                }}
+                                listMode="SCROLLVIEW"
+                            />
+                        </View>
+
+                        <TouchableOpacity
+                            onPress={() => handleUpdateStore(shopImage)}
+                            style={{
+                                ...globalStyles.button,
+                                alignSelf: 'center',
+                                marginBottom: 10,
+                            }}>
+                            <Text style={globalStyles.textButton}>
+                                Update Store
+                            </Text>
+                        </TouchableOpacity>
+                    </ScrollView>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
         </SafeAreaView>
@@ -548,7 +565,12 @@ const styles = StyleSheet.create({
     },
 
     dropStyle: {
-        marginTop: 5,
-        backgroundColor: SECONDARY_COLOR,
+        backgroundColor: 'white',
+        shadowColor: PRIMARY_COLOR,
+        elevation: 10,
+        shadowOffset: {width: -2, height: 4},
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        borderColor: SECONDARY_COLOR,
     },
 })

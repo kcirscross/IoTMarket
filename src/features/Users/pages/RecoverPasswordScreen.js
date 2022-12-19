@@ -55,11 +55,13 @@ const RecoverPasswordScreen = ({navigation}) => {
     }, [])
 
     return (
-        <SafeAreaView style={globalStyles.container}>
+        <SafeAreaView
+            style={{
+                ...globalStyles.container,
+                backgroundColor: 'white',
+            }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    style={styles.container}>
+                <KeyboardAvoidingView style={styles.container}>
                     <Toast position="bottom" bottomOffset={70} />
 
                     <Image source={require('~/assets/images/logo.jpg')} />
@@ -77,7 +79,7 @@ const RecoverPasswordScreen = ({navigation}) => {
                     <TouchableOpacity
                         style={{
                             ...globalStyles.button,
-                            marginTop: 20,
+                            ...styles.touchStyle,
                         }}
                         onPress={handleRecoverPassword}>
                         <Text style={globalStyles.textButton}>
@@ -98,5 +100,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
         height: '100%',
+    },
+    touchStyle: {
+        position: 'absolute',
+        bottom: 20,
+        alignSelf: 'center',
     },
 })

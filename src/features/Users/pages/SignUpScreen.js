@@ -152,11 +152,10 @@ const SignUpScreen = ({navigation}) => {
             style={{
                 ...globalStyles.container,
                 ...styles.container,
+                backgroundColor: 'white',
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    style={styles.container}>
+                <KeyboardAvoidingView style={styles.container}>
                     <Image
                         source={require('~/assets/images/logo.jpg')}
                         style={styles.logo}
@@ -235,7 +234,7 @@ const SignUpScreen = ({navigation}) => {
 
                     <View
                         style={{
-                            marginTop: 50,
+                            marginTop: 10,
                             width: '100%',
                         }}>
                         <View
@@ -284,7 +283,7 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 20,
+        marginTop: 10,
     },
 
     horizontalLine: {

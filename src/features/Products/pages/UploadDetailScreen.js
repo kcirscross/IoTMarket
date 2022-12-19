@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import firebase from '@react-native-firebase/app'
 import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
@@ -29,6 +28,7 @@ import {
     PRIMARY_COLOR,
     SECONDARY_COLOR,
 } from '../../../components/constants'
+import {patchAPI, postAPI} from '../../../components/utils/base_API'
 import UploadImageItem from '../components/UploadImageItem'
 
 const UploadDetailScreen = ({navigation, route}) => {
@@ -182,13 +182,11 @@ const UploadDetailScreen = ({navigation, route}) => {
         const filePath = `products/${
             currentUser.email + '_' + productName + '_' + Date.now()
         }/images`
-        const token = await AsyncStorage.getItem('token')
         let list = []
 
         try {
-            listImages.map((item, index) => {
-                //Upload Images
-                firebase
+            listImages.map(async (item, index) => {
+                await firebase
                     .storage()
                     .ref(
                         `${filePath}/${listImages[index].substring(
@@ -196,87 +194,663 @@ const UploadDetailScreen = ({navigation, route}) => {
                         )}`,
                     )
                     .putFile(item)
-                    .then(async () => {
-                        //Get Download Url
-                        const result = await firebase
-                            .storage()
-                            .ref(
-                                `${filePath}/${listImages[index].substring(
-                                    listImages[index].lastIndexOf('/') + 1,
-                                )}`,
-                            )
-                            .getDownloadURL()
-                        list.push(result)
-
-                        if (index == listImages.length - 1) {
-                            axios({
-                                method: 'post',
-                                url: `${API_URL}/product`,
-                                headers: {
-                                    authorization: `Bearer ${token}`,
-                                },
-                                data: {
-                                    thumbnailImage: list[0],
-                                    productName: productName,
-                                    subcategoryId: chosenSubCategory,
-                                    description: productDescription,
-                                    categoryId: category._id,
-                                    detailImages: list,
-                                    video: '',
-                                    weight: parseFloat(weightBeforeBoxed),
-                                    height: parseFloat(heightBeforeBoxed),
-                                    width: parseFloat(widthBeforeBoxed),
-                                    length: parseFloat(lengthBeforeBoxed),
-                                    weightAfterBoxing:
-                                        parseFloat(weightAfterBoxed),
-                                    heightAfterBoxing:
-                                        parseFloat(heightAfterBoxed),
-                                    widthAfterBoxing:
-                                        parseFloat(widthAfterBoxed),
-                                    lengthAfterBoxing:
-                                        parseFloat(lengthAfterBoxed),
-                                    price: productPrice,
-                                    numberInStock:
-                                        currentUser.storeId !== undefined
-                                            ? parseFloat(productAmount)
-                                            : 1,
-                                    condition: chosenCondition,
-                                },
-                            })
-                                .then(res => {
-                                    if (res.status == 200) {
-                                        setModalLoading(false)
-                                        Alert.alert(
-                                            'Upload product successfully.',
-                                            '',
-                                            [
-                                                {
-                                                    text: 'OK',
-                                                    onPress: () =>
-                                                        navigation.replace(
-                                                            'Profile',
-                                                            {
-                                                                0:
-                                                                    currentUser.storeId !=
+                    .then(() => {
+                        if (index === listImages.length - 1) {
+                            firebase
+                                .storage()
+                                .ref(filePath)
+                                .list()
+                                .then(result => {
+                                    result.items.map(
+                                        async (item, index) =>
+                                            await firebase
+                                                .storage()
+                                                .ref(item.fullPath)
+                                                .getDownloadURL()
+                                                .then(url => {
+                                                    list.push(url)
+                                                    if (
+                                                        index ===
+                                                        result.items.length - 1
+                                                    ) {
+                                                        list.unshift(filePath)
+                                                        postAPI({
+                                                            url: 'product',
+                                                            data: {
+                                                                thumbnailImage:
+                                                                    list[1],
+                                                                productName:
+                                                                    productName,
+                                                                subcategoryId:
+                                                                    chosenSubCategory,
+                                                                description:
+                                                                    productDescription,
+                                                                categoryId:
+                                                                    route.params
+                                                                        .category
+                                                                        ._id,
+                                                                detailImages:
+                                                                    list,
+                                                                video: '',
+                                                                weight: parseFloat(
+                                                                    weightBeforeBoxed,
+                                                                ),
+                                                                height: parseFloat(
+                                                                    heightBeforeBoxed,
+                                                                ),
+                                                                width: parseFloat(
+                                                                    widthBeforeBoxed,
+                                                                ),
+                                                                length: parseFloat(
+                                                                    lengthBeforeBoxed,
+                                                                ),
+                                                                weightAfterBoxing:
+                                                                    parseFloat(
+                                                                        weightAfterBoxed,
+                                                                    ),
+                                                                heightAfterBoxing:
+                                                                    parseFloat(
+                                                                        heightAfterBoxed,
+                                                                    ),
+                                                                widthAfterBoxing:
+                                                                    parseFloat(
+                                                                        widthAfterBoxed,
+                                                                    ),
+                                                                lengthAfterBoxing:
+                                                                    parseFloat(
+                                                                        lengthAfterBoxed,
+                                                                    ),
+                                                                price: productPrice,
+                                                                numberInStock:
+                                                                    currentUser.storeId !==
                                                                     undefined
-                                                                        ? currentUser.storeId
-                                                                        : currentUser._id,
+                                                                        ? parseFloat(
+                                                                              productAmount,
+                                                                          )
+                                                                        : 1,
+                                                                condition:
+                                                                    chosenCondition,
                                                             },
-                                                        ),
-                                                },
-                                            ],
-                                        )
-                                    }
-                                })
-                                .catch(err => {
-                                    console.log(err)
-                                    setModalLoading(false)
+                                                        })
+                                                            .then(res => {
+                                                                if (
+                                                                    res.status ===
+                                                                    200
+                                                                ) {
+                                                                    setModalLoading(
+                                                                        false,
+                                                                    )
+                                                                    Alert.alert(
+                                                                        'Upload product successfully.',
+                                                                        '',
+                                                                        [
+                                                                            {
+                                                                                text: 'OK',
+                                                                                onPress:
+                                                                                    () =>
+                                                                                        navigation.replace(
+                                                                                            'Profile',
+                                                                                            {
+                                                                                                0:
+                                                                                                    currentUser.storeId !=
+                                                                                                    undefined
+                                                                                                        ? currentUser.storeId
+                                                                                                        : currentUser._id,
+                                                                                            },
+                                                                                        ),
+                                                                            },
+                                                                        ],
+                                                                    )
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.log(err)
+                                                                setModalLoading(
+                                                                    false,
+                                                                )
+                                                            })
+                                                    }
+                                                }),
+                                    )
                                 })
                         }
                     })
             })
         } catch (error) {
             console.log(error.message)
+        }
+    }
+
+    const updateProduct = (deleteImages, containImages) => {
+        // setModalLoading(true)
+        let listName = []
+        if (deleteImages.length > 0) {
+            deleteImages.forEach(image => {
+                listName.push(image.split('%2Fimages%2F')[1].split('?alt')[0])
+            })
+
+            listName.forEach(name => {
+                firebase
+                    .storage()
+                    .ref(`${route.params.bucketPath}/${name}`)
+                    .delete()
+            })
+
+            if (containImages.length > 0) {
+                if (
+                    JSON.stringify(listImages) === JSON.stringify(containImages)
+                ) {
+                    containImages.unshift(route.params.bucketPath)
+
+                    patchAPI({
+                        url: `product/${product._id}`,
+                        data: {
+                            thumbnailImage: containImages[1],
+                            productName: productName,
+                            subcategoryId: chosenSubCategory,
+                            description: productDescription,
+                            categoryId: route.params.category._id,
+                            detailImages: containImages,
+                            video: '',
+                            weight: parseFloat(weightBeforeBoxed),
+                            height: parseFloat(heightBeforeBoxed),
+                            width: parseFloat(widthBeforeBoxed),
+                            length: parseFloat(lengthBeforeBoxed),
+                            weightAfterBoxing: parseFloat(weightAfterBoxed),
+                            heightAfterBoxing: parseFloat(heightAfterBoxed),
+                            widthAfterBoxing: parseFloat(widthAfterBoxed),
+                            lengthAfterBoxing: parseFloat(lengthAfterBoxed),
+                            price: productPrice,
+                            numberInStock:
+                                currentUser.storeId !== undefined
+                                    ? parseFloat(productAmount)
+                                    : 1,
+                            condition: chosenCondition,
+                        },
+                    })
+                        .then(res => {
+                            if (res.status === 200) {
+                                setModalLoading(false)
+                                Alert.alert(
+                                    'Update product successfully.',
+                                    '',
+                                    [
+                                        {
+                                            text: 'OK',
+                                            onPress: () => navigation.goBack(),
+                                        },
+                                    ],
+                                )
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            setModalLoading(false)
+                        })
+                } else {
+                    let listURL = []
+
+                    listImages.forEach((image, index) => {
+                        if (!containImages.includes(image)) {
+                            firebase
+                                .storage()
+                                .ref(
+                                    `${
+                                        route.params.bucketPath
+                                    }/${image.substring(
+                                        image.lastIndexOf('/') + 1,
+                                    )}`,
+                                )
+                                .putFile(image)
+                                .then(() => {
+                                    if (index === listImages.length - 1) {
+                                        firebase
+                                            .storage()
+                                            .ref(route.params.bucketPath)
+                                            .list()
+                                            .then(results => {
+                                                results.items.map(
+                                                    (item, index) => {
+                                                        firebase
+                                                            .storage()
+                                                            .ref(item.fullPath)
+                                                            .getDownloadURL()
+                                                            .then(url => {
+                                                                listURL.push(
+                                                                    url,
+                                                                )
+
+                                                                if (
+                                                                    index ===
+                                                                    results
+                                                                        .items
+                                                                        .length -
+                                                                        1
+                                                                ) {
+                                                                    listURL.unshift(
+                                                                        route
+                                                                            .params
+                                                                            .bucketPath,
+                                                                    )
+
+                                                                    patchAPI({
+                                                                        url: `product/${product._id}`,
+                                                                        data: {
+                                                                            thumbnailImage:
+                                                                                listURL[1],
+                                                                            productName:
+                                                                                productName,
+                                                                            subcategoryId:
+                                                                                chosenSubCategory,
+                                                                            description:
+                                                                                productDescription,
+                                                                            categoryId:
+                                                                                route
+                                                                                    .params
+                                                                                    .category
+                                                                                    ._id,
+                                                                            detailImages:
+                                                                                listURL,
+                                                                            video: '',
+                                                                            weight: parseFloat(
+                                                                                weightBeforeBoxed,
+                                                                            ),
+                                                                            height: parseFloat(
+                                                                                heightBeforeBoxed,
+                                                                            ),
+                                                                            width: parseFloat(
+                                                                                widthBeforeBoxed,
+                                                                            ),
+                                                                            length: parseFloat(
+                                                                                lengthBeforeBoxed,
+                                                                            ),
+                                                                            weightAfterBoxing:
+                                                                                parseFloat(
+                                                                                    weightAfterBoxed,
+                                                                                ),
+                                                                            heightAfterBoxing:
+                                                                                parseFloat(
+                                                                                    heightAfterBoxed,
+                                                                                ),
+                                                                            widthAfterBoxing:
+                                                                                parseFloat(
+                                                                                    widthAfterBoxed,
+                                                                                ),
+                                                                            lengthAfterBoxing:
+                                                                                parseFloat(
+                                                                                    lengthAfterBoxed,
+                                                                                ),
+                                                                            price: productPrice,
+                                                                            numberInStock:
+                                                                                currentUser.storeId !==
+                                                                                undefined
+                                                                                    ? parseFloat(
+                                                                                          productAmount,
+                                                                                      )
+                                                                                    : 1,
+                                                                            condition:
+                                                                                chosenCondition,
+                                                                        },
+                                                                    })
+                                                                        .then(
+                                                                            res => {
+                                                                                if (
+                                                                                    res.status ===
+                                                                                    200
+                                                                                ) {
+                                                                                    setModalLoading(
+                                                                                        false,
+                                                                                    )
+                                                                                    Alert.alert(
+                                                                                        'Update product successfully.',
+                                                                                        '',
+                                                                                        [
+                                                                                            {
+                                                                                                text: 'OK',
+                                                                                                onPress:
+                                                                                                    () =>
+                                                                                                        navigation.goBack(),
+                                                                                            },
+                                                                                        ],
+                                                                                    )
+                                                                                }
+                                                                            },
+                                                                        )
+                                                                        .catch(
+                                                                            err => {
+                                                                                console.log(
+                                                                                    err,
+                                                                                )
+                                                                                setModalLoading(
+                                                                                    false,
+                                                                                )
+                                                                            },
+                                                                        )
+                                                                }
+                                                            })
+                                                    },
+                                                )
+                                            })
+                                    }
+                                })
+                        }
+                    })
+                }
+            } else {
+                let listURL = []
+
+                listImages.forEach((image, index) => {
+                    firebase
+                        .storage()
+                        .ref(
+                            `${route.params.bucketPath}/${image.substring(
+                                image.lastIndexOf('/') + 1,
+                            )}`,
+                        )
+                        .putFile(image)
+                        .then(() => {
+                            if (index === listImages.length - 1) {
+                                firebase
+                                    .storage()
+                                    .ref(route.params.bucketPath)
+                                    .list()
+                                    .then(results => {
+                                        results.items.map((item, index) => {
+                                            firebase
+                                                .storage()
+                                                .ref(item.fullPath)
+                                                .getDownloadURL()
+                                                .then(url => {
+                                                    listURL.push(url)
+
+                                                    if (
+                                                        index ===
+                                                        results.items.length - 1
+                                                    ) {
+                                                        listURL.unshift(
+                                                            route.params
+                                                                .bucketPath,
+                                                        )
+
+                                                        patchAPI({
+                                                            url: `product/${product._id}`,
+                                                            data: {
+                                                                thumbnailImage:
+                                                                    listURL[1],
+                                                                productName:
+                                                                    productName,
+                                                                subcategoryId:
+                                                                    chosenSubCategory,
+                                                                description:
+                                                                    productDescription,
+                                                                categoryId:
+                                                                    route.params
+                                                                        .category
+                                                                        ._id,
+                                                                detailImages:
+                                                                    listURL,
+                                                                video: '',
+                                                                weight: parseFloat(
+                                                                    weightBeforeBoxed,
+                                                                ),
+                                                                height: parseFloat(
+                                                                    heightBeforeBoxed,
+                                                                ),
+                                                                width: parseFloat(
+                                                                    widthBeforeBoxed,
+                                                                ),
+                                                                length: parseFloat(
+                                                                    lengthBeforeBoxed,
+                                                                ),
+                                                                weightAfterBoxing:
+                                                                    parseFloat(
+                                                                        weightAfterBoxed,
+                                                                    ),
+                                                                heightAfterBoxing:
+                                                                    parseFloat(
+                                                                        heightAfterBoxed,
+                                                                    ),
+                                                                widthAfterBoxing:
+                                                                    parseFloat(
+                                                                        widthAfterBoxed,
+                                                                    ),
+                                                                lengthAfterBoxing:
+                                                                    parseFloat(
+                                                                        lengthAfterBoxed,
+                                                                    ),
+                                                                price: productPrice,
+                                                                numberInStock:
+                                                                    currentUser.storeId !==
+                                                                    undefined
+                                                                        ? parseFloat(
+                                                                              productAmount,
+                                                                          )
+                                                                        : 1,
+                                                                condition:
+                                                                    chosenCondition,
+                                                            },
+                                                        })
+                                                            .then(res => {
+                                                                if (
+                                                                    res.status ===
+                                                                    200
+                                                                ) {
+                                                                    setModalLoading(
+                                                                        false,
+                                                                    )
+                                                                    Alert.alert(
+                                                                        'Update product successfully.',
+                                                                        '',
+                                                                        [
+                                                                            {
+                                                                                text: 'OK',
+                                                                                onPress:
+                                                                                    () =>
+                                                                                        navigation.goBack(),
+                                                                            },
+                                                                        ],
+                                                                    )
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.log(err)
+                                                                setModalLoading(
+                                                                    false,
+                                                                )
+                                                            })
+                                                    }
+                                                })
+                                        })
+                                    })
+                            }
+                        })
+                })
+            }
+        } else {
+            if (
+                JSON.stringify(listImages) ===
+                JSON.stringify(product.detailImages)
+            ) {
+                containImages.unshift(route.params.bucketPath)
+
+                patchAPI({
+                    url: `product/${product._id}`,
+                    data: {
+                        thumbnailImage: containImages[1],
+                        productName: productName,
+                        subcategoryId: chosenSubCategory,
+                        description: productDescription,
+                        categoryId: route.params.category._id,
+                        detailImages: containImages,
+                        video: '',
+                        weight: parseFloat(weightBeforeBoxed),
+                        height: parseFloat(heightBeforeBoxed),
+                        width: parseFloat(widthBeforeBoxed),
+                        length: parseFloat(lengthBeforeBoxed),
+                        weightAfterBoxing: parseFloat(weightAfterBoxed),
+                        heightAfterBoxing: parseFloat(heightAfterBoxed),
+                        widthAfterBoxing: parseFloat(widthAfterBoxed),
+                        lengthAfterBoxing: parseFloat(lengthAfterBoxed),
+                        price: productPrice,
+                        numberInStock:
+                            currentUser.storeId !== undefined
+                                ? parseFloat(productAmount)
+                                : 1,
+                        condition: chosenCondition,
+                    },
+                })
+                    .then(res => {
+                        if (res.status === 200) {
+                            setModalLoading(false)
+                            Alert.alert('Update product successfully.', '', [
+                                {
+                                    text: 'OK',
+                                    onPress: () => navigation.goBack(),
+                                },
+                            ])
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        setModalLoading(false)
+                    })
+            } else {
+                let listURL = []
+
+                listImages.forEach((image, index) => {
+                    if (!containImages.includes(image)) {
+                        firebase
+                            .storage()
+                            .ref(
+                                `${route.params.bucketPath}/${image.substring(
+                                    image.lastIndexOf('/') + 1,
+                                )}`,
+                            )
+                            .putFile(image)
+                            .then(() => {
+                                if (index === listImages.length - 1) {
+                                    firebase
+                                        .storage()
+                                        .ref(route.params.bucketPath)
+                                        .list()
+                                        .then(results => {
+                                            results.items.map((item, index) => {
+                                                firebase
+                                                    .storage()
+                                                    .ref(item.fullPath)
+                                                    .getDownloadURL()
+                                                    .then(url => {
+                                                        listURL.push(url)
+
+                                                        if (
+                                                            index ===
+                                                            results.items
+                                                                .length -
+                                                                1
+                                                        ) {
+                                                            listURL.unshift(
+                                                                route.params
+                                                                    .bucketPath,
+                                                            )
+
+                                                            patchAPI({
+                                                                url: `product/${product._id}`,
+                                                                data: {
+                                                                    thumbnailImage:
+                                                                        listURL[1],
+                                                                    productName:
+                                                                        productName,
+                                                                    subcategoryId:
+                                                                        chosenSubCategory,
+                                                                    description:
+                                                                        productDescription,
+                                                                    categoryId:
+                                                                        route
+                                                                            .params
+                                                                            .category
+                                                                            ._id,
+                                                                    detailImages:
+                                                                        listURL,
+                                                                    video: '',
+                                                                    weight: parseFloat(
+                                                                        weightBeforeBoxed,
+                                                                    ),
+                                                                    height: parseFloat(
+                                                                        heightBeforeBoxed,
+                                                                    ),
+                                                                    width: parseFloat(
+                                                                        widthBeforeBoxed,
+                                                                    ),
+                                                                    length: parseFloat(
+                                                                        lengthBeforeBoxed,
+                                                                    ),
+                                                                    weightAfterBoxing:
+                                                                        parseFloat(
+                                                                            weightAfterBoxed,
+                                                                        ),
+                                                                    heightAfterBoxing:
+                                                                        parseFloat(
+                                                                            heightAfterBoxed,
+                                                                        ),
+                                                                    widthAfterBoxing:
+                                                                        parseFloat(
+                                                                            widthAfterBoxed,
+                                                                        ),
+                                                                    lengthAfterBoxing:
+                                                                        parseFloat(
+                                                                            lengthAfterBoxed,
+                                                                        ),
+                                                                    price: productPrice,
+                                                                    numberInStock:
+                                                                        currentUser.storeId !==
+                                                                        undefined
+                                                                            ? parseFloat(
+                                                                                  productAmount,
+                                                                              )
+                                                                            : 1,
+                                                                    condition:
+                                                                        chosenCondition,
+                                                                },
+                                                            })
+                                                                .then(res => {
+                                                                    if (
+                                                                        res.status ===
+                                                                        200
+                                                                    ) {
+                                                                        setModalLoading(
+                                                                            false,
+                                                                        )
+                                                                        Alert.alert(
+                                                                            'Update product successfully.',
+                                                                            '',
+                                                                            [
+                                                                                {
+                                                                                    text: 'OK',
+                                                                                    onPress:
+                                                                                        () =>
+                                                                                            navigation.goBack(),
+                                                                                },
+                                                                            ],
+                                                                        )
+                                                                    }
+                                                                })
+                                                                .catch(err => {
+                                                                    console.log(
+                                                                        err,
+                                                                    )
+                                                                    setModalLoading(
+                                                                        false,
+                                                                    )
+                                                                })
+                                                        }
+                                                    })
+                                            })
+                                        })
+                                }
+                            })
+                    }
+                })
+            }
         }
     }
 
@@ -319,11 +893,23 @@ const UploadDetailScreen = ({navigation, route}) => {
             weightAfterBoxed == '' ||
             widthAfterBoxed == '' ||
             lengthAfterBoxed == '' ||
-            chosenCondition == ''
+            chosenCondition == '' ||
+            listImages.length < 1
         ) {
-            console.log('a')
+            Toast.show({
+                type: 'error',
+                text1: 'Please fill in all field.',
+            })
         } else {
-            console.log('b')
+            let deleteImages = []
+            let containImages = []
+            product.detailImages.forEach((image, index) => {
+                !listImages.includes(image)
+                    ? deleteImages.push(image)
+                    : containImages.push(image)
+                index === product.detailImages.length - 1 &&
+                    updateProduct(deleteImages, containImages)
+            })
         }
     }
 
@@ -334,7 +920,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                 opacity: modalLoading + modalPhotos ? 0.5 : 1,
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView behavior="padding">
+                <KeyboardAvoidingView>
                     <ModalLoading visible={modalLoading} />
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <Modal

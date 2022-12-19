@@ -1,5 +1,4 @@
 import React, {useEffect, useLayoutEffect, useState} from 'react'
-import {View} from 'react-native'
 import {SafeAreaView, ScrollView, StyleSheet} from 'react-native'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
@@ -25,6 +24,7 @@ const FollowingScreen = ({navigation}) => {
 
     //Get List Following
     useEffect(() => {
+        setModalLoading(true)
         getAPI({url: 'user/follow'})
             .then(res => {
                 if (res.status === 200) {
@@ -35,24 +35,23 @@ const FollowingScreen = ({navigation}) => {
             .catch(err => console.log('Get Follow: ', err))
     }, [])
 
-    return (
+    return !modalLoading ? (
         <SafeAreaView style={globalStyles.container}>
-            {!modalLoading ? (
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    style={{paddingTop: 10}}>
-                    <ModalLoading visible={modalLoading} />
-                    {listFollowing.map((store, index) => (
-                        <FollowingItemHorizontal
-                            store={store}
-                            key={index}
-                            navigation={navigation}
-                        />
-                    ))}
-                </ScrollView>
-            ) : (
-                <View />
-            )}
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={{paddingTop: 10}}>
+                {listFollowing.map((store, index) => (
+                    <FollowingItemHorizontal
+                        store={store}
+                        key={index}
+                        navigation={navigation}
+                    />
+                ))}
+            </ScrollView>
+        </SafeAreaView>
+    ) : (
+        <SafeAreaView>
+            <ModalLoading visible={modalLoading} />
         </SafeAreaView>
     )
 }

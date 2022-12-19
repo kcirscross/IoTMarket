@@ -1,6 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import storage from '@react-native-firebase/storage'
-import axios from 'axios'
 import React, {useLayoutEffect, useState} from 'react'
 import {
     Alert,
@@ -16,20 +14,19 @@ import {
 } from 'react-native'
 import {Avatar, Input} from 'react-native-elements'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
+import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useDispatch, useSelector} from 'react-redux'
 import ModalLoading from '~/components/utils/ModalLoading'
 import {globalStyles} from '../../../assets/styles/globalStyles'
 import {
-    API_URL,
     AVATAR_BORDER,
     PRIMARY_COLOR,
     REGEX_PHONE_NUMBER,
 } from '../../../components/constants'
 import {patchAPI} from '../../../components/utils/base_API'
 import {updateAvatar, updateGender, updatePhoneNumber} from '../userSlice'
-import Toast from 'react-native-toast-message'
 
 const ChangeInfoScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
@@ -209,13 +206,10 @@ const ChangeInfoScreen = ({navigation}) => {
             }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView
-                    behavior="padding"
                     style={{
                         width: '100%',
                         height: '100%',
                     }}>
-                    <Toast position="bottom" bottomOffset={70} />
-
                     <ModalLoading visible={modalLoading} />
 
                     <Modal
@@ -563,6 +557,8 @@ const ChangeInfoScreen = ({navigation}) => {
                             }
                         />
                     </TouchableOpacity>
+
+                    <Toast position="bottom" bottomOffset={70} />
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
         </SafeAreaView>

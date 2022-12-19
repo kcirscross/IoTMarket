@@ -9,6 +9,7 @@ import {
     KeyboardAvoidingView,
     Modal,
     SafeAreaView,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -334,6 +335,11 @@ const StoreScreen = ({navigation}) => {
     const handleRevenue = dataRevenue => {
         let labels = []
         let datasets = []
+
+        dataRevenue.sort((a, b) => {
+            return a._id.month - b._id.month
+        })
+
         dataRevenue.length !== 0 &&
             dataRevenue.map((month, index) => {
                 labels.push(month._id.month.toString())
@@ -378,17 +384,6 @@ const StoreScreen = ({navigation}) => {
         }
     }, [isFocus])
 
-    const data = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-            {
-                data: [
-                    200000, 4500000, 28000000, 800000000, 99000000, 43000000,
-                ],
-            },
-        ],
-    }
-
     const chartConfig = {
         backgroundGradientFrom: 'white',
         backgroundGradientFromOpacity: 0.5,
@@ -411,7 +406,7 @@ const StoreScreen = ({navigation}) => {
     const formatYLabel = yLabel => {
         let yLabelNew = Math.round(yLabel)
         if (yLabelNew / 1000000 > 1) {
-            yLabelNew = yLabelNew / 1000000 + 'M'
+            yLabelNew = Math.round(yLabelNew / 1000000) + 'M'
         } else if (yLabelNew / 1000 > 1) {
             yLabelNew = yLabelNew / 1000 + 'K'
         }
@@ -562,178 +557,187 @@ const StoreScreen = ({navigation}) => {
                     </Modal>
 
                     {currentUser.storeId == undefined ? (
-                        <View style={{flex: 1}}>
-                            <Text style={{...styles.labelStyle, fontSize: 20}}>
-                                Store Logo
-                            </Text>
-
-                            <TouchableOpacity
-                                onPress={() => setModalAvatarVisible(true)}
-                                style={{
-                                    alignItems: 'center',
-                                }}>
-                                <Avatar
-                                    rounded
-                                    size={90}
-                                    source={
-                                        shopImage == ''
-                                            ? require('~/assets/images/logo.jpg')
-                                            : {uri: shopImage}
-                                    }
-                                    avatarStyle={{
-                                        borderColor: AVATAR_BORDER,
-                                        borderWidth: 1,
-                                    }}
-                                />
-
-                                <Icon
-                                    name="camera"
-                                    size={24}
-                                    color="black"
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <View style={{flex: 1}}>
+                                <Text
                                     style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        right: '38%',
-                                    }}
-                                />
-                            </TouchableOpacity>
+                                        ...styles.labelStyle,
+                                        fontSize: 20,
+                                    }}>
+                                    Store Logo
+                                </Text>
 
-                            <Input
-                                placeholder="Store Name"
-                                containerStyle={styles.textContainer}
-                                label="Store Name (At least 15 characters)"
-                                labelStyle={styles.labelStyle}
-                                inputContainerStyle={styles.inputContainer}
-                                renderErrorMessage={false}
-                                onChangeText={text => setDisplayName(text)}
-                            />
+                                <TouchableOpacity
+                                    onPress={() => setModalAvatarVisible(true)}
+                                    style={{
+                                        alignItems: 'center',
+                                    }}>
+                                    <Avatar
+                                        rounded
+                                        size={90}
+                                        source={
+                                            shopImage == ''
+                                                ? require('~/assets/images/logo.jpg')
+                                                : {uri: shopImage}
+                                        }
+                                        avatarStyle={{
+                                            borderColor: AVATAR_BORDER,
+                                            borderWidth: 1,
+                                        }}
+                                    />
 
-                            <Input
-                                placeholder="Store Description"
-                                containerStyle={styles.textContainer}
-                                label="Store Description (At least 15 character)"
-                                labelStyle={styles.labelStyle}
-                                inputContainerStyle={styles.inputContainer}
-                                renderErrorMessage={false}
-                                onChangeText={text => setDescription(text)}
-                            />
+                                    <Icon
+                                        name="camera"
+                                        size={24}
+                                        color="black"
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            right: '38%',
+                                        }}
+                                    />
+                                </TouchableOpacity>
 
-                            <View>
                                 <Input
-                                    placeholder="Detail Address"
+                                    placeholder="Store Name"
                                     containerStyle={styles.textContainer}
-                                    label="Detail Address"
+                                    label="Store Name (At least 15 characters)"
                                     labelStyle={styles.labelStyle}
                                     inputContainerStyle={styles.inputContainer}
                                     renderErrorMessage={false}
-                                    onChangeText={text => setChosenStreet(text)}
+                                    onChangeText={text => setDisplayName(text)}
                                 />
-                            </View>
 
-                            <View
-                                style={{
-                                    marginTop: 10,
-                                }}>
-                                <Text style={styles.labelStyle}>
-                                    Choose your city.
-                                </Text>
-                                <DropDownPicker
-                                    open={openCity}
-                                    value={valueCity}
-                                    items={itemsCity}
-                                    placeholder={'Select your city.'}
-                                    labelStyle={{
-                                        color: 'black',
-                                    }}
-                                    setOpen={setOpenCity}
-                                    setValue={setValueCity}
-                                    setItems={setItemsCity}
-                                    onSelectItem={item => {
-                                        getDistrict(item.value)
-                                        setChosenCity(item.label)
-                                    }}
-                                    style={styles.dropStyle}
-                                    zIndex={3}
-                                    dropDownContainerStyle={{
-                                        borderColor: SECONDARY_COLOR,
-                                    }}
+                                <Input
+                                    placeholder="Store Description"
+                                    containerStyle={styles.textContainer}
+                                    label="Store Description (At least 15 character)"
+                                    labelStyle={styles.labelStyle}
+                                    inputContainerStyle={styles.inputContainer}
+                                    renderErrorMessage={false}
+                                    onChangeText={text => setDescription(text)}
                                 />
-                            </View>
-                            <View
-                                style={{
-                                    marginTop: 10,
-                                }}>
-                                <Text style={styles.labelStyle}>
-                                    Choose your district.
-                                </Text>
-                                <DropDownPicker
-                                    open={openDistrict}
-                                    value={valueDistrict}
-                                    items={itemsDistrict}
-                                    placeholder={'Select your district.'}
-                                    labelStyle={{
-                                        color: 'black',
-                                    }}
-                                    setOpen={setOpenDistrict}
-                                    setValue={setValueDistrict}
-                                    setItems={setItemsDistrict}
-                                    onSelectItem={item => {
-                                        getWard(item.value)
-                                        setChosenDistrict(item.label)
-                                    }}
-                                    style={styles.dropStyle}
-                                    zIndex={2}
-                                    dropDownContainerStyle={{
-                                        borderColor: SECONDARY_COLOR,
-                                    }}
-                                />
-                            </View>
-                            <View
-                                style={{
-                                    marginTop: 10,
-                                }}>
-                                <Text style={styles.labelStyle}>
-                                    Choose your ward.
-                                </Text>
-                                <DropDownPicker
-                                    open={openWard}
-                                    value={valueWard}
-                                    items={itemsWard}
-                                    labelStyle={{
-                                        color: 'black',
-                                    }}
-                                    placeholder={'Select your ward.'}
-                                    setOpen={setOpenWard}
-                                    setValue={setValueWard}
-                                    setItems={setItemsWard}
-                                    style={styles.dropStyle}
-                                    zIndex={1}
-                                    onSelectItem={item =>
-                                        setChosenWard(item.label)
+
+                                <View>
+                                    <Input
+                                        placeholder="Detail Address"
+                                        containerStyle={styles.textContainer}
+                                        label="Detail Address"
+                                        labelStyle={styles.labelStyle}
+                                        inputContainerStyle={
+                                            styles.inputContainer
+                                        }
+                                        renderErrorMessage={false}
+                                        onChangeText={text =>
+                                            setChosenStreet(text)
+                                        }
+                                    />
+                                </View>
+
+                                <View
+                                    style={{
+                                        marginTop: 10,
+                                    }}>
+                                    <Text style={styles.labelStyle}>
+                                        Choose your city.
+                                    </Text>
+                                    <DropDownPicker
+                                        open={openCity}
+                                        value={valueCity}
+                                        items={itemsCity}
+                                        placeholder={'Select your city.'}
+                                        labelStyle={{
+                                            color: 'black',
+                                        }}
+                                        setOpen={setOpenCity}
+                                        setValue={setValueCity}
+                                        setItems={setItemsCity}
+                                        onSelectItem={item => {
+                                            getDistrict(item.value)
+                                            setChosenCity(item.label)
+                                        }}
+                                        style={styles.dropStyle}
+                                        zIndex={3}
+                                        dropDownContainerStyle={{
+                                            borderColor: SECONDARY_COLOR,
+                                        }}
+                                    />
+                                </View>
+                                <View
+                                    style={{
+                                        marginTop: 10,
+                                    }}>
+                                    <Text style={styles.labelStyle}>
+                                        Choose your district.
+                                    </Text>
+                                    <DropDownPicker
+                                        open={openDistrict}
+                                        value={valueDistrict}
+                                        items={itemsDistrict}
+                                        placeholder={'Select your district.'}
+                                        labelStyle={{
+                                            color: 'black',
+                                        }}
+                                        setOpen={setOpenDistrict}
+                                        setValue={setValueDistrict}
+                                        setItems={setItemsDistrict}
+                                        onSelectItem={item => {
+                                            getWard(item.value)
+                                            setChosenDistrict(item.label)
+                                        }}
+                                        style={styles.dropStyle}
+                                        zIndex={2}
+                                        dropDownContainerStyle={{
+                                            borderColor: SECONDARY_COLOR,
+                                        }}
+                                    />
+                                </View>
+                                <View
+                                    style={{
+                                        marginTop: 10,
+                                    }}>
+                                    <Text style={styles.labelStyle}>
+                                        Choose your ward.
+                                    </Text>
+                                    <DropDownPicker
+                                        open={openWard}
+                                        value={valueWard}
+                                        items={itemsWard}
+                                        labelStyle={{
+                                            color: 'black',
+                                        }}
+                                        placeholder={'Select your ward.'}
+                                        setOpen={setOpenWard}
+                                        setValue={setValueWard}
+                                        setItems={setItemsWard}
+                                        style={styles.dropStyle}
+                                        zIndex={1}
+                                        onSelectItem={item =>
+                                            setChosenWard(item.label)
+                                        }
+                                        dropDownContainerStyle={{
+                                            borderColor: SECONDARY_COLOR,
+                                        }}
+                                    />
+                                </View>
+
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        handleCreateStoreClick(shopImage)
                                     }
-                                    dropDownContainerStyle={{
-                                        borderColor: SECONDARY_COLOR,
-                                    }}
-                                />
+                                    style={{
+                                        ...globalStyles.button,
+                                        alignSelf: 'center',
+                                        marginBottom: 10,
+                                    }}>
+                                    <Text style={globalStyles.textButton}>
+                                        Create Store
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
-
-                            <TouchableOpacity
-                                onPress={() =>
-                                    handleCreateStoreClick(shopImage)
-                                }
-                                style={{
-                                    ...globalStyles.button,
-                                    position: 'absolute',
-                                    bottom: 10,
-                                    alignSelf: 'center',
-                                }}>
-                                <Text style={globalStyles.textButton}>
-                                    Create Store
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        </ScrollView>
                     ) : (
-                        <View>
+                        <ScrollView showsVerticalScrollIndicator={false}>
                             <Card
                                 containerStyle={{
                                     ...globalStyles.cardContainer,
@@ -774,9 +778,44 @@ const StoreScreen = ({navigation}) => {
                                                 alignItems: 'center',
                                                 marginTop: 5,
                                             }}>
-                                            <Text style={{color: 'black'}}>
-                                                {followers} Follow
-                                            </Text>
+                                            <View
+                                                style={{
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    marginLeft: 10,
+                                                }}>
+                                                <Ion
+                                                    name="star"
+                                                    color="#FA8128"
+                                                    size={16}
+                                                />
+                                                <Text
+                                                    style={{
+                                                        color: 'black',
+                                                        marginLeft: 5,
+                                                    }}>
+                                                    {storeInfo.rating}/5
+                                                    {'     '}|
+                                                </Text>
+
+                                                <Text>{'     '}</Text>
+                                                <Ion
+                                                    name="person"
+                                                    color={PRIMARY_COLOR}
+                                                    size={16}
+                                                />
+                                                <Text
+                                                    style={{
+                                                        color: 'black',
+                                                        marginLeft: 5,
+                                                    }}>
+                                                    {
+                                                        storeInfo.followers
+                                                            ?.length
+                                                    }{' '}
+                                                    Followers
+                                                </Text>
+                                            </View>
 
                                             <View style={{flex: 1}} />
 
@@ -914,85 +953,91 @@ const StoreScreen = ({navigation}) => {
                                 </Card>
                             )}
 
-                            <Card
-                                containerStyle={{
-                                    ...globalStyles.cardContainer,
-                                    marginTop: 5,
-                                }}>
-                                <Text style={styles.chartTitle}>
-                                    Top 5 Sold Products
-                                </Text>
+                            {Object.keys(topProducts).length > 0 && (
+                                <Card
+                                    containerStyle={{
+                                        ...globalStyles.cardContainer,
+                                        marginTop: 5,
+                                        marginBottom: 10,
+                                    }}>
+                                    <Text style={styles.chartTitle}>
+                                        Top 5 Sold Products
+                                    </Text>
 
-                                {topProducts.map((product, index) => (
-                                    <View
-                                        key={index}
-                                        style={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'space-around',
-                                        }}>
-                                        <Text
+                                    {topProducts.map((product, index) => (
+                                        <View
+                                            key={index}
                                             style={{
-                                                color: PRIMARY_COLOR,
-                                                fontWeight: '600',
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-around',
                                             }}>
-                                            {`Top ${index + 1}`}
-                                        </Text>
+                                            <Text
+                                                style={{
+                                                    color: PRIMARY_COLOR,
+                                                    fontWeight: '600',
+                                                }}>
+                                                {`Top ${index + 1}`}
+                                            </Text>
 
-                                        <Divider
-                                            color={PRIMARY_COLOR}
-                                            orientation="vertical"
-                                            width={1}
-                                            style={{marginVertical: 15}}
-                                        />
+                                            <Divider
+                                                color={PRIMARY_COLOR}
+                                                orientation="vertical"
+                                                width={1}
+                                                style={{marginVertical: 15}}
+                                            />
 
-                                        <Image
-                                            source={{
-                                                uri: product.thumbnailImage,
-                                            }}
-                                            style={{
-                                                width: 80,
-                                                height: 80,
-                                            }}
-                                            resizeMethod="resize"
-                                            resizeMode="contain"
-                                        />
+                                            <Image
+                                                source={{
+                                                    uri: product.thumbnailImage,
+                                                }}
+                                                style={{
+                                                    width: 80,
+                                                    height: 80,
+                                                }}
+                                                resizeMethod="resize"
+                                                resizeMode="contain"
+                                            />
 
-                                        <Divider
-                                            color={PRIMARY_COLOR}
-                                            orientation="vertical"
-                                            width={1}
-                                            style={{marginVertical: 15}}
-                                        />
+                                            <Divider
+                                                color={PRIMARY_COLOR}
+                                                orientation="vertical"
+                                                width={1}
+                                                style={{marginVertical: 15}}
+                                            />
 
-                                        <Text
-                                            style={{
-                                                color: 'black',
-                                                fontSize: 16,
-                                                fontWeight: '600',
-                                            }}>
-                                            {product.productName}
-                                        </Text>
+                                            <Text
+                                                numberOfLines={2}
+                                                ellipsizeMode="tail"
+                                                style={{
+                                                    color: 'black',
+                                                    fontSize: 16,
+                                                    fontWeight: '600',
+                                                    width: '50%',
+                                                }}>
+                                                {product.productName}
+                                            </Text>
 
-                                        <Divider
-                                            color={PRIMARY_COLOR}
-                                            orientation="vertical"
-                                            width={1}
-                                            style={{marginVertical: 15}}
-                                        />
+                                            <Divider
+                                                color={PRIMARY_COLOR}
+                                                orientation="vertical"
+                                                width={1}
+                                                style={{marginVertical: 15}}
+                                            />
 
-                                        <Text
-                                            style={{
-                                                color: 'black',
-                                                fontSize: 16,
-                                                fontWeight: '600',
-                                            }}>
-                                            {product.soldCount}
-                                        </Text>
-                                    </View>
-                                ))}
-                            </Card>
-                        </View>
+                                            <Text
+                                                style={{
+                                                    color: 'black',
+                                                    fontSize: 16,
+                                                    fontWeight: '600',
+                                                }}>
+                                                {product.soldCount}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </Card>
+                            )}
+                        </ScrollView>
                     )}
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
