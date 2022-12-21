@@ -262,9 +262,10 @@ const StoreProfileScreen = ({navigation, route}) => {
                                 onPress={handleFollowClick}
                                 style={{
                                     ...styles.touchStyle,
-                                    backgroundColor: isFollow
+                                    borderColor: isFollow
                                         ? 'red'
                                         : PRIMARY_COLOR,
+                                    borderWidth: 1,
                                     marginRight: 5,
                                 }}>
                                 {isFollow ? (
@@ -276,11 +277,11 @@ const StoreProfileScreen = ({navigation, route}) => {
                                         <Ant
                                             name="minuscircleo"
                                             size={14}
-                                            color="white"
+                                            color="red"
                                         />
                                         <Text
                                             style={{
-                                                color: 'white',
+                                                color: 'red',
                                                 marginLeft: 5,
                                             }}>
                                             Follow
@@ -295,11 +296,11 @@ const StoreProfileScreen = ({navigation, route}) => {
                                         <Ant
                                             name="pluscircleo"
                                             size={14}
-                                            color="white"
+                                            color={PRIMARY_COLOR}
                                         />
                                         <Text
                                             style={{
-                                                color: 'white',
+                                                color: PRIMARY_COLOR,
                                                 marginLeft: 5,
                                             }}>
                                             Follow

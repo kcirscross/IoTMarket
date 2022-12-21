@@ -53,7 +53,7 @@ const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
                         marginLeft: 5,
                         fontWeight: 'bold',
                     }}>
-                    Call
+                    CALL
                 </Text>
             </TouchableOpacity>
 

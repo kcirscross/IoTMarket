@@ -76,7 +76,7 @@ const PaymentCartScreen = ({navigation, route}) => {
             if (deleveryMethod) {
                 Alert.alert(
                     'Confirm Order',
-                    'You will pay when received product.',
+                    'You will pay when receive product.',
                     [
                         {
                             text: 'Yes',

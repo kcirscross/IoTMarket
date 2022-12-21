@@ -88,7 +88,7 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
         <Card
             containerStyle={{
                 ...globalStyles.cardContainer,
-                marginTop: 5,
+                marginTop: 10,
             }}>
             <TouchableOpacity
                 onPress={() =>
@@ -241,7 +241,11 @@ const OrderItemHorizontal = ({navigation, order, sendIndex}) => {
                         )}
                     {!isMyProduct && statusDelivery === 'Delivered' && (
                         <TouchableOpacity
-                            style={{...styles.touchStyle, marginLeft: 10}}
+                            style={{
+                                ...styles.touchStyle,
+                                marginLeft: 10,
+                                marginVertical: 5,
+                            }}
                             onPress={handleAddCartClick}>
                             <Text style={styles.textStyle}>Buy Again</Text>
                         </TouchableOpacity>
@@ -260,6 +264,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 10,
+        marginVertical: 5,
     },
     textStyle: {
         color: 'white',

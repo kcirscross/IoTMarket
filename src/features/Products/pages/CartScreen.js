@@ -22,7 +22,6 @@ const CartScreen = ({navigation}) => {
     const [modalLoading, setModalLoading] = useState(false)
     const [listOrder, setListOrder] = useState([])
     const isFocus = useIsFocused()
-    const [newList, setNewList] = useState([])
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -110,10 +109,6 @@ const CartScreen = ({navigation}) => {
         )
     }
 
-    const handleSelectAllClick = () => {
-        setIsCheckAll(true)
-    }
-
     return (
         <SafeAreaView
             style={{
@@ -160,7 +155,7 @@ const CartScreen = ({navigation}) => {
 
             {!modalLoading && (
                 <View style={{flex: 1}}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         {listProducts.map((product, index) => (
                             <ProductItemHorizontal
                                 key={index}

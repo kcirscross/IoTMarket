@@ -65,7 +65,7 @@ const PaymentScreen = ({navigation, route}) => {
             if (deleveryMethod) {
                 Alert.alert(
                     'Confirm Order',
-                    'You will pay when received product.',
+                    'You will pay when receive product.',
                     [
                         {
                             text: 'Yes',
@@ -162,7 +162,7 @@ const PaymentScreen = ({navigation, route}) => {
             <Card
                 containerStyle={{
                     ...globalStyles.cardContainer,
-                    marginTop: 5,
+                    marginTop: 12,
                 }}>
                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <Ion name="cart-outline" size={30} color={PRIMARY_COLOR} />
@@ -206,7 +206,7 @@ const PaymentScreen = ({navigation, route}) => {
             <Card
                 containerStyle={{
                     ...globalStyles.cardContainer,
-                    marginTop: 5,
+                    marginTop: 12,
                 }}>
                 <TouchableOpacity
                     onPress={() => setModalDeliveryVisible(true)}
@@ -249,7 +249,7 @@ const PaymentScreen = ({navigation, route}) => {
             <Card
                 containerStyle={{
                     ...globalStyles.cardContainer,
-                    marginTop: 5,
+                    marginTop: 12,
                 }}>
                 <View
                     style={{

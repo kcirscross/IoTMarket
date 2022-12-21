@@ -430,7 +430,6 @@ const ProductDetail = ({navigation, route}) => {
                 <View
                     style={{
                         height: 300,
-                        marginBottom: 10,
                     }}>
                     {listImages.length == 1 ? (
                         <View>
@@ -486,7 +485,11 @@ const ProductDetail = ({navigation, route}) => {
                     />
                 </View>
 
-                <Card containerStyle={globalStyles.cardContainer}>
+                <Card
+                    containerStyle={{
+                        ...globalStyles.cardContainer,
+                        marginTop: 12,
+                    }}>
                     <TouchableOpacity
                         onPress={() =>
                             navigation.navigate('StoreProfile', {
@@ -502,7 +505,7 @@ const ProductDetail = ({navigation, route}) => {
                             <View>
                                 <Avatar
                                     rounded
-                                    size={'large'}
+                                    size={'medium'}
                                     source={{
                                         uri: isStore
                                             ? storeInfo.shopImage
@@ -537,7 +540,7 @@ const ProductDetail = ({navigation, route}) => {
                                         fontWeight: 'bold',
                                         color: 'black',
                                         marginLeft: 10,
-                                        fontSize: 18,
+                                        fontSize: 16,
                                     }}>
                                     {isStore
                                         ? storeInfo.displayName
@@ -564,10 +567,11 @@ const ProductDetail = ({navigation, route}) => {
                                             onPress={handleFollowClick}
                                             style={{
                                                 ...styles.touchStyle,
-                                                backgroundColor: isFollow
+                                                borderColor: isFollow
                                                     ? 'red'
                                                     : PRIMARY_COLOR,
                                                 marginRight: 5,
+                                                borderWidth: 1,
                                             }}>
                                             {isFollow ? (
                                                 <View
@@ -578,11 +582,11 @@ const ProductDetail = ({navigation, route}) => {
                                                     <Ant
                                                         name="minuscircleo"
                                                         size={14}
-                                                        color="white"
+                                                        color="red"
                                                     />
                                                     <Text
                                                         style={{
-                                                            color: 'white',
+                                                            color: 'red',
                                                             marginLeft: 5,
                                                         }}>
                                                         Follow
@@ -597,11 +601,11 @@ const ProductDetail = ({navigation, route}) => {
                                                     <Ant
                                                         name="pluscircleo"
                                                         size={14}
-                                                        color="white"
+                                                        color={PRIMARY_COLOR}
                                                     />
                                                     <Text
                                                         style={{
-                                                            color: 'white',
+                                                            color: PRIMARY_COLOR,
                                                             marginLeft: 5,
                                                         }}>
                                                         Follow
@@ -619,13 +623,13 @@ const ProductDetail = ({navigation, route}) => {
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
                     <Text
                         style={{
                             fontWeight: 'bold',
                             color: 'black',
-                            fontSize: 20,
+                            fontSize: 18,
                         }}>
                         {product.productName}
                     </Text>
@@ -691,7 +695,7 @@ const ProductDetail = ({navigation, route}) => {
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Condition: </Text>
@@ -711,7 +715,7 @@ const ProductDetail = ({navigation, route}) => {
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
                     <View style={styles.viewStyle}>
                         <Text
@@ -731,7 +735,7 @@ const ProductDetail = ({navigation, route}) => {
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
                     <View
                         style={{
@@ -949,19 +953,23 @@ const ProductDetail = ({navigation, route}) => {
                 </Card>
 
                 {listProduct.length > 0 && (
-                    <View style={{marginBottom: 75, marginTop: 5}}>
+                    <View
+                        style={{
+                            marginBottom: 60,
+                            marginTop: 12,
+                        }}>
                         <Text
                             style={{
                                 color: 'black',
                                 fontWeight: '700',
                                 fontSize: 18,
                             }}>
-                            Product In Same Category
+                            Products In Same Category
                         </Text>
 
                         <ScrollView
                             horizontal
-                            style={{paddingVertical: 5}}
+                            style={{marginTop: 5}}
                             showsHorizontalScrollIndicator={false}>
                             {listProduct.map((item, index) => (
                                 <ProductItem

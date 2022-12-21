@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect, useState} from 'react'
 import {
     Image,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native'
-import { Avatar, Divider, Rating } from 'react-native-elements'
-import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../components/constants'
-import { getAPI } from '../../../components/utils/base_API'
+import {Avatar, Divider, Rating} from 'react-native-elements'
+import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
+import {getAPI} from '../../../components/utils/base_API'
 
-const ReviewItemHorizontal = ({ navigation, review }) => {
+const ReviewItemHorizontal = ({navigation, review}) => {
     // console.log(review)
 
     const [userInfo, setUserInfo] = useState([])
@@ -21,7 +21,7 @@ const ReviewItemHorizontal = ({ navigation, review }) => {
     //Get User Information
     useEffect(() => {
         review !== undefined &&
-            getAPI({ url: `user/${review.reviewerId}` })
+            getAPI({url: `user/${review.reviewerId}`})
                 .then(res => {
                     if (res.status === 200) {
                         setUserInfo(res.data.userInfo)
@@ -63,11 +63,11 @@ const ReviewItemHorizontal = ({ navigation, review }) => {
                         <Avatar
                             rounded
                             size={50}
-                            source={{ uri: userInfo.avatar }}
+                            source={{uri: userInfo.avatar}}
                         />
                     </TouchableOpacity>
 
-                    <View style={{ marginLeft: 10 }}>
+                    <View style={{marginLeft: 10}}>
                         <Text
                             style={{
                                 color: 'black',
@@ -87,16 +87,21 @@ const ReviewItemHorizontal = ({ navigation, review }) => {
                     </View>
                 </View>
 
-                <Text style={{ color: 'black' }}>{review.content}</Text>
+                <Text
+                    style={{
+                        color: 'black',
+                    }}>
+                    {review.content}
+                </Text>
 
                 {review.images.length + review.videos.length > 0 && (
                     <ScrollView
-                        contentContainerStyle={{ flexDirection: 'row' }}
+                        contentContainerStyle={{flexDirection: 'row'}}
                         horizontal
                         showsHorizontalScrollIndicator={false}>
                         {review.videos[0] != '' && (
                             <Image
-                                source={{ uri: review.videos[0] }}
+                                source={{uri: review.videos[0]}}
                                 style={{
                                     width: 80,
                                     height: 80,
@@ -114,7 +119,7 @@ const ReviewItemHorizontal = ({ navigation, review }) => {
                         {review.images.length > 0 &&
                             review.images.map((image, index) => (
                                 <Image
-                                    source={{ uri: image }}
+                                    source={{uri: image}}
                                     key={index}
                                     style={{
                                         width: 80,

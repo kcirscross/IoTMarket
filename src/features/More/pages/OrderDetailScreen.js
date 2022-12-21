@@ -24,6 +24,7 @@ const OrderDetailScreen = ({navigation, route}) => {
     const [modalLoading, setModalLoading] = useState(true)
     const [statusDelivery, setStatusDelivery] = useState('')
     const [productList, setProductList] = useState([])
+    const [isOwner, setIsOwner] = useState(false)
 
     const currentUser = useSelector(state => state.user)
 
@@ -67,6 +68,11 @@ const OrderDetailScreen = ({navigation, route}) => {
 
                     let tempList = []
                     let length = res.data.order.productsList.length
+
+                    if (res.data.order.refModel === 'Store') {
+                        currentUser.storeId === res.data.order.ownerId &&
+                            setIsOwner(true)
+                    }
 
                     res.data.order.productsList.map((product, index) => {
                         getAPI({url: `product/${product.name}`})
@@ -183,7 +189,7 @@ const OrderDetailScreen = ({navigation, route}) => {
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
                     <View style={{flexDirection: 'row'}}>
                         <Ion
@@ -192,27 +198,28 @@ const OrderDetailScreen = ({navigation, route}) => {
                             size={28}
                         />
 
-                        <View>
-                            <Text style={{...styles.titleStyle}}>
-                                Receive Address
-                            </Text>
-                            <Text
-                                style={{
-                                    color: 'black',
-                                    marginLeft: 10,
-                                }}>{`\n${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street}\n${currentUser.address.ward}, ${currentUser.address.district}\n${currentUser.address.city}`}</Text>
-                        </View>
-
-                        <View style={{flex: 1}} />
+                        <Text style={{...styles.titleStyle}}>
+                            Receive Address
+                        </Text>
                     </View>
+
+                    <Text
+                        style={{
+                            color: 'black',
+                            marginLeft: 10,
+                        }}>{`${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street}\n${currentUser.address.ward}, ${currentUser.address.district}\n${currentUser.address.city}`}</Text>
                 </Card>
 
                 <Card
                     containerStyle={{
                         ...globalStyles.cardContainer,
-                        marginTop: 5,
+                        marginTop: 12,
                     }}>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                        }}>
                         <Ion
                             name="cart-outline"
                             size={30}
@@ -238,8 +245,8 @@ const OrderDetailScreen = ({navigation, route}) => {
                                 />
                                 <View
                                     style={{
-                                        marginVertical: 10,
                                         marginHorizontal: 10,
+                                        marginBottom: 10,
                                         flex: 1,
                                     }}>
                                     <Text style={{color: 'black'}}>
@@ -275,36 +282,38 @@ const OrderDetailScreen = ({navigation, route}) => {
                 </Card>
             </ScrollView>
 
-            <View
-                style={{
-                    flexDirection: 'row',
-                    position: 'absolute',
-                    bottom: 10,
-                    justifyContent: 'space-evenly',
-                    width: '105%',
-                }}>
-                {statusDelivery === 'Delivered' ? (
-                    <TouchableOpacity
-                        style={styles.touchStyle}
-                        onPress={handleAddCartClick}>
-                        <Ion name="cart-outline" color="white" size={24} />
+            {!isOwner && (
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        position: 'absolute',
+                        bottom: 10,
+                        justifyContent: 'space-evenly',
+                        width: '105%',
+                    }}>
+                    {statusDelivery === 'Delivered' ? (
+                        <TouchableOpacity
+                            style={styles.touchStyle}
+                            onPress={handleAddCartClick}>
+                            <Ion name="cart-outline" color="white" size={24} />
 
-                        <Text style={styles.textStyle}>Buy Again</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        style={styles.touchStyle}
-                        onPress={handleConfirmReceivedClick}>
-                        <Ion
-                            name="checkmark-done-circle-outline"
-                            color="white"
-                            size={24}
-                        />
+                            <Text style={styles.textStyle}>Buy Again</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={styles.touchStyle}
+                            onPress={handleConfirmReceivedClick}>
+                            <Ion
+                                name="checkmark-done-circle-outline"
+                                color="white"
+                                size={24}
+                            />
 
-                        <Text style={styles.textStyle}>Received</Text>
-                    </TouchableOpacity>
-                )}
-            </View>
+                            <Text style={styles.textStyle}>Received</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            )}
         </SafeAreaView>
     ) : (
         <SafeAreaView style={globalStyles.container}>

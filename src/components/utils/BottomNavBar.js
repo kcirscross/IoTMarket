@@ -1,16 +1,16 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Ion from 'react-native-vector-icons/Ionicons'
 import MaterialCom from 'react-native-vector-icons/MaterialCommunityIcons'
-import { useSelector } from 'react-redux'
-import { HomeScreen } from '~/features/Home'
-import { MoreScreen } from '~/features/More'
-import { UploadProductScreen } from '~/features/Products'
-import { OrderScreen } from '../../features/More'
+import {useSelector} from 'react-redux'
+import {HomeScreen} from '~/features/Home'
+import {MoreScreen} from '~/features/More'
+import {UploadProductScreen} from '~/features/Products'
+import {OrderScreen} from '../../features/More'
 import ProfileScreen from '../../features/Users/pages/ProfileScreen'
-import { PRIMARY_COLOR } from '../constants'
+import {PRIMARY_COLOR} from '../constants'
 
 const Tab = createBottomTabNavigator()
 
@@ -24,7 +24,7 @@ const screenOptions = () => ({
     },
     tabBarShowLabel: false,
     tabBarHideOnKeyboard: true,
-    headerStyle: { backgroundColor: PRIMARY_COLOR },
+    headerStyle: {backgroundColor: PRIMARY_COLOR},
     headerTitleStyle: {
         color: 'white',
     },
@@ -33,7 +33,7 @@ const screenOptions = () => ({
     headerShown: false,
 })
 
-const CustomTabBarButton = ({ children, onPress }) => (
+const CustomTabBarButton = ({children, onPress}) => (
     <TouchableOpacity
         style={{
             top: -15,
@@ -63,12 +63,26 @@ const BottomNavBar = () => {
                 name="Home"
                 component={HomeScreen}
                 options={{
-                    tabBarIcon: ({ focused }) => (
+                    tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <Ion
+                            {/* <Ion
                                 name={focused ? 'home' : 'home-outline'}
                                 size={focused ? 40 : 30}
                                 color={focused ? PRIMARY_COLOR : 'black'}
+                            /> */}
+
+                            <Image
+                                source={
+                                    focused
+                                        ? require('~/assets/images/homeFocused.png')
+                                        : require('~/assets/images/home.png')
+                                }
+                                style={{
+                                    width: focused ? 36 : 30,
+                                    height: focused ? 36 : 30,
+                                }}
+                                resizeMethod="resize"
+                                resizeMode="contain"
                             />
                         </View>
                     ),
@@ -84,9 +98,9 @@ const BottomNavBar = () => {
                             : currentUser._id,
                 }}
                 options={{
-                    tabBarIcon: ({ focused }) => (
+                    tabBarIcon: ({focused}) => (
                         <View style={styles.viewContainer}>
-                            <MaterialCom
+                            {/* <MaterialCom
                                 name={
                                     focused
                                         ? 'storefront'
@@ -94,7 +108,20 @@ const BottomNavBar = () => {
                                 }
                                 size={focused ? 40 : 32}
                                 color={focused ? PRIMARY_COLOR : '#323232'}
-                            />
+                            /> */}
+                            <Image
+                            source={
+                                focused
+                                    ? require('~/assets/images/profileFocused.png')
+                                    : require('~/assets/images/profile.png')
+                            }
+                            style={{
+                                width: focused ? 36 : 30,
+                                height: focused ? 36 : 30,
+                            }}
+                            resizeMethod="resize"
+                            resizeMode="contain"
+                        />
                         </View>
                     ),
                 }}
@@ -103,7 +130,7 @@ const BottomNavBar = () => {
                 name="UploadProduct"
                 component={UploadProductScreen}
                 options={{
-                    tabBarIcon: ({ focused }) => (
+                    tabBarIcon: ({focused}) => (
                         <Icon
                             name="plus-circle"
                             size={62}
@@ -116,15 +143,28 @@ const BottomNavBar = () => {
             <Tab.Screen
                 name="Order"
                 component={OrderScreen}
-                initialParams={[{ from: 'buyer' }]}
+                initialParams={[{from: 'buyer'}]}
                 options={{
-                    tabBarIcon: ({ focused }) => (
-                        <Ion
-                            name={focused ? 'reader' : 'reader-outline'}
-                            size={focused ? 40 : 30}
-                            color={focused ? PRIMARY_COLOR : 'black'}
-                            solid={true}
-                        />
+                    tabBarIcon: ({focused}) => (
+                        // <Ion
+                        //     name={focused ? 'reader' : 'reader-outline'}
+                        //     size={focused ? 40 : 30}
+                        //     color={focused ? PRIMARY_COLOR : 'black'}
+                        //     solid={true}
+                        // />
+                        <Image
+                                source={
+                                    focused
+                                        ? require('~/assets/images/orderFocused.png')
+                                        : require('~/assets/images/order.png')
+                                }
+                                style={{
+                                    width: focused ? 36 : 30,
+                                    height: focused ? 36 : 30,
+                                }}
+                                resizeMethod="resize"
+                                resizeMode="contain"
+                            />
                     ),
                 }}
             />
@@ -132,11 +172,25 @@ const BottomNavBar = () => {
                 name="More"
                 component={MoreScreen}
                 options={{
-                    tabBarIcon: ({ focused }) => (
-                        <Ion
-                            name={focused ? 'settings' : 'settings-outline'}
-                            size={focused ? 42 : 32}
-                            color={focused ? PRIMARY_COLOR : '#323232'}
+                    tabBarIcon: ({focused}) => (
+                        // <Ion
+                        //     name={focused ? 'settings' : 'settings-outline'}
+                        //     size={focused ? 42 : 32}
+                        //     color={focused ? PRIMARY_COLOR : '#323232'}
+                        // />
+
+                        <Image
+                            source={
+                                focused
+                                    ? require('~/assets/images/settingFocused.png')
+                                    : require('~/assets/images/setting.png')
+                            }
+                            style={{
+                                width: focused ? 36 : 30,
+                                height: focused ? 36 : 30,
+                            }}
+                            resizeMethod="resize"
+                            resizeMode="contain"
                         />
                     ),
                 }}
