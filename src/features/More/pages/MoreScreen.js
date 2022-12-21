@@ -152,7 +152,7 @@ const MoreScreen = ({navigation}) => {
             </Card>
 
             <Card
-                containerStyle={{...globalStyles.cardContainer, marginTop: 5}}>
+                containerStyle={{...globalStyles.cardContainer, marginTop: 12}}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate('Store')}
                     style={styles.container}>
@@ -244,7 +244,7 @@ const MoreScreen = ({navigation}) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={handleSignOutClick}
-                    style={styles.container}>
+                    style={{...styles.container, marginBottom: 10}}>
                     <Icon
                         name="sign-out-alt"
                         color={'black'}

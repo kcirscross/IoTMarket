@@ -55,7 +55,8 @@ const FollowingItemHorizontal = ({navigation, store}) => {
     }, [])
 
     return !loading ? (
-        <Card containerStyle={{...globalStyles.cardContainer, marginBottom: 5}}>
+        <Card
+            containerStyle={{...globalStyles.cardContainer, marginBottom: 12}}>
             <TouchableOpacity
                 onPress={() =>
                     navigation.navigate('StoreProfile', {store, ownerInfo})
@@ -136,7 +137,8 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                     style={{
                         padding: 5,
                         borderRadius: 10,
-                        backgroundColor: isFollow ? 'red' : PRIMARY_COLOR,
+                        borderColor: isFollow ? 'red' : PRIMARY_COLOR,
+                        borderWidth: 1,
                     }}>
                     {isFollow ? (
                         <View
@@ -144,10 +146,10 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                                 flexDirection: 'row',
                                 alignItems: 'center',
                             }}>
-                            <Ant name="minuscircleo" size={14} color="white" />
+                            <Ant name="minuscircleo" size={14} color="red" />
                             <Text
                                 style={{
-                                    color: 'white',
+                                    color: 'red',
                                     marginLeft: 5,
                                 }}>
                                 Follow
@@ -159,10 +161,10 @@ const FollowingItemHorizontal = ({navigation, store}) => {
                                 flexDirection: 'row',
                                 alignItems: 'center',
                             }}>
-                            <Ant name="pluscircleo" size={14} color="white" />
+                            <Ant name="pluscircleo" size={14} color={PRIMARY_COLOR} />
                             <Text
                                 style={{
-                                    color: 'white',
+                                    color: PRIMARY_COLOR,
                                     marginLeft: 5,
                                 }}>
                                 Follow

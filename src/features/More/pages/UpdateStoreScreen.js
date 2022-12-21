@@ -393,9 +393,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             defaultValue={storeInfo.displayName}
                             label="Store Name (At least 15 characters)"
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             renderErrorMessage={false}
                             onChangeText={text => setDisplayName(text)}
                         />
@@ -407,9 +405,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             defaultValue={storeInfo.description}
                             label="Store Description (At least 15 character)"
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             renderErrorMessage={false}
                             onChangeText={text => setDescription(text)}
                         />
@@ -420,9 +416,7 @@ const UpdateStoreScreen = ({navigation, route}) => {
                             defaultValue={storeInfo.address.street}
                             label="Detail Address"
                             labelStyle={styles.labelStyle}
-                            inputContainerStyle={{
-                                borderBottomWidth: 0,
-                            }}
+                            inputContainerStyle={styles.inputContainer}
                             renderErrorMessage={false}
                             onChangeText={text => setChosenStreet(text)}
                         />
@@ -546,8 +540,15 @@ const styles = StyleSheet.create({
         fontWeight: 'normal',
     },
     textContainer: {
+        marginTop: 10,
+        paddingHorizontal: 0,
+    },
+    inputContainer: {
         ...globalStyles.input,
         width: '100%',
+        marginTop: 0,
+        borderBottomWidth: 0,
+        paddingVertical: 5,
     },
     modalView: {
         backgroundColor: 'white',

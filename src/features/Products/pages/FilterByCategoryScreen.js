@@ -78,227 +78,245 @@ const FilterByCategoryScreen = ({navigation, route}) => {
             .catch(err => console.log('Get List Products: ', err))
     }, [index, filter])
 
-    return listProducts.length +
-        listProductsNew.length +
-        listProductsPriceAcs.length +
-        listProductsPriceDesc.length +
-        listProductsSale.length >
+    return !modalLoading ? (
+        listProducts.length +
+            listProductsNew.length +
+            listProductsPriceAcs.length +
+            listProductsPriceDesc.length +
+            listProductsSale.length >
         0 ? (
-        <SafeAreaView style={{...globalStyles.container}}>
-            <ModalLoading visible={modalLoading} />
+            <SafeAreaView style={{...globalStyles.container}}>
+                <ModalLoading visible={modalLoading} />
 
-            {listProducts.length > 0 ? (
-                <View
-                    style={{
-                        marginTop: 5,
-                        flex: 1,
-                    }}>
-                    <View style={styles.viewContainer}>
-                        <Tab
-                            indicatorStyle={{
-                                backgroundColor: PRIMARY_COLOR,
-                            }}
-                            value={index}
-                            onChange={setIndex}>
-                            <Tab.Item
-                                title="popular"
-                                titleStyle={{
-                                    fontSize: 13,
-                                    color: index == 0 ? PRIMARY_COLOR : 'black',
+                {listProducts.length > 0 ? (
+                    <View
+                        style={{
+                            marginTop: 5,
+                            flex: 1,
+                        }}>
+                        <View style={styles.viewContainer}>
+                            <Tab
+                                indicatorStyle={{
+                                    backgroundColor: PRIMARY_COLOR,
                                 }}
-                                buttonStyle={{
-                                    padding: 0,
-                                }}
-                                containerStyle={styles.tabContainer}
-                            />
+                                value={index}
+                                onChange={setIndex}>
+                                <Tab.Item
+                                    title="popular"
+                                    titleStyle={{
+                                        fontSize: 13,
+                                        color:
+                                            index == 0
+                                                ? PRIMARY_COLOR
+                                                : 'black',
+                                    }}
+                                    buttonStyle={{
+                                        padding: 0,
+                                    }}
+                                    containerStyle={styles.tabContainer}
+                                />
 
-                            <Tab.Item
-                                title="newest"
-                                titleStyle={{
-                                    fontSize: 13,
-                                    color: index == 1 ? PRIMARY_COLOR : 'black',
-                                }}
-                                buttonStyle={{
-                                    padding: 0,
-                                }}
-                                containerStyle={styles.tabContainer}
-                            />
+                                <Tab.Item
+                                    title="newest"
+                                    titleStyle={{
+                                        fontSize: 13,
+                                        color:
+                                            index == 1
+                                                ? PRIMARY_COLOR
+                                                : 'black',
+                                    }}
+                                    buttonStyle={{
+                                        padding: 0,
+                                    }}
+                                    containerStyle={styles.tabContainer}
+                                />
 
-                            <Tab.Item
-                                title="best sale"
-                                titleStyle={{
-                                    fontSize: 13,
-                                    color: index == 2 ? PRIMARY_COLOR : 'black',
-                                }}
-                                buttonStyle={{
-                                    padding: 0,
-                                }}
-                                containerStyle={styles.tabContainer}
-                            />
+                                <Tab.Item
+                                    title="best sale"
+                                    titleStyle={{
+                                        fontSize: 13,
+                                        color:
+                                            index == 2
+                                                ? PRIMARY_COLOR
+                                                : 'black',
+                                    }}
+                                    buttonStyle={{
+                                        padding: 0,
+                                    }}
+                                    containerStyle={styles.tabContainer}
+                                />
 
-                            <Tab.Item
-                                title="price"
-                                titleStyle={{
-                                    fontSize: 13,
-                                    color: index == 3 ? PRIMARY_COLOR : 'black',
-                                }}
-                                buttonStyle={{
-                                    padding: 0,
-                                }}
-                                containerStyle={styles.tabContainer}
-                                onPressIn={() => {
-                                    setFilter(!filter)
-                                }}
-                                iconRight={true}
-                                icon={
-                                    filter ? (
-                                        <Ion
-                                            name="arrow-down-outline"
-                                            size={16}
-                                            color={
-                                                index == 3
-                                                    ? PRIMARY_COLOR
-                                                    : 'black'
-                                            }
+                                <Tab.Item
+                                    title="price"
+                                    titleStyle={{
+                                        fontSize: 13,
+                                        color:
+                                            index == 3
+                                                ? PRIMARY_COLOR
+                                                : 'black',
+                                    }}
+                                    buttonStyle={{
+                                        padding: 0,
+                                    }}
+                                    containerStyle={styles.tabContainer}
+                                    onPressIn={() => {
+                                        setFilter(!filter)
+                                    }}
+                                    iconRight={true}
+                                    icon={
+                                        filter ? (
+                                            <Ion
+                                                name="arrow-down-outline"
+                                                size={16}
+                                                color={
+                                                    index == 3
+                                                        ? PRIMARY_COLOR
+                                                        : 'black'
+                                                }
+                                            />
+                                        ) : (
+                                            <Ion
+                                                name="arrow-up-outline"
+                                                size={16}
+                                                color={
+                                                    index == 3
+                                                        ? PRIMARY_COLOR
+                                                        : 'black'
+                                                }
+                                            />
+                                        )
+                                    }
+                                />
+                            </Tab>
+                        </View>
+
+                        <TabView value={index} onChange={setIndex}>
+                            <TabView.Item style={{width: '100%'}}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                    }}
+                                    style={{
+                                        paddingVertical: 5,
+                                    }}>
+                                    {listProducts.map((data, index) => (
+                                        <ProductItem
+                                            key={index}
+                                            data={data}
+                                            navigation={navigation}
                                         />
-                                    ) : (
-                                        <Ion
-                                            name="arrow-up-outline"
-                                            size={16}
-                                            color={
-                                                index == 3
-                                                    ? PRIMARY_COLOR
-                                                    : 'black'
-                                            }
+                                    ))}
+                                </ScrollView>
+                            </TabView.Item>
+
+                            <TabView.Item style={{width: '100%'}}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                    }}
+                                    style={{
+                                        paddingVertical: 5,
+                                    }}>
+                                    {listProductsNew.map((data, index) => (
+                                        <ProductItem
+                                            key={index}
+                                            data={data}
+                                            navigation={navigation}
                                         />
-                                    )
-                                }
-                            />
-                        </Tab>
+                                    ))}
+                                </ScrollView>
+                            </TabView.Item>
+
+                            <TabView.Item style={{width: '100%'}}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                    }}
+                                    style={{
+                                        paddingVertical: 5,
+                                    }}>
+                                    {listProductsSale.map((data, index) => (
+                                        <ProductItem
+                                            key={index}
+                                            data={data}
+                                            navigation={navigation}
+                                        />
+                                    ))}
+                                </ScrollView>
+                            </TabView.Item>
+
+                            <TabView.Item style={{width: '100%'}}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                    }}
+                                    style={{
+                                        paddingVertical: 5,
+                                    }}>
+                                    {filter
+                                        ? listProductsPriceDesc.map(
+                                              (data, index) => (
+                                                  <ProductItem
+                                                      key={index}
+                                                      data={data}
+                                                      navigation={navigation}
+                                                  />
+                                              ),
+                                          )
+                                        : listProductsPriceAcs.map(
+                                              (data, index) => (
+                                                  <ProductItem
+                                                      key={index}
+                                                      data={data}
+                                                      navigation={navigation}
+                                                  />
+                                              ),
+                                          )}
+                                </ScrollView>
+                            </TabView.Item>
+                        </TabView>
                     </View>
-
-                    <TabView value={index} onChange={setIndex}>
-                        <TabView.Item style={{width: '100%'}}>
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{
-                                    flexDirection: 'row',
-                                    flexWrap: 'wrap',
-                                }}
-                                style={{
-                                    paddingVertical: 5,
-                                }}>
-                                {listProducts.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
-                            </ScrollView>
-                        </TabView.Item>
-
-                        <TabView.Item style={{width: '100%'}}>
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{
-                                    flexDirection: 'row',
-                                    flexWrap: 'wrap',
-                                }}
-                                style={{
-                                    paddingVertical: 5,
-                                }}>
-                                {listProductsNew.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
-                            </ScrollView>
-                        </TabView.Item>
-
-                        <TabView.Item style={{width: '100%'}}>
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{
-                                    flexDirection: 'row',
-                                    flexWrap: 'wrap',
-                                }}
-                                style={{
-                                    paddingVertical: 5,
-                                }}>
-                                {listProductsSale.map((data, index) => (
-                                    <ProductItem
-                                        key={index}
-                                        data={data}
-                                        navigation={navigation}
-                                    />
-                                ))}
-                            </ScrollView>
-                        </TabView.Item>
-
-                        <TabView.Item style={{width: '100%'}}>
-                            <ScrollView
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={{
-                                    flexDirection: 'row',
-                                    flexWrap: 'wrap',
-                                }}
-                                style={{
-                                    paddingVertical: 5,
-                                }}>
-                                {filter
-                                    ? listProductsPriceDesc.map(
-                                          (data, index) => (
-                                              <ProductItem
-                                                  key={index}
-                                                  data={data}
-                                                  navigation={navigation}
-                                              />
-                                          ),
-                                      )
-                                    : listProductsPriceAcs.map(
-                                          (data, index) => (
-                                              <ProductItem
-                                                  key={index}
-                                                  data={data}
-                                                  navigation={navigation}
-                                              />
-                                          ),
-                                      )}
-                            </ScrollView>
-                        </TabView.Item>
-                    </TabView>
-                </View>
-            ) : (
-                <View />
-            )}
-        </SafeAreaView>
-    ) : (
-        <View
-            style={{
-                flex: 1,
-                alignItems: 'center',
-                marginTop: '50%',
-            }}>
-            <Image
-                source={require('~/assets/images/notfound.png')}
+                ) : (
+                    <View />
+                )}
+            </SafeAreaView>
+        ) : (
+            <View
                 style={{
-                    width: 200,
-                    height: 200,
-                }}
-            />
-            <Text
-                style={{
-                    marginTop: 10,
-                    color: PRIMARY_COLOR,
-                    fontSize: 20,
-                    fontWeight: '700',
+                    flex: 1,
+                    alignItems: 'center',
+                    marginTop: '50%',
                 }}>
-                This category is empty.
-            </Text>
-        </View>
+                <Image
+                    source={require('~/assets/images/notfound.png')}
+                    style={{
+                        width: 200,
+                        height: 200,
+                    }}
+                />
+                <Text
+                    style={{
+                        marginTop: 10,
+                        color: PRIMARY_COLOR,
+                        fontSize: 20,
+                        fontWeight: '700',
+                    }}>
+                    This category is empty.
+                </Text>
+            </View>
+        )
+    ) : (
+        <SafeAreaView>
+            <ModalLoading visible={modalLoading} />
+        </SafeAreaView>
     )
 }
 

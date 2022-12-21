@@ -140,11 +140,11 @@ const ProductItemHorizontal = ({navigation, product, type, onPress}) => {
                     resizeMode="contain"
                 />
 
-                <View style={{marginLeft: 5, flex: 1}}>
+                <View style={{marginHorizontal: 5, flex: 1}}>
                     <Text
                         style={{
                             color: 'black',
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: 'bold',
                             width: '100%',
                         }}>
