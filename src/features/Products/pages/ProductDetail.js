@@ -699,7 +699,19 @@ const ProductDetail = ({navigation, route}) => {
                     }}>
                     <View style={styles.viewStyle}>
                         <Text style={styles.textStyle}>Condition: </Text>
-                        <Text style={{color: 'black'}}>
+                        <Text
+                            style={{
+                                color:
+                                    product.condition === 'New'
+                                        ? PRIMARY_COLOR
+                                        : product.condition ===
+                                          'Used - Like New'
+                                        ? 'green'
+                                        : product.condition === 'Used - Good'
+                                        ? '#ffbf00'
+                                        : 'orange',
+                                fontWeight: 'bold',
+                            }}>
                             {product.condition}
                         </Text>
                     </View>
