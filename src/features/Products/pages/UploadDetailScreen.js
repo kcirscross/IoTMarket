@@ -170,7 +170,7 @@ const UploadDetailScreen = ({navigation, route}) => {
                 mediaType: 'photo',
             },
             res => {
-                if (res.didCancel != true) {
+                if (res.didCancel !== true) {
                     setListImages([...listImages, res.assets[0].uri])
                 }
             },

@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import {useIsFocused} from '@react-navigation/native'
+import axios from 'axios'
 import React, {useEffect, useLayoutEffect, useState} from 'react'
 import {
     Dimensions,
@@ -16,13 +18,19 @@ import {Badge, SearchBar} from 'react-native-elements'
 import Ion from 'react-native-vector-icons/Ionicons'
 import {useSelector} from 'react-redux'
 import {globalStyles} from '../../../assets/styles/globalStyles'
-import {AlertForSignIn, PRIMARY_COLOR} from '../../../components/constants'
-import {getAPI} from '../../../components/utils/base_API'
+import {
+    AlertForSignIn,
+    API_URL,
+    PRIMARY_COLOR,
+} from '../../../components/constants'
+import {getAPI, postAPI} from '../../../components/utils/base_API'
 import {ProductItem} from '../../Products/components'
 import {CategoryItem} from '../components'
 
 const HomeScreen = ({navigation}) => {
     const currentUser = useSelector(state => state.user)
+
+    const listFavorite = useSelector(state => state.favorite)
 
     const [listProducts, setListProducts] = useState([])
     const [listCategories, setListCategories] = useState([])
@@ -31,6 +39,7 @@ const HomeScreen = ({navigation}) => {
     const isFocus = useIsFocused()
     const [loading, setLoading] = useState(true)
     const [searchValue, setSearchValue] = useState('')
+    const [listRecommend, setListRecommend] = useState([])
 
     let diviceWidth = Dimensions.get('window').width
 
@@ -40,9 +49,12 @@ const HomeScreen = ({navigation}) => {
             res => res.status === 200 && setListProducts(res.data.products),
         )
 
-        getAPI({url: 'category'}).then(
-            res => res.status === 200 && setListCategories(res.data.categories),
-        )
+        getAPI({url: 'category'}).then(res => {
+            if (res.status === 200) {
+                setListCategories(res.data.categories)
+                setLoading(false)
+            }
+        })
 
         Object.keys(currentUser).length !== 0 &&
             getAPI({url: 'noti'})
@@ -54,6 +66,36 @@ const HomeScreen = ({navigation}) => {
                 })
                 .catch(err => console.log('Get Notification: ', err))
     }, [isFocus])
+
+    useEffect(() => {
+        listFavorite.length !== 0 &&
+            postAPI({
+                url: `product/recommend`,
+                data: {
+                    favorite: listFavorite[0]._id,
+                },
+            })
+                .then(res => {
+                    setListRecommend(res.data.product)
+                    setLoading(false)
+                })
+                .catch(err => console.log('Get Recommend List: ', err))
+    }, [listFavorite])
+    const getRecommend = async () => {
+        const token = await AsyncStorage.getItem('token')
+        await axios({
+            method: 'post',
+            url: 'http://10.0.2.2:5000/api/v1/product/recommend',
+            headers: {
+                authorization: token !== undefined ? `Bearer ${token}` : '',
+            },
+            data: {
+                favorite: listFavorite[0]._id,
+            },
+        }).then(res => {
+            setListRecommend(res.data.product)
+        })
+    }
 
     const onRefresh = () => {
         getAPI({url: 'product'}).then(
@@ -173,22 +215,6 @@ const HomeScreen = ({navigation}) => {
                 }>
                 {/* Ads view */}
                 <View>
-                    {/* <Text
-                        style={{
-                            fontSize: 24,
-                            color: 'white',
-                        }}>
-                        Get discount up to 50%
-                    </Text>
-                    <Text></Text>
-                    <Text
-                        style={{
-                            fontSize: 16,
-                            color: 'white',
-                        }}>
-                        Get a big discount with a very limited time, what are
-                        you waiting for shop now!
-                    </Text> */}
                     <Image
                         source={require('~/assets/images/discount.jpg')}
                         style={{
@@ -243,14 +269,41 @@ const HomeScreen = ({navigation}) => {
                     </ScrollView>
                 </View>
 
+                {/* List Recommend Products*/}
+                {listRecommend.length !== undefined && (
+                    <View
+                        style={{
+                            marginTop: 5,
+                        }}>
+                        <Text style={globalStyles.textTitle}>For You</Text>
+
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                            }}
+                            style={{
+                                paddingVertical: 5,
+                            }}>
+                            {listRecommend.map((data, index) => (
+                                <ProductItem
+                                    key={index}
+                                    data={data}
+                                    navigation={navigation}
+                                />
+                            ))}
+                        </ScrollView>
+                    </View>
+                )}
+
                 {/* List Products */}
                 <View
                     style={{
                         marginTop: 5,
                     }}>
-                    <Text style={globalStyles.textTitle}>
-                        Recommend For You
-                    </Text>
+                    <Text style={globalStyles.textTitle}>Products</Text>
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{
