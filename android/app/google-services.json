@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "550636790404",
-    "project_id": "iotmarket-10501",
-    "storage_bucket": "iotmarket-10501.appspot.com"
+    "project_number": "709479518411",
+    "project_id": "datn-26027",
+    "storage_bucket": "datn-26027.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:550636790404:android:f29e738374cdaba35e98d1",
+        "mobilesdk_app_id": "1:709479518411:android:b444f347f3036713b64b4e",
         "android_client_info": {
           "package_name": "com.iotmarket"
         }
       },
       "oauth_client": [
         {
-          "client_id": "550636790404-a80h1112n22fbruticc2ka4p65o2rb0d.apps.googleusercontent.com",
+          "client_id": "709479518411-aeemo6ngvuqrqqr58m9h7r571n7cp2iv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.iotmarket",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "certificate_hash": "c3704c3f57a955289a12879d700de3045266e5bd"
           }
         },
         {
-          "client_id": "550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com",
+          "client_id": "709479518411-c90o8nhrvkvg89jt4c4ab75hf99nfguk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAQffhHBwQwqLa7c6Gs2pn49mSCZ7LD8HE"
+          "current_key": "AIzaSyAvcwnUto3hJbYoG8foWTpu6jVLhJzI0l8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "550636790404-jkka629ik6ag2jdh7rpajr3luctuf2nd.apps.googleusercontent.com",
+              "client_id": "709479518411-c90o8nhrvkvg89jt4c4ab75hf99nfguk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
