@@ -16,7 +16,7 @@ const WebViewPayment = ({navigation, route}) => {
             onMessage={data => {
                 if (
                     data.nativeEvent.data.startsWith(
-                        '"https://iotmarket.herokuapp.com/api/v1/order/result',
+                        'http://192.168.1.202:5000/api/v1/order/result',
                     )
                 ) {
                     if (
