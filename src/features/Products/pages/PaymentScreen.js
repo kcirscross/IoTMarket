@@ -224,7 +224,7 @@ const PaymentScreen = ({ navigation, route }) => {
               </Text>
             </View>
 
-            <View style={Layout.row} />
+            <View style={Layout.fill} />
 
             <Ion
               name="chevron-forward-outline"
