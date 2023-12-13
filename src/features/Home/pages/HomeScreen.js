@@ -82,7 +82,7 @@ const HomeScreen = ({ navigation }) => {
     const token = await AsyncStorage.getItem('token');
     await axios({
       method: 'post',
-      url: 'http://192.168.1.202:5000/api/v1/product/recommend',
+      url: 'http://192.168.1.202:3000/api/v1/product/recommend',
       headers: {
         authorization: token !== undefined ? `Bearer ${token}` : '',
       },
