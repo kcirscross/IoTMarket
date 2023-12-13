@@ -1,124 +1,120 @@
-import React, {useState} from 'react'
-import {Linking, StyleSheet, Text, TouchableOpacity, View} from 'react-native'
-import {Divider} from 'react-native-elements'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import {PRIMARY_COLOR} from '../../../components/constants'
-import ModalChooseQuantity from './ModalChooseQuantity'
+/* eslint-disable react-native/no-inline-styles */
+import { Layout } from '@/assets/styles';
+import { PRIMARY_COLOR } from '@/components/constants';
+import React, { memo, useState } from 'react';
+import { Linking, Text, TouchableOpacity, View } from 'react-native';
+import { Divider } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import ModalChooseQuantity from './ModalChooseQuantity';
 
-const BottomMenuBar = ({navigation, productOwner, product, onPress}) => {
-    const [modalBuy, setModalBuy] = useState(false)
+const BottomMenuBar = ({ navigation, productOwner, product, onPress }) => {
+  const [modalBuy, setModalBuy] = useState(false);
 
-    const handleCallClick = () => {
-        Linking.openURL(`tel:${productOwner.phoneNumber}`)
-    }
+  const handleCallClick = () => {
+    Linking.openURL(`tel:${productOwner.phoneNumber}`);
+  };
 
-    const handleSmsClick = () => {
-        Linking.openURL(`sms:${productOwner.phoneNumber}`)
-    }
+  const handleSmsClick = () => {
+    Linking.openURL(`sms:${productOwner.phoneNumber}`);
+  };
 
-    const setModalVisible = isVisible => {
-        onPress(isVisible)
-        setModalBuy(isVisible)
-    }
+  const setModalVisible = isVisible => {
+    onPress(isVisible);
+    setModalBuy(isVisible);
+  };
 
-    return (
-        <View
-            style={{
-                position: 'absolute',
-                bottom: 0,
-                height: 50,
-                flexDirection: 'row',
-                width: '105%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderTopEndRadius: 10,
-                borderTopLeftRadius: 10,
-                borderTopColor: 'white',
-                borderTopWidth: 3,
-                backgroundColor: 'white',
-            }}>
-            <TouchableOpacity
-                onPress={handleCallClick}
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flex: 1,
-                    height: '100%',
-                }}>
-                <Icon name="phone-alt" size={24} color={PRIMARY_COLOR} />
-                <Text
-                    style={{
-                        color: PRIMARY_COLOR,
-                        marginLeft: 5,
-                        fontWeight: 'bold',
-                    }}>
-                    CALL
-                </Text>
-            </TouchableOpacity>
+  return (
+    <View
+      style={[
+        Layout.absolute,
+        Layout.rowCenter,
+        Layout.bottom0,
+        {
+          height: 50,
+          width: '105%',
+          borderTopEndRadius: 10,
+          borderTopLeftRadius: 10,
+          borderTopColor: 'white',
+          borderTopWidth: 3,
+          backgroundColor: 'white',
+        },
+      ]}
+    >
+      <TouchableOpacity
+        onPress={handleCallClick}
+        style={[Layout.rowCenter, Layout.fill, Layout.fullHeight]}
+      >
+        <Icon name="phone-alt" size={24} color={PRIMARY_COLOR} />
+        <Text
+          style={{
+            color: PRIMARY_COLOR,
+            marginLeft: 5,
+            fontWeight: 'bold',
+          }}
+        >
+          CALL
+        </Text>
+      </TouchableOpacity>
 
-            <Divider
-                width={1}
-                color={PRIMARY_COLOR}
-                orientation="vertical"
-                style={{marginVertical: 10}}
-            />
+      <Divider
+        width={1}
+        color={PRIMARY_COLOR}
+        orientation="vertical"
+        style={{ marginVertical: 10 }}
+      />
 
-            <TouchableOpacity
-                onPress={handleSmsClick}
-                style={{
-                    flexDirection: 'row',
-                    flex: 1,
-                    height: '100%',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                <Icon name="sms" size={24} color={PRIMARY_COLOR} />
-                <Text
-                    style={{
-                        color: PRIMARY_COLOR,
-                        marginLeft: 5,
-                        fontWeight: 'bold',
-                    }}>
-                    SMS
-                </Text>
-            </TouchableOpacity>
+      <TouchableOpacity
+        onPress={handleSmsClick}
+        style={[Layout.rowCenter, Layout.fill, Layout.fullHeight]}
+      >
+        <Icon name="sms" size={24} color={PRIMARY_COLOR} />
+        <Text
+          style={{
+            color: PRIMARY_COLOR,
+            marginLeft: 5,
+            fontWeight: 'bold',
+          }}
+        >
+          SMS
+        </Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity
-                onPress={() => {
-                    setModalBuy(true)
-                    onPress(true)
-                }}
-                style={{
-                    flexDirection: 'row',
-                    flex: 1,
-                    height: '100%',
-                    backgroundColor: PRIMARY_COLOR,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    borderTopEndRadius: 10,
-                }}>
-                <Text
-                    style={{
-                        color: 'white',
-                        marginLeft: 5,
-                        fontWeight: 'bold',
-                        borderTopEndRadius: 10,
-                    }}>
-                    BUY NOW
-                </Text>
-            </TouchableOpacity>
-            <ModalChooseQuantity
-                navigation={navigation}
-                visible={modalBuy}
-                productOwner={productOwner}
-                product={product}
-                onPress={setModalVisible}
-            />
-        </View>
-    )
-}
+      <TouchableOpacity
+        onPress={() => {
+          setModalBuy(true);
+          onPress(true);
+        }}
+        style={[
+          Layout.rowCenter,
+          Layout.fill,
+          Layout.fullHeight,
+          {
+            backgroundColor: PRIMARY_COLOR,
+            borderTopEndRadius: 10,
+          },
+        ]}
+      >
+        <Text
+          style={{
+            color: 'white',
+            marginLeft: 5,
+            fontWeight: 'bold',
+            borderTopEndRadius: 10,
+          }}
+        >
+          BUY NOW
+        </Text>
+      </TouchableOpacity>
 
-export default BottomMenuBar
+      <ModalChooseQuantity
+        navigation={navigation}
+        visible={modalBuy}
+        productOwner={productOwner}
+        product={product}
+        onPress={setModalVisible}
+      />
+    </View>
+  );
+};
 
-const styles = StyleSheet.create({})
+export default memo(BottomMenuBar);

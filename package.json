@@ -7,7 +7,9 @@
         "ios": "react-native run-ios",
         "start": "react-native start --reset-cache",
         "test": "jest",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "clean:android": "cd android && ./gradlew clean && cd ..",
+        "clean:cache": "rm -rf node_modules/ && npm cache clean --force && npm install --legacy-peer-deps"
     },
     "dependencies": {
         "@react-native-async-storage/async-storage": "^1.17.10",
@@ -51,6 +53,7 @@
         "@types/react": "^18.2.43",
         "@types/react-test-renderer": "^18.0.7",
         "babel-jest": "^26.6.3",
+        "babel-plugin-module-resolver": "^5.0.0",
         "babel-plugin-root-import": "^6.6.0",
         "eslint": "^7.32.0",
         "jest": "^26.6.3",

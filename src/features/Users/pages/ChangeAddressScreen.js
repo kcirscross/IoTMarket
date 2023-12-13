@@ -1,342 +1,347 @@
-import axios from 'axios'
-import React, {useEffect, useLayoutEffect, useState} from 'react'
+import axios from 'axios';
+import React, { memo, useEffect, useLayoutEffect, useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
-} from 'react-native'
-import DropDownPicker from 'react-native-dropdown-picker'
-import {Input} from 'react-native-elements'
-import {useDispatch} from 'react-redux'
-import ModalLoading from '~/components/utils/ModalLoading'
-import {globalStyles} from '../../../assets/styles/globalStyles'
-import {PRIMARY_COLOR, SECONDARY_COLOR} from '../../../components/constants'
-import {patchAPI} from '../../../components/utils/base_API'
-import {updateAddress} from '../userSlice'
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { Input } from 'react-native-elements';
+import { useDispatch } from 'react-redux';
+import ModalLoading from '~/components/utils/ModalLoading';
+import { globalStyles } from '../../../assets/styles/globalStyles';
+import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../../components/constants';
+import { patchAPI } from '../../../components/utils/base_API';
+import { updateAddress } from '../userSlice';
+import { Layout } from '@/assets/styles';
 
-const ChangeAddressScreen = ({navigation, route}) => {
-    const [openCity, setOpenCity] = useState(false)
-    const [valueCity, setValueCity] = useState(null)
-    const [itemsCity, setItemsCity] = useState([])
+const ChangeAddressScreen = ({ navigation, route }) => {
+  const [openCity, setOpenCity] = useState(false);
+  const [valueCity, setValueCity] = useState(null);
+  const [itemsCity, setItemsCity] = useState([]);
 
-    const [openDistrict, setOpenDistrict] = useState(false)
-    const [valueDistrict, setValueDistrict] = useState(null)
-    const [itemsDistrict, setItemsDistrict] = useState([])
+  const [openDistrict, setOpenDistrict] = useState(false);
+  const [valueDistrict, setValueDistrict] = useState(null);
+  const [itemsDistrict, setItemsDistrict] = useState([]);
 
-    const [openWard, setOpenWard] = useState(false)
-    const [valueWard, setValueWard] = useState(null)
-    const [itemsWard, setItemsWard] = useState([])
+  const [openWard, setOpenWard] = useState(false);
+  const [valueWard, setValueWard] = useState(null);
+  const [itemsWard, setItemsWard] = useState([]);
 
-    const [chosenCity, setChosenCity] = useState('')
-    const [chosenDistrict, setChosenDistrict] = useState('')
-    const [chosenWard, setChosenWard] = useState('')
-    const [chosenStreet, setChosenStreet] = useState('')
+  const [chosenCity, setChosenCity] = useState('');
+  const [chosenDistrict, setChosenDistrict] = useState('');
+  const [chosenWard, setChosenWard] = useState('');
+  const [chosenStreet, setChosenStreet] = useState('');
 
-    const existAddress = route.params
-    const dispatch = useDispatch()
+  const existAddress = route.params;
+  const dispatch = useDispatch();
 
-    const [modalLoading, setModalLoading] = useState(false)
+  const [modalLoading, setModalLoading] = useState(false);
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            title: 'Change Address',
-            headerStyle: {backgroundColor: PRIMARY_COLOR},
-            headerTintColor: 'white',
-            headerShown: true,
-            headerBackTitleStyle: {
-                color: 'white',
-            },
-        })
-    }, [])
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'Change Address',
+      headerStyle: { backgroundColor: PRIMARY_COLOR },
+      headerTintColor: 'white',
+      headerShown: true,
+      headerBackTitleStyle: {
+        color: 'white',
+      },
+    });
+  }, []);
 
-    const getCity = async () => {
-        let list = []
-        await axios({
-            method: 'get',
-            url: 'https://provinces.open-api.vn/api/p/',
-        })
-            .then(res => {
-                if (res.status == 200) {
-                    res.data.forEach(city =>
-                        list.push({
-                            label: city.name,
-                            value: city.code,
-                        }),
-                    )
-                    setItemsCity(list)
-                }
-            })
-            .catch(err => console.log(err))
-    }
-
-    const getDistrict = async code => {
-        let list = []
-        await axios({
-            method: 'get',
-            url: `https://provinces.open-api.vn/api/p/${code}`,
-            params: {
-                depth: 2,
-            },
-        })
-            .then(res => {
-                if (res.status == 200) {
-                    res.data.districts.forEach(districts =>
-                        list.push({
-                            label: districts.name,
-                            value: districts.code,
-                        }),
-                    )
-                    setItemsDistrict(list)
-                }
-            })
-            .catch(err => console.log(err))
-    }
-
-    const getWard = async code => {
-        let list = []
-        await axios({
-            method: 'get',
-            url: `https://provinces.open-api.vn/api/d/${code}`,
-            params: {
-                depth: 2,
-            },
-        })
-            .then(res => {
-                if (res.status == 200) {
-                    res.data.wards.forEach(wards =>
-                        list.push({
-                            label: wards.name,
-                            value: wards.code,
-                        }),
-                    )
-                    setItemsWard(list)
-                }
-            })
-            .catch(err => console.log(err))
-    }
-
-    //Init value if exist address
-    useEffect(() => {
-        if (existAddress != undefined) {
-            setChosenCity(existAddress.city)
-            setChosenDistrict(existAddress.district)
-            setChosenWard(existAddress.ward)
-            setChosenStreet(existAddress.street)
+  const getCity = async () => {
+    let list = [];
+    await axios({
+      method: 'get',
+      url: 'https://provinces.open-api.vn/api/p/',
+    })
+      .then(res => {
+        if (res.status === 200) {
+          res.data.forEach(city =>
+            list.push({
+              label: city.name,
+              value: city.code,
+            }),
+          );
+          setItemsCity(list);
         }
-    }, [])
+      })
+      .catch(err => console.log(err));
+  };
 
-    useEffect(() => {
-        getCity()
-    }, [])
-
-    const handleUpdateAddressClick = async () => {
-        //Validate
-        if (
-            chosenStreet == '' ||
-            chosenWard == '' ||
-            chosenDistrict == '' ||
-            chosenCity == ''
-        ) {
-            Alert.alert('Please fill in all field.')
-        } else {
-            setModalLoading(true)
-
-            patchAPI({
-                url: 'user/changeaddress',
-                data: {
-                    street: chosenStreet,
-                    ward: chosenWard,
-                    district: chosenDistrict,
-                    city: chosenCity,
-                },
-            }).then(res => {
-                if (res.status === 200) {
-                    setModalLoading(false)
-
-                    dispatch(updateAddress(res.data.newAddress))
-
-                    Alert.alert('Update successfully.', '', [
-                        {
-                            text: 'OK',
-                            onPress: () => {
-                                navigation.goBack()
-                            },
-                        },
-                    ])
-                }
-            })
+  const getDistrict = async code => {
+    let list = [];
+    await axios({
+      method: 'get',
+      url: `https://provinces.open-api.vn/api/p/${code}`,
+      params: {
+        depth: 2,
+      },
+    })
+      .then(res => {
+        if (res.status === 200) {
+          res.data.districts.forEach(districts =>
+            list.push({
+              label: districts.name,
+              value: districts.code,
+            }),
+          );
+          setItemsDistrict(list);
         }
-    }
+      })
+      .catch(err => console.log(err));
+  };
 
-    return (
-        <SafeAreaView
+  const getWard = async code => {
+    let list = [];
+    await axios({
+      method: 'get',
+      url: `https://provinces.open-api.vn/api/d/${code}`,
+      params: {
+        depth: 2,
+      },
+    })
+      .then(res => {
+        if (res.status === 200) {
+          res.data.wards.forEach(wards =>
+            list.push({
+              label: wards.name,
+              value: wards.code,
+            }),
+          );
+          setItemsWard(list);
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  //Init value if exist address
+  useEffect(() => {
+    if (existAddress !== undefined) {
+      setChosenCity(existAddress.city);
+      setChosenDistrict(existAddress.district);
+      setChosenWard(existAddress.ward);
+      setChosenStreet(existAddress.street);
+    }
+  }, []);
+
+  useEffect(() => {
+    getCity();
+  }, []);
+
+  const handleUpdateAddressClick = async () => {
+    //Validate
+    if (
+      chosenStreet === '' ||
+      chosenWard === '' ||
+      chosenDistrict === '' ||
+      chosenCity === ''
+    ) {
+      Alert.alert('Please fill in all field.');
+    } else {
+      console.log(chosenCity, chosenWard, chosenDistrict, chosenStreet);
+      setModalLoading(true);
+
+      patchAPI({
+        url: 'user/changeaddress',
+        data: {
+          street: chosenStreet,
+          ward: chosenWard,
+          district: chosenDistrict,
+          city: chosenCity,
+        },
+      }).then(res => {
+        if (res.status === 200) {
+          setModalLoading(false);
+
+          dispatch(updateAddress(res.data.newAddress));
+
+          Alert.alert('Update successfully.', '', [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.goBack();
+              },
+            },
+          ]);
+        }
+      });
+    }
+  };
+
+  return (
+    <SafeAreaView
+      style={{
+        ...globalStyles.container,
+        opacity: modalLoading ? 0.5 : 1,
+      }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView style={Layout.fullSize}>
+          <ModalLoading visible={modalLoading} />
+          <View
             style={{
-                ...globalStyles.container,
-                opacity: modalLoading ? 0.5 : 1,
-            }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView style={{height: '100%', width: '100%'}}>
-                    <ModalLoading visible={modalLoading} />
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.textStyle}>Choose your city.</Text>
-                        <DropDownPicker
-                            open={openCity}
-                            value={valueCity}
-                            items={itemsCity}
-                            placeholder={
-                                existAddress != undefined
-                                    ? existAddress.city
-                                    : 'Select your city.'
-                            }
-                            labelStyle={{
-                                color: 'black',
-                            }}
-                            setOpen={setOpenCity}
-                            setValue={setValueCity}
-                            setItems={setItemsCity}
-                            onSelectItem={item => {
-                                getDistrict(item.value)
-                                setChosenCity(item.label)
-                            }}
-                            style={styles.dropStyle}
-                            zIndex={3}
-                            dropDownContainerStyle={{
-                                borderColor: SECONDARY_COLOR,
-                            }}
-                        />
-                    </View>
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.textStyle}>Choose your city.</Text>
+            <DropDownPicker
+              open={openCity}
+              value={valueCity}
+              items={itemsCity}
+              placeholder={
+                existAddress != undefined
+                  ? existAddress.city
+                  : 'Select your city.'
+              }
+              labelStyle={{
+                color: 'black',
+              }}
+              setOpen={setOpenCity}
+              setValue={setValueCity}
+              setItems={setItemsCity}
+              onSelectItem={item => {
+                getDistrict(item.value);
+                setChosenCity(item.label);
+              }}
+              style={styles.dropStyle}
+              zIndex={3}
+              dropDownContainerStyle={{
+                borderColor: SECONDARY_COLOR,
+              }}
+            />
+          </View>
 
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.textStyle}>
-                            Choose your district.
-                        </Text>
-                        <DropDownPicker
-                            open={openDistrict}
-                            value={valueDistrict}
-                            items={itemsDistrict}
-                            placeholder={
-                                existAddress != undefined
-                                    ? existAddress.district
-                                    : 'Select your district.'
-                            }
-                            labelStyle={{
-                                color: 'black',
-                            }}
-                            setOpen={setOpenDistrict}
-                            setValue={setValueDistrict}
-                            setItems={setItemsDistrict}
-                            onSelectItem={item => {
-                                getWard(item.value)
-                                setChosenDistrict(item.label)
-                            }}
-                            style={styles.dropStyle}
-                            zIndex={2}
-                            dropDownContainerStyle={{
-                                borderColor: SECONDARY_COLOR,
-                            }}
-                        />
-                    </View>
+          <View
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.textStyle}>Choose your district.</Text>
+            <DropDownPicker
+              open={openDistrict}
+              value={valueDistrict}
+              items={itemsDistrict}
+              placeholder={
+                existAddress != undefined
+                  ? existAddress.district
+                  : 'Select your district.'
+              }
+              labelStyle={{
+                color: 'black',
+              }}
+              setOpen={setOpenDistrict}
+              setValue={setValueDistrict}
+              setItems={setItemsDistrict}
+              onSelectItem={item => {
+                getWard(item.value);
+                setChosenDistrict(item.label);
+              }}
+              style={styles.dropStyle}
+              zIndex={2}
+              dropDownContainerStyle={{
+                borderColor: SECONDARY_COLOR,
+              }}
+            />
+          </View>
 
-                    <View
-                        style={{
-                            marginTop: 10,
-                        }}>
-                        <Text style={styles.textStyle}>Choose your ward.</Text>
-                        <DropDownPicker
-                            open={openWard}
-                            value={valueWard}
-                            items={itemsWard}
-                            labelStyle={{
-                                color: 'black',
-                            }}
-                            placeholder={
-                                existAddress != undefined
-                                    ? existAddress.ward
-                                    : 'Select your ward.'
-                            }
-                            setOpen={setOpenWard}
-                            setValue={setValueWard}
-                            setItems={setItemsWard}
-                            style={styles.dropStyle}
-                            zIndex={1}
-                            onSelectItem={item => setChosenWard(item.label)}
-                            dropDownContainerStyle={{
-                                borderColor: SECONDARY_COLOR,
-                            }}
-                        />
-                    </View>
+          <View
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <Text style={styles.textStyle}>Choose your ward.</Text>
+            <DropDownPicker
+              open={openWard}
+              value={valueWard}
+              items={itemsWard}
+              labelStyle={{
+                color: 'black',
+              }}
+              placeholder={
+                existAddress !== undefined
+                  ? existAddress.ward
+                  : 'Select your ward.'
+              }
+              setOpen={setOpenWard}
+              setValue={setValueWard}
+              setItems={setItemsWard}
+              style={styles.dropStyle}
+              zIndex={1}
+              onSelectItem={item => setChosenWard(item.label)}
+              dropDownContainerStyle={{
+                borderColor: SECONDARY_COLOR,
+              }}
+            />
+          </View>
 
-                    <Input
-                        label="Please fill in your address."
-                        placeholder="Your detail address."
-                        containerStyle={{
-                            marginTop: 10,
-                            paddingHorizontal: 0,
-                        }}
-                        defaultValue={chosenStreet}
-                        inputContainerStyle={styles.textContainer}
-                        labelStyle={styles.labelStyle}
-                        inputStyle={{
-                            padding: 0,
-                            fontSize: 16,
-                            ...styles.textStyle,
-                        }}
-                        renderErrorMessage={false}
-                        onChangeText={text => setChosenStreet(text)}
-                    />
+          <Input
+            label="Please fill in your address."
+            placeholder="Your detail address."
+            containerStyle={{
+              marginTop: 10,
+              paddingHorizontal: 0,
+            }}
+            defaultValue={chosenStreet}
+            inputContainerStyle={styles.textContainer}
+            labelStyle={styles.labelStyle}
+            inputStyle={{
+              padding: 0,
+              fontSize: 16,
+              ...styles.textStyle,
+            }}
+            renderErrorMessage={false}
+            onChangeText={text => setChosenStreet(text)}
+          />
 
-                    <TouchableOpacity
-                        onPress={handleUpdateAddressClick}
-                        style={{
-                            ...globalStyles.button,
-                            position: 'absolute',
-                            bottom: 10,
-                            alignSelf: 'center',
-                        }}>
-                        <Text style={globalStyles.textButton}>Update</Text>
-                    </TouchableOpacity>
-                </KeyboardAvoidingView>
-            </TouchableWithoutFeedback>
-        </SafeAreaView>
-    )
-}
+          <TouchableOpacity
+            onPress={handleUpdateAddressClick}
+            style={{
+              ...globalStyles.button,
+              position: 'absolute',
+              bottom: 10,
+              alignSelf: 'center',
+            }}
+          >
+            <Text style={globalStyles.textButton}>Update</Text>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
+  );
+};
 
-export default ChangeAddressScreen
+export default memo(ChangeAddressScreen);
 
 const styles = StyleSheet.create({
-    textStyle: {
-        color: 'black',
-    },
-    labelStyle: {
-        color: 'black',
-        fontWeight: 'normal',
-    },
-    dropStyle: {
-        backgroundColor: 'white',
-        shadowColor: PRIMARY_COLOR,
-        elevation: 10,
-        shadowOffset: {width: -2, height: 4},
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        borderColor: SECONDARY_COLOR,
-    },
-    textContainer: {
-        ...globalStyles.input,
-        width: '100%',
-        marginTop: 0,
-        borderBottomWidth: 0,
-        paddingVertical: 5,
-    },
-})
+  textStyle: {
+    color: 'black',
+  },
+  labelStyle: {
+    color: 'black',
+    fontWeight: 'normal',
+  },
+  dropStyle: {
+    backgroundColor: 'white',
+    shadowColor: PRIMARY_COLOR,
+    elevation: 10,
+    shadowOffset: { width: -2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    borderColor: SECONDARY_COLOR,
+  },
+  textContainer: {
+    ...globalStyles.input,
+    width: '100%',
+    marginTop: 0,
+    borderBottomWidth: 0,
+    paddingVertical: 5,
+  },
+});
