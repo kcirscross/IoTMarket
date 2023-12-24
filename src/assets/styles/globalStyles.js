@@ -3,8 +3,7 @@ import { PRIMARY_COLOR, SECONDARY_COLOR } from '../../components/constants';
 
 export const globalStyles = StyleSheet.create({
   container: {
-    paddingLeft: 10,
-    paddingRight: 10,
+    paddingHorizontal: 10,
     flex: 1,
     backgroundColor: SECONDARY_COLOR,
   },
@@ -41,14 +40,13 @@ export const globalStyles = StyleSheet.create({
   },
   cardContainer: {
     margin: 0,
-    paddingLeft: 5,
-    paddingRight: 5,
+    paddingHorizontal: 10,
     borderRadius: 10,
-    paddingVertical: 5,
+    paddingVertical: 10,
     shadowColor: PRIMARY_COLOR,
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 3,
-    elevation: 10,
+    elevation: 5,
   },
 });

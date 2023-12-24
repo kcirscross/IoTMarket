@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   dropStyle: {
     backgroundColor: 'white',
     shadowColor: PRIMARY_COLOR,
-    elevation: 10,
+    elevation: 5,
     shadowOffset: { width: -2, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 3,

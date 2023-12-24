@@ -1,3 +1,4 @@
+import { Layout } from '@/assets/styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import { NavigationContainer } from '@react-navigation/native';
@@ -5,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
 import { API_URL } from './src/components/constants';
 import BottomNavBar from './src/components/utils/BottomNavBar';
@@ -138,57 +140,62 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={globalScreenOptions}
-          initialRouteName="Splash"
-        >
-          <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="SignIn" component={SignInScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen
-            name="RecoverPassword"
-            component={RecoverPasswordScreen}
-          />
-          <Stack.Screen name="BottomNavBar" component={BottomNavBar} />
-          <Stack.Screen name="ProductItem" component={ProductItem} />
-          <Stack.Screen name="ProductDetail" component={ProductDetail} />
-          <Stack.Screen name="More" component={MoreScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
-          <Stack.Screen name="ChangeAddress" component={ChangeAddressScreen} />
-          <Stack.Screen
-            name="ChangePassword"
-            component={ChangePasswordScreen}
-          />
-          <Stack.Screen name="Cart" component={CartScreen} />
-          <Stack.Screen name="Favorite" component={FavoriteScreen} />
-          <Stack.Screen name="UploadDetail" component={UploadDetailScreen} />
-          <Stack.Screen name="Store" component={StoreScreen} />
-          <Stack.Screen name="UpdateStore" component={UpdateStoreScreen} />
-          <Stack.Screen name="SettingStore" component={SettingStoreScreen} />
-          <Stack.Screen
-            name="FilterByCategory"
-            component={FilterByCategoryScreen}
-          />
-          <Stack.Screen name="Following" component={FollowingScreen} />
-          <Stack.Screen name="StoreProfile" component={StoreProfileScreen} />
-          <Stack.Screen name="Payment" component={PaymentScreen} />
-          <Stack.Screen name="PaymentCart" component={PaymentCartScreen} />
-          <Stack.Screen name="WebViewPayment" component={WebViewPayment} />
-          <Stack.Screen
-            name="Order"
-            component={OrderScreen}
-            initialParams={[{ from: 'buyer' }]}
-          />
-          <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
-          <Stack.Screen name="Notification" component={NotificationScreen} />
-          <Stack.Screen name="Review" component={ReviewScreen} />
+      <GestureHandlerRootView style={Layout.fill}>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={globalScreenOptions}
+            initialRouteName="Splash"
+          >
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen
+              name="RecoverPassword"
+              component={RecoverPasswordScreen}
+            />
+            <Stack.Screen name="BottomNavBar" component={BottomNavBar} />
+            <Stack.Screen name="ProductItem" component={ProductItem} />
+            <Stack.Screen name="ProductDetail" component={ProductDetail} />
+            <Stack.Screen name="More" component={MoreScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="ChangeInfo" component={ChangeInfoScreen} />
+            <Stack.Screen
+              name="ChangeAddress"
+              component={ChangeAddressScreen}
+            />
+            <Stack.Screen
+              name="ChangePassword"
+              component={ChangePasswordScreen}
+            />
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Favorite" component={FavoriteScreen} />
+            <Stack.Screen name="UploadDetail" component={UploadDetailScreen} />
+            <Stack.Screen name="Store" component={StoreScreen} />
+            <Stack.Screen name="UpdateStore" component={UpdateStoreScreen} />
+            <Stack.Screen name="SettingStore" component={SettingStoreScreen} />
+            <Stack.Screen
+              name="FilterByCategory"
+              component={FilterByCategoryScreen}
+            />
+            <Stack.Screen name="Following" component={FollowingScreen} />
+            <Stack.Screen name="StoreProfile" component={StoreProfileScreen} />
+            <Stack.Screen name="Payment" component={PaymentScreen} />
+            <Stack.Screen name="PaymentCart" component={PaymentCartScreen} />
+            <Stack.Screen name="WebViewPayment" component={WebViewPayment} />
+            <Stack.Screen
+              name="Order"
+              component={OrderScreen}
+              initialParams={[{ from: 'buyer' }]}
+            />
+            <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+            <Stack.Screen name="Notification" component={NotificationScreen} />
+            <Stack.Screen name="Review" component={ReviewScreen} />
 
-          <Stack.Screen name="AllReview" component={AllReviewScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+            <Stack.Screen name="AllReview" component={AllReviewScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </GestureHandlerRootView>
     </Provider>
   );
 }

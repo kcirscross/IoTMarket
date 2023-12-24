@@ -1,5 +1,5 @@
+import { PRIMARY_COLOR } from '@/components/constants';
 import { StyleSheet } from 'react-native';
-import { Colors } from './Variables';
 
 export const Layout = StyleSheet.create({
   /* Column Layouts */
@@ -283,7 +283,7 @@ export const Layout = StyleSheet.create({
   // Drop shadow
   regularDropShadow: {
     elevation: 5,
-    shadowColor: Colors.textGray800,
+    shadowColor: PRIMARY_COLOR,
     shadowOffset: {
       width: 0,
       height: 1,

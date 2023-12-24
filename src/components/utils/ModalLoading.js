@@ -1,6 +1,8 @@
-import React from 'react';
-import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
+/* eslint-disable react-native/no-inline-styles */
+import React, { memo } from 'react';
+import { ActivityIndicator, Modal, StyleSheet, View } from 'react-native';
 import { PRIMARY_COLOR } from '../constants';
+import { AppText } from '../GlobalComponents';
 
 const ModalLoading = ({ visible }) => {
   return (
@@ -27,7 +29,7 @@ const ModalLoading = ({ visible }) => {
           size={'large'}
           color={PRIMARY_COLOR}
         />
-        <Text
+        <AppText
           style={{
             color: PRIMARY_COLOR,
             fontWeight: '700',
@@ -37,13 +39,13 @@ const ModalLoading = ({ visible }) => {
           }}
         >
           Loading...
-        </Text>
+        </AppText>
       </View>
     </Modal>
   );
 };
 
-export default ModalLoading;
+export default memo(ModalLoading);
 
 const styles = StyleSheet.create({
   modalStyle: {

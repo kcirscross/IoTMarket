@@ -1,10 +1,19 @@
+/* eslint-disable react-native/no-inline-styles */
+import { Colors, FontSize, Fonts, Gutters, Layout } from '@/assets/styles';
+import { AppText } from '@/components/GlobalComponents';
 import { AlertForSignIn, PRIMARY_COLOR } from '@/components/constants';
 import { getAPI, postAPI } from '@/components/utils/base_API';
 import { ProductItem } from '@/features/Products/components';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
-import React, { memo, useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {
   Dimensions,
   FlatList,
@@ -12,7 +21,6 @@ import {
   RefreshControl,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -82,7 +90,7 @@ const HomeScreen = ({ navigation }) => {
     const token = await AsyncStorage.getItem('token');
     await axios({
       method: 'post',
-      url: 'http://192.168.1.202:3000/api/v1/product/recommend',
+      url: 'http://192.168.0.103:3000/api/v1/product/recommend',
       headers: {
         authorization: token !== undefined ? `Bearer ${token}` : '',
       },
@@ -112,11 +120,12 @@ const HomeScreen = ({ navigation }) => {
       },
       headerTitle: () => (
         <View
-          style={{
-            alignItems: 'center',
-            flexDirection: 'row',
-            width: deviceWidth,
-          }}
+          style={[
+            Layout.rowHCenter,
+            {
+              width: deviceWidth,
+            },
+          ]}
         >
           <SearchBar
             placeholder="Search..."
@@ -139,17 +148,16 @@ const HomeScreen = ({ navigation }) => {
               height: '90%',
               alignItems: 'center',
             }}
-            inputStyle={{
-              color: 'black',
-            }}
+            inputStyle={Colors.black}
           />
 
           <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              flex: 0.3,
-            }}
+            style={[
+              Layout.rowHCenter,
+              {
+                flex: 0.3,
+              },
+            ]}
           >
             <TouchableOpacity
               onPress={() => {
@@ -205,73 +213,74 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={globalStyles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={[Layout.scroll, Gutters.smallBPadding]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* Ads view */}
-        <View>
-          <Image
-            source={require('~/assets/images/discount.jpg')}
-            style={{
+        <Image
+          source={require('~/assets/images/discount.jpg')}
+          style={[
+            Gutters.smallTMargin,
+            {
               width: '100%',
               height: 190,
               borderRadius: 10,
-              marginTop: 10,
-            }}
-            resizeMethod="resize"
-            resizeMode="contain"
-          />
-        </View>
+            },
+          ]}
+          resizeMethod="resize"
+          resizeMode="contain"
+        />
 
         {/* List Categories */}
-        <Text style={globalStyles.textTitle}>Categories</Text>
-
-        <View
-          style={{
-            alignItems: 'center',
-            marginTop: 5,
-          }}
+        <AppText
+          style={[
+            Fonts.titleSmall,
+            Gutters.smallTMargin,
+            { fontSize: FontSize.large },
+          ]}
         >
-          <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            <FlatList
-              numColumns={
-                listCategories.length > 4
-                  ? Math.ceil(listCategories.length / 2)
-                  : listCategories.length
-              }
-              key={
-                listCategories.length > 4
-                  ? Math.ceil(listCategories.length / 2)
-                  : listCategories.length
-              }
-              scrollEnabled={false}
-              contentContainerStyle={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              showsVerticalScrollIndicator={false}
-              showsHorizontalScrollIndicator={false}
-              data={listCategories}
-              renderItem={({ item, index }) => (
-                <CategoryItem
-                  data={[item, index, listCategories.length]}
-                  key={index}
-                  navigation={navigation}
-                />
-              )}
-            />
-          </ScrollView>
-        </View>
+          Categories
+        </AppText>
+
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[Layout.scroll, Gutters.tinyTPadding]}
+        >
+          <FlatList
+            numColumns={
+              listCategories.length > 4
+                ? Math.ceil(listCategories.length / 2)
+                : listCategories.length
+            }
+            key={
+              listCategories.length > 4
+                ? Math.ceil(listCategories.length / 2)
+                : listCategories.length
+            }
+            scrollEnabled={false}
+            contentContainerStyle={[Layout.center, Gutters.smallBPadding]}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            data={listCategories}
+            renderItem={({ item, index }) => (
+              <CategoryItem
+                data={[item, index, listCategories.length]}
+                key={index}
+                navigation={navigation}
+              />
+            )}
+          />
+        </ScrollView>
 
         {/* List Recommend Products*/}
-        {listRecommend.length !== undefined && (
-          <View
-            style={{
-              marginTop: 5,
-            }}
-          >
-            <Text style={globalStyles.textTitle}>For You</Text>
+        {listRecommend.length !== undefined && listRecommend?.length > 0 && (
+          <Fragment>
+            <AppText style={[Fonts.titleSmall, { fontSize: FontSize.large }]}>
+              For You
+            </AppText>
 
             <ScrollView
               horizontal
@@ -288,43 +297,31 @@ const HomeScreen = ({ navigation }) => {
                 <ProductItem key={index} data={data} navigation={navigation} />
               ))}
             </ScrollView>
-          </View>
+          </Fragment>
         )}
 
         {/* List Products */}
-        <View
-          style={{
-            marginTop: 5,
-          }}
-        >
-          <Text style={globalStyles.textTitle}>Products</Text>
+        <Fragment>
+          <AppText style={[Fonts.titleSmall, { fontSize: FontSize.large }]}>
+            Products
+          </AppText>
+
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               flexDirection: 'row',
               flexWrap: 'wrap',
-            }}
-            style={{
-              paddingVertical: 5,
+              paddingVertical: 10,
             }}
           >
             {listProducts.map((data, index) => (
               <ProductItem key={index} data={data} navigation={navigation} />
             ))}
           </ScrollView>
-        </View>
+        </Fragment>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default memo(HomeScreen);
-
-const styles = StyleSheet.create({
-  adsView: {
-    backgroundColor: PRIMARY_COLOR,
-    borderRadius: 10,
-    marginTop: 10,
-    padding: 10,
-  },
-});

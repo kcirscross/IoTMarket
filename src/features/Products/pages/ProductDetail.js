@@ -3,17 +3,21 @@
 import { firebase } from '@react-native-firebase/messaging';
 import { useIsFocused } from '@react-navigation/native';
 import axios from 'axios';
-import React, { memo, useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {
   Alert,
   Dimensions,
-  Image,
   Modal,
   RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -28,13 +32,12 @@ import Material from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import ModalLoading from '~/components/utils/ModalLoading';
 
+import { Gutters, Layout, globalStyles } from '@/assets/styles';
 import {
-  ProductItem,
-  ReviewItemHorizontal,
-  SimplePaginationDot,
-} from '../components';
-import BottomMenuBar from '../components/BottomMenuBar';
-import { addFavorite, removeFavorite } from '../favoriteSlice';
+  AppImage,
+  AppScalableImage,
+  AppText,
+} from '@/components/GlobalComponents';
 import {
   API_URL,
   AVATAR_BORDER,
@@ -43,9 +46,15 @@ import {
   SECONDARY_COLOR,
   convertTime,
 } from '@/components/constants';
-import { Layout, globalStyles } from '@/assets/styles';
 import { deleteAPI, getAPI, patchAPI } from '@/components/utils/base_API';
 import { addFollow, removeFollow } from '@/features/Users/userSlice';
+import {
+  ProductItem,
+  ReviewItemHorizontal,
+  SimplePaginationDot,
+} from '../components';
+import BottomMenuBar from '../components/BottomMenuBar';
+import { addFavorite, removeFavorite } from '../favoriteSlice';
 
 const ProductDetail = ({ navigation, route }) => {
   const currentUser = useSelector(state => state.user);
@@ -71,6 +80,7 @@ const ProductDetail = ({ navigation, route }) => {
   const [modalEdit, setModalEdit] = useState(false);
   const [bucketPath, setBucketPath] = useState('');
   const isFocus = useIsFocused();
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -398,84 +408,83 @@ const ProductDetail = ({ navigation, route }) => {
       .catch(err => console.log('Get Sub: ', err));
   };
 
+  const handleCloseImageFullscreen = useCallback(() => {
+    setIsImageFullscreen(false);
+  }, []);
+
   return !modalLoading ? (
     <SafeAreaView
       style={{
         ...globalStyles.container,
         opacity: modalLoading + modalBuyVisible ? 0.3 : 1,
+        paddingHorizontal: 0,
       }}
     >
       <ModalLoading visible={modalLoading} />
 
+      <AppScalableImage
+        images={[{ uri: listImages[0] }]}
+        imageIndex={currentIndex}
+        visible={isImageFullscreen}
+        onRequestClose={handleCloseImageFullscreen}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={[Layout.scroll, Gutters.tinyHPadding]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View
-          style={{
-            height: 300,
-          }}
-        >
-          {listImages.length === 1 ? (
-            <View>
-              <Image
-                source={{ uri: listImages[0] }}
-                resizeMethod="scale"
-                resizeMode="contain"
-                style={styles.imageStyle}
-              />
-            </View>
-          ) : (
-            <Carousel
-              autoplay={true}
-              lockScrollWhileSnapping={true}
-              autoplayInterval={1000}
-              data={listImages}
-              style={{
-                marginBottom: 10,
-              }}
-              initialIndex={0}
-              onScrollEnd={handleCarouselScrollEnd}
-              itemWidth={Dimensions.get('window').width * 0.95}
-              containerWidth={Dimensions.get('window').width * 0.95}
-              separatorWidth={2}
-              inActiveOpacity={0.5}
-              onSnapToItem={index => setCurrentIndex(index)}
-              renderItem={({ item }) => (
-                <Image
+        {listImages.length === 1 ? (
+          <TouchableOpacity onPress={() => setIsImageFullscreen(true)}>
+            <AppImage
+              source={{ uri: listImages[0] }}
+              style={styles.imageStyle}
+            />
+          </TouchableOpacity>
+        ) : (
+          <Carousel
+            autoplay={true}
+            lockScrollWhileSnapping={true}
+            autoplayInterval={1000}
+            data={listImages}
+            style={{
+              marginBottom: 10,
+            }}
+            initialIndex={0}
+            onScrollEnd={handleCarouselScrollEnd}
+            itemWidth={Dimensions.get('window').width * 0.95}
+            containerWidth={Dimensions.get('window').width * 0.95}
+            separatorWidth={2}
+            inActiveOpacity={0.5}
+            onSnapToItem={index => setCurrentIndex(index)}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentIndex(index);
+                  setIsImageFullscreen(true);
+                }}
+              >
+                <AppImage
                   source={{
                     uri: item,
                   }}
-                  resizeMethod="scale"
-                  resizeMode="contain"
-                  style={[
-                    Layout.fullWidth,
-                    {
-                      height: 250,
-                      borderRadius: 10,
-                      shadowColor: 'black',
-                      shadowOffset: { width: -2, height: 4 },
-                      shadowOpacity: 0.5,
-                      shadowRadius: 3,
-                      elevation: 10,
-                    },
-                  ]}
+                  style={styles.imageStyle}
                 />
-              )}
-            />
-          )}
-          <SimplePaginationDot
-            currentIndex={currentIndex}
-            length={listImages.length}
+              </TouchableOpacity>
+            )}
           />
-        </View>
+        )}
+        <SimplePaginationDot
+          currentIndex={currentIndex}
+          length={listImages.length}
+        />
 
         <Card
           containerStyle={{
             ...globalStyles.cardContainer,
-            marginTop: 12,
+            marginTop: 20,
           }}
         >
           <TouchableOpacity
@@ -518,24 +527,24 @@ const ProductDetail = ({ navigation, route }) => {
               </View>
 
               <View style={Layout.fill}>
-                <Text
+                <AppText
                   numberOfLines={2}
                   ellipsizeMode="tail"
                   style={{
                     fontWeight: 'bold',
-                    color: 'black',
                     marginLeft: 10,
-                    fontSize: 16,
                   }}
                 >
                   {isStore ? storeInfo.displayName : productOwner.fullName}
-                </Text>
-                <Text style={{ color: 'black', marginLeft: 10 }}>
+                </AppText>
+
+                <AppText style={{ marginLeft: 10 }}>
                   {productOwner.onlineStatus === 'Online'
                     ? 'Online'
                     : convertTime(Date.parse(productOwner.updatedAt))}
-                </Text>
+                </AppText>
               </View>
+
               {!isOwner && (
                 <View style={Layout.center}>
                   {isStore && (
@@ -551,14 +560,14 @@ const ProductDetail = ({ navigation, route }) => {
                       {isFollow ? (
                         <View style={Layout.rowHCenter}>
                           <Ant name="minuscircleo" size={14} color="red" />
-                          <Text
+                          <AppText
                             style={{
                               color: 'red',
                               marginLeft: 5,
                             }}
                           >
                             Follow
-                          </Text>
+                          </AppText>
                         </View>
                       ) : (
                         <View style={Layout.rowHCenter}>
@@ -567,14 +576,14 @@ const ProductDetail = ({ navigation, route }) => {
                             size={14}
                             color={PRIMARY_COLOR}
                           />
-                          <Text
+                          <AppText
                             style={{
                               color: PRIMARY_COLOR,
                               marginLeft: 5,
                             }}
                           >
                             Follow
-                          </Text>
+                          </AppText>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -591,24 +600,24 @@ const ProductDetail = ({ navigation, route }) => {
             marginTop: 12,
           }}
         >
-          <Text
+          <AppText
             style={{
               fontWeight: 'bold',
-              color: 'black',
-              fontSize: 18,
+              fontSize: 20,
             }}
           >
             {product.productName}
-          </Text>
+          </AppText>
 
-          <Text
+          <AppText
             style={{
               color: 'blue',
               fontSize: 18,
             }}
           >
             Price: {Intl.NumberFormat('en-US').format(product.price)} đ
-          </Text>
+          </AppText>
+
           <View style={Layout.rowHCenter}>
             <Rating
               type="custom"
@@ -618,16 +627,15 @@ const ProductDetail = ({ navigation, route }) => {
               ratingColor="#FA8128"
               fractions={false}
             />
-            <Text
+
+            <AppText
               style={{
-                color: 'black',
-                fontSize: 16,
                 marginLeft: 5,
               }}
             >
               {rating.ratingValue} | Sold:{' '}
               {Intl.NumberFormat('en-US').format(product.soldCount)}
-            </Text>
+            </AppText>
 
             <View style={Layout.fill} />
 
@@ -663,8 +671,8 @@ const ProductDetail = ({ navigation, route }) => {
           }}
         >
           <View style={styles.viewStyle}>
-            <Text style={styles.textStyle}>Condition: </Text>
-            <Text
+            <AppText>Condition: </AppText>
+            <AppText
               style={{
                 color:
                   product.condition === 'New'
@@ -678,12 +686,12 @@ const ProductDetail = ({ navigation, route }) => {
               }}
             >
               {product.condition}
-            </Text>
+            </AppText>
           </View>
 
           <View style={styles.viewStyle}>
-            <Text style={styles.textStyle}>Number in stock: </Text>
-            <Text style={{ color: 'black' }}>{product.numberInStock}</Text>
+            <AppText>Number in stock: </AppText>
+            <AppText>{product.numberInStock}</AppText>
           </View>
         </Card>
 
@@ -693,18 +701,7 @@ const ProductDetail = ({ navigation, route }) => {
             marginTop: 12,
           }}
         >
-          <View style={styles.viewStyle}>
-            <Text
-              numberOfLines={
-                modalLoading
-                  ? 1
-                  : Math.round(product?.description?.length / 45 ?? 1)
-              }
-              style={{ color: 'black' }}
-            >
-              {product.description}
-            </Text>
-          </View>
+          <AppText>{product.description}</AppText>
         </Card>
 
         <Card
@@ -723,16 +720,15 @@ const ProductDetail = ({ navigation, route }) => {
             ]}
           >
             <View style={Layout.alignItemsCenter}>
-              <Text
+              <AppText
                 style={{
-                  color: 'black',
                   fontWeight: '700',
                   fontSize: 20,
                   marginVertical: 10,
                 }}
               >
                 {rating.ratingValue}
-              </Text>
+              </AppText>
 
               <Rating
                 type="custom"
@@ -743,9 +739,9 @@ const ProductDetail = ({ navigation, route }) => {
                 fractions={false}
               />
 
-              <Text style={{ color: 'black' }}>{`(${Intl.NumberFormat(
-                'en-US',
-              ).format(rating.ratingCount)} reviews)`}</Text>
+              <AppText>{`(${Intl.NumberFormat('en-US').format(
+                rating.ratingCount,
+              )} reviews)`}</AppText>
             </View>
 
             <Divider orientation="vertical" color={PRIMARY_COLOR} width={1} />
@@ -753,14 +749,13 @@ const ProductDetail = ({ navigation, route }) => {
             {rating !== undefined && (
               <View>
                 <View style={Layout.rowHCenter}>
-                  <Text
+                  <AppText
                     style={{
-                      color: 'black',
                       marginRight: 10,
                     }}
                   >
                     5
-                  </Text>
+                  </AppText>
                   <Progress.Bar
                     animated={false}
                     progress={rating.fiveStarCount / rating.ratingCount || 0}
@@ -772,14 +767,13 @@ const ProductDetail = ({ navigation, route }) => {
                 </View>
 
                 <View style={Layout.rowHCenter}>
-                  <Text
+                  <AppText
                     style={{
-                      color: 'black',
                       marginRight: 10,
                     }}
                   >
                     4
-                  </Text>
+                  </AppText>
                   <Progress.Bar
                     animated={false}
                     progress={rating.fourStarCount / rating.ratingCount || 0}
@@ -790,14 +784,13 @@ const ProductDetail = ({ navigation, route }) => {
                 </View>
 
                 <View style={Layout.rowHCenter}>
-                  <Text
+                  <AppText
                     style={{
-                      color: 'black',
                       marginRight: 10,
                     }}
                   >
                     3
-                  </Text>
+                  </AppText>
                   <Progress.Bar
                     animated={false}
                     progress={rating.threeStarCount / rating.ratingCount || 0}
@@ -808,14 +801,14 @@ const ProductDetail = ({ navigation, route }) => {
                 </View>
 
                 <View style={Layout.rowHCenter}>
-                  <Text
+                  <AppText
                     style={{
-                      color: 'black',
                       marginRight: 10,
                     }}
                   >
                     2
-                  </Text>
+                  </AppText>
+
                   <Progress.Bar
                     animated={false}
                     progress={rating.twoStarCount / rating.ratingCount || 0}
@@ -826,14 +819,13 @@ const ProductDetail = ({ navigation, route }) => {
                 </View>
 
                 <View style={Layout.rowHCenter}>
-                  <Text
+                  <AppText
                     style={{
-                      color: 'black',
                       marginRight: 10,
                     }}
                   >
                     1
-                  </Text>
+                  </AppText>
                   <Progress.Bar
                     animated={false}
                     progress={rating.oneStarCount / rating.ratingCount || 0}
@@ -879,17 +871,16 @@ const ProductDetail = ({ navigation, route }) => {
                 },
               ]}
             >
-              <Text
+              <AppText
                 style={[
                   Layout.selfCenter,
                   {
                     color: PRIMARY_COLOR,
-                    fontSize: 16,
                   },
                 ]}
               >
                 See all {rating.ratingCount} reviews.
-              </Text>
+              </AppText>
 
               <Ion
                 name="chevron-forward-outline"
@@ -908,15 +899,14 @@ const ProductDetail = ({ navigation, route }) => {
               marginTop: 12,
             }}
           >
-            <Text
+            <AppText
               style={{
-                color: 'black',
                 fontWeight: '700',
                 fontSize: 18,
               }}
             >
               Products In Same Category
-            </Text>
+            </AppText>
 
             <ScrollView
               horizontal
@@ -936,7 +926,7 @@ const ProductDetail = ({ navigation, route }) => {
       <Modal visible={modalEdit} animationType="none" transparent={true}>
         <Card containerStyle={styles.modalEdit}>
           <TouchableOpacity onPress={handleEditClick} style={styles.touchEdit}>
-            <Text style={styles.textEdit}>Edit</Text>
+            <AppText style={styles.textEdit}>Edit</AppText>
             <Material name="edit" size={20} color="black" />
           </TouchableOpacity>
 
@@ -946,7 +936,9 @@ const ProductDetail = ({ navigation, route }) => {
             style={styles.touchEdit}
             onPress={handleDeleteClick}
           >
-            <Text style={{ ...styles.textEdit, color: 'red' }}>Delete</Text>
+            <AppText style={{ ...styles.textEdit, color: 'red' }}>
+              Delete
+            </AppText>
             <Material name="delete-outline" size={20} color="red" />
           </TouchableOpacity>
         </Card>
@@ -980,16 +972,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 5,
   },
-  textStyle: { color: 'black', fontSize: 16 },
   viewStyle: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   imageStyle: {
-    width: '100%',
+    width: Dimensions.get('window').width - 20,
     height: 250,
     borderRadius: 10,
-    elevation: 3,
     marginVertical: 10,
   },
   modalEdit: {
@@ -1007,7 +997,6 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   textEdit: {
-    color: 'black',
     fontWeight: '500',
     fontSize: 16,
   },

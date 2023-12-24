@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native-image-viewing/dist/ImageViewing.js b/node_modules/react-native-image-viewing/dist/ImageViewing.js
+index 3d7641a..406b3a3 100644
+--- a/node_modules/react-native-image-viewing/dist/ImageViewing.js
++++ b/node_modules/react-native-image-viewing/dist/ImageViewing.js
+@@ -37,8 +37,8 @@ function ImageViewing({ images, keyExtractor, imageIndex, visible, onRequestClos
+     if (!visible) {
+         return null;
+     }
+-    return (<Modal transparent={presentationStyle === "overFullScreen"} visible={visible} presentationStyle={presentationStyle} animationType={animationType} onRequestClose={onRequestCloseEnhanced} supportedOrientations={["portrait"]} hardwareAccelerated>
+-      <StatusBarManager presentationStyle={presentationStyle}/>
++    return (<Modal statusBarTranslucent={presentationStyle === "overFullScreen"} transparent={presentationStyle === "overFullScreen"} visible={visible} presentationStyle={presentationStyle} animationType={animationType} onRequestClose={onRequestCloseEnhanced} supportedOrientations={["portrait"]} hardwareAccelerated>
++      {/* <StatusBarManager presentationStyle={presentationStyle}/> */}
+       <View style={[styles.container, { opacity, backgroundColor }]}>
+         <Animated.View style={[styles.header, { transform: headerTransform }]}>
+           {typeof HeaderComponent !== "undefined" ? (React.createElement(HeaderComponent, {
