@@ -15,7 +15,7 @@ const WebViewPayment = ({ navigation, route }) => {
       onMessage={data => {
         if (
           data.nativeEvent.data.includes(
-            'http://192.168.0.103:3000/api/v1/order/result',
+            'http://192.168.1.202:3000/api/v1/order/result',
           )
         ) {
           if (data.nativeEvent.data.search('vnp_TransactionStatus=00')) {
