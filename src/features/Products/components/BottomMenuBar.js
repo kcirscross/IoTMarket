@@ -6,8 +6,11 @@ import { Linking, Text, TouchableOpacity, View } from 'react-native';
 import { Divider } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import ModalChooseQuantity from './ModalChooseQuantity';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BottomMenuBar = ({ navigation, productOwner, product, onPress }) => {
+  const { bottom } = useSafeAreaInsets();
+
   const [modalBuy, setModalBuy] = useState(false);
 
   const handleCallClick = () => {
@@ -28,8 +31,9 @@ const BottomMenuBar = ({ navigation, productOwner, product, onPress }) => {
       style={[
         Layout.absolute,
         Layout.rowCenter,
-        Layout.bottom0,
+        Layout.regularDropShadow,
         {
+          bottom: bottom,
           height: 50,
           width: '105%',
           borderTopEndRadius: 10,

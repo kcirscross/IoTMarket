@@ -1,606 +1,313 @@
-import storage from '@react-native-firebase/storage'
-import React, {useLayoutEffect, useState} from 'react'
+/* eslint-disable react-native/no-inline-styles */
+import { Colors, Gutters, Layout } from '@/assets/styles';
+import { AppText } from '@/components/GlobalComponents';
+import React, { memo, useCallback, useLayoutEffect, useState } from 'react';
 import {
-    Alert,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
-} from 'react-native'
-import {Avatar, Input} from 'react-native-elements'
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker'
-import Toast from 'react-native-toast-message'
-import Icon from 'react-native-vector-icons/FontAwesome5'
-import Ion from 'react-native-vector-icons/Ionicons'
-import {useDispatch, useSelector} from 'react-redux'
-import ModalLoading from '~/components/utils/ModalLoading'
-import {globalStyles} from '../../../assets/styles/globalStyles'
+  Alert,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { Avatar, Input } from 'react-native-elements';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import { useDispatch, useSelector } from 'react-redux';
+import ModalLoading from '~/components/utils/ModalLoading';
+import { globalStyles } from '../../../assets/styles/globalStyles';
 import {
-    AVATAR_BORDER,
-    PRIMARY_COLOR,
-    REGEX_PHONE_NUMBER,
-} from '../../../components/constants'
-import {patchAPI} from '../../../components/utils/base_API'
-import {updateAvatar, updateGender, updatePhoneNumber} from '../userSlice'
+  AVATAR_BORDER,
+  PRIMARY_COLOR,
+  REGEX_PHONE_NUMBER,
+} from '../../../components/constants';
+import { patchAPI } from '../../../components/utils/base_API';
+import AvatarPickerBottomSheet from '../components/AvatarPickerBottomSheet';
+import ModalChangeGender from '../components/ModalChangeGender';
+import { updatePhoneNumber } from '../userSlice';
 
-const ChangeInfoScreen = ({navigation}) => {
-    const currentUser = useSelector(state => state.user)
-    const dispatch = useDispatch()
-    const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber)
-    const [modalGenderVisible, setModalGenderVisible] = useState(false)
-    const [modalAvatarVisible, setModalAvatarVisible] = useState(false)
-    const [modalLoading, setModalLoading] = useState(false)
+const ChangeInfoScreen = ({ navigation }) => {
+  const currentUser = useSelector(state => state.user);
+  const dispatch = useDispatch();
+  const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber);
+  const [modalGenderVisible, setModalGenderVisible] = useState(false);
+  const [modalAvatarVisible, setModalAvatarVisible] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
 
-    const {street, ward, district, city} = currentUser.address || ''
+  const { street, ward, district, city } = currentUser.address || '';
 
-    const updatePhone = () => {
-        setModalLoading(true)
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'My Information',
+      headerStyle: { backgroundColor: PRIMARY_COLOR },
+      headerTintColor: Colors.white,
+      headerShown: true,
+      headerBackTitleStyle: {
+        color: Colors.white,
+      },
+    });
+  }, []);
 
-        patchAPI({
-            url: 'user/changephone',
-            data: {
-                phoneNumber: phoneNumber,
-            },
-        })
-            .then(res => {
-                if (res.status === 200) {
-                    setModalLoading(false)
+  const updatePhone = useCallback(() => {
+    setModalLoading(true);
 
-                    const action = updatePhoneNumber(res.data.newPhoneNumber)
-                    dispatch(action)
+    patchAPI({
+      url: 'user/changephone',
+      data: {
+        phoneNumber: phoneNumber,
+      },
+    })
+      .then(res => {
+        if (res.status === 200) {
+          setModalLoading(false);
 
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Your phone number is updated.',
-                    })
-                }
-            })
-            .catch(err => {
-                setModalLoading(false)
-                console.log('Update Phone: ', err)
-            })
-    }
+          const action = updatePhoneNumber(res.data.newPhoneNumber);
+          dispatch(action);
 
-    const handleChangePhoneNumberClick = () => {
-        //Validate Phone Number
-        if (phoneNumber == '' || !REGEX_PHONE_NUMBER.test(phoneNumber)) {
-            return Alert.alert('Phone number is invalid.')
-        } else {
-            updatePhone()
+          Toast.show({
+            type: 'success',
+            text1: 'Your phone number is updated.',
+          });
         }
+      })
+      .catch(err => {
+        setModalLoading(false);
+        console.log('Update Phone: ', err);
+      });
+  }, [phoneNumber]);
+
+  const handleChangePhoneNumberClick = useCallback(() => {
+    //Validate Phone Number
+    if (phoneNumber === '' || !REGEX_PHONE_NUMBER.test(phoneNumber)) {
+      return Alert.alert('Phone number is invalid.');
+    } else {
+      updatePhone();
     }
+  }, [phoneNumber]);
 
-    const changeGender = gender => {
-        //Validate Gender
-        if (gender != '') {
-            setModalLoading(true)
+  const handleClosePicker = () => {
+    setModalAvatarVisible(false);
+  };
 
-            patchAPI({
-                url: 'user/changegender',
-                data: {
-                    gender: gender,
-                },
-            }).then(res => {
-                if (res.status === 200) {
-                    setModalLoading(false)
+  const handleCloseModalChangeGender = () => {
+    setModalGenderVisible(false);
+  };
 
-                    const action = updateGender(res.data.newGender)
-                    dispatch(action)
-
-                    Toast.show({
-                        type: 'success',
-                        text1: 'Your gender is updated.',
-                    })
-                }
-            })
-        }
-    }
-
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            title: 'My Infomation',
-            headerStyle: {backgroundColor: PRIMARY_COLOR},
-            headerTintColor: 'white',
-            headerShown: true,
-            headerBackTitleStyle: {
-                color: 'white',
-            },
-        })
-    }, [])
-
-    const pickImageFromGallery = async () => {
-        await launchImageLibrary(
+  return (
+    <SafeAreaView
+      style={{
+        ...globalStyles.container,
+        paddingHorizontal: 0,
+      }}
+    >
+      <KeyboardAwareScrollView
+        enableOnAndroid
+        contentContainerStyle={[Layout.scroll, Gutters.tinyHPadding]}
+      >
+        <View
+          style={[
+            Layout.rowCenter,
             {
-                mediaType: 'photo',
-                storageOptions: {
-                    skipBackup: true,
-                    path: 'images',
-                },
+              marginTop: 10,
             },
-            res => {
-                if (res.didCancel != true) {
-                    setModalLoading(true)
-                    uploadImageToFirebase(
-                        `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
-                        res.assets[0].uri,
-                    )
-                }
-            },
-        )
-    }
+          ]}
+        >
+          <TouchableOpacity onPress={() => setModalAvatarVisible(true)}>
+            <Avatar
+              rounded
+              source={{
+                uri: currentUser.avatar,
+              }}
+              size={80}
+              avatarStyle={{
+                borderWidth: 1,
+                borderColor: AVATAR_BORDER,
+              }}
+            />
 
-    const pickImageFromCamera = async () => {
-        await launchCamera(
-            {
-                mediaType: 'photo',
-            },
-            res => {
-                if (res.didCancel != true) {
-                    setModalLoading(true)
-                    uploadImageToFirebase(
-                        `users/${currentUser.email}/avatar/${res.assets[0].fileName}`,
-                        res.assets[0].uri,
-                    )
-                }
-            },
-        )
-    }
+            <Icon
+              name="camera"
+              size={20}
+              color={Colors.black}
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                right: 5,
+              }}
+            />
+          </TouchableOpacity>
 
-    const uploadImageToFirebase = async (filePath, uri) => {
-        try {
-            //Upload Image
-            await storage()
-                .ref(filePath)
-                .putFile(uri)
-                .then(async () => {
-                    //Get URL
-                    await storage()
-                        .ref(filePath)
-                        .getDownloadURL()
-                        .then(url => {
-                            patchAPI({
-                                url: 'user/changeavatar',
-                                data: {
-                                    avatarLink: url,
-                                },
-                            })
-                                .then(res => {
-                                    if (res.status === 200) {
-                                        setModalLoading(false)
-
-                                        dispatch(
-                                            updateAvatar(
-                                                res.data.newAvatarLink,
-                                            ),
-                                        )
-
-                                        Toast.show({
-                                            type: 'success',
-                                            text1: 'Your avatar is updated.',
-                                        })
-                                    }
-                                })
-                                .catch(err =>
-                                    console.log('Update Avatar: ', err),
-                                )
-                        })
-                })
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-
-    return (
-        <SafeAreaView
+          <View
             style={{
-                ...globalStyles.container,
-                opacity:
-                    modalAvatarVisible + modalGenderVisible + modalLoading
-                        ? 0.5
-                        : 1,
-            }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                    }}>
-                    <ModalLoading visible={modalLoading} />
+              marginLeft: 10,
+              flex: 1,
+            }}
+          >
+            <Input
+              placeholder="Full Name"
+              containerStyle={styles.textContainer}
+              defaultValue={currentUser.fullName}
+              label="Full Name"
+              labelStyle={styles.labelStyle}
+              inputContainerStyle={styles.inputContainer}
+              renderErrorMessage={false}
+              editable={false}
+            />
+          </View>
+        </View>
 
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalAvatarVisible}>
-                        <SafeAreaView
-                            style={{
-                                flex: 1,
-                            }}>
-                            <View style={styles.modalView}>
-                                <View
-                                    style={{
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 18,
-                                            marginLeft: -10,
-                                        }}>
-                                        Choose your image from?
-                                    </Text>
+        <Input
+          placeholder="Phone Number"
+          containerStyle={styles.textContainer}
+          defaultValue={currentUser.phoneNumber}
+          label="Phone Number"
+          labelStyle={styles.labelStyle}
+          inputContainerStyle={styles.inputContainer}
+          keyboardType={'phone-pad'}
+          renderErrorMessage={!REGEX_PHONE_NUMBER.test(phoneNumber)}
+          errorMessage={
+            phoneNumber === ''
+              ? 'This field is required.'
+              : 'The Phone Number is invalid.'
+          }
+          errorStyle={{
+            display: !REGEX_PHONE_NUMBER.test(phoneNumber) ? 'flex' : 'none',
+          }}
+          onChangeText={text => setPhoneNumber(text)}
+          rightIcon={
+            phoneNumber === currentUser.phoneNumber ? (
+              <Icon name="pen" size={20} color={Colors.black} />
+            ) : (
+              <TouchableOpacity
+                onPress={handleChangePhoneNumberClick}
+                style={{
+                  ...globalStyles.button,
+                  width: 60,
+                  height: 35,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: 0,
+                }}
+              >
+                <AppText style={styles.textButton}>SAVE</AppText>
+              </TouchableOpacity>
+            )
+          }
+        />
 
-                                    <View style={{flex: 1}} />
+        <Pressable
+          onPress={() =>
+            navigation.navigate('ChangeAddress', currentUser.address)
+          }
+        >
+          <Input
+            containerStyle={styles.textContainer}
+            defaultValue={
+              currentUser.address?.city === '' ?? ''
+                ? ''
+                : `${street},\n${ward},\n${district},\n${city}.`
+            }
+            label="Address"
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainer}
+            multiline={true}
+            renderErrorMessage={false}
+            editable={false}
+            rightIcon={<Icon name="pen" size={20} color={Colors.black} />}
+          />
+        </Pressable>
 
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            setModalAvatarVisible(false)
-                                        }>
-                                        <Ion
-                                            name="close-circle-outline"
-                                            size={30}
-                                            color="black"
-                                        />
-                                    </TouchableOpacity>
-                                </View>
+        <Pressable
+          onPress={() => {
+            setModalGenderVisible(true);
+          }}
+        >
+          <Input
+            containerStyle={styles.textContainer}
+            label="Gender"
+            defaultValue={currentUser.gender}
+            labelStyle={styles.labelStyle}
+            inputContainerStyle={styles.inputContainer}
+            renderErrorMessage={false}
+            editable={false}
+            rightIcon={<Icon name="pen" size={20} color={Colors.black} />}
+          />
+        </Pressable>
 
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setModalAvatarVisible(false)
-                                        pickImageFromGallery()
-                                    }}
-                                    style={styles.touchModalView}>
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 18,
-                                        }}>
-                                        Gallery
-                                    </Text>
+        <Pressable
+          onPress={() => {
+            currentUser.fromGoogle
+              ? Alert.alert(
+                  'Cannot change password',
+                  'Because you are signing in with Google account.',
+                )
+              : navigation.navigate('ChangePassword');
+          }}
+        >
+          <Input
+            containerStyle={styles.textContainer}
+            label="Change Password"
+            labelStyle={styles.labelStyle}
+            defaultValue={'********'}
+            inputContainerStyle={styles.inputContainer}
+            renderErrorMessage={false}
+            editable={false}
+            rightIcon={<Icon name="pen" size={20} color={Colors.black} />}
+          />
+        </Pressable>
+      </KeyboardAwareScrollView>
 
-                                    <Ion
-                                        name="images-outline"
-                                        size={64}
-                                        color={PRIMARY_COLOR}
-                                    />
-                                </TouchableOpacity>
+      {modalAvatarVisible && (
+        <AvatarPickerBottomSheet onDismiss={handleClosePicker} />
+      )}
 
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setModalAvatarVisible(false)
-                                        pickImageFromCamera()
-                                    }}
-                                    style={{
-                                        ...styles.touchModalView,
-                                        marginTop: 10,
-                                    }}>
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 18,
-                                        }}>
-                                        Camera
-                                    </Text>
+      <ModalChangeGender
+        visible={modalGenderVisible}
+        onDismiss={handleCloseModalChangeGender}
+      />
 
-                                    <Ion
-                                        name="camera-outline"
-                                        size={64}
-                                        color={PRIMARY_COLOR}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </SafeAreaView>
-                    </Modal>
+      <ModalLoading visible={modalLoading} />
+    </SafeAreaView>
+  );
+};
 
-                    <View
-                        style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginTop: 10,
-                            justifyContent: 'center',
-                        }}>
-                        <TouchableOpacity
-                            onPress={() => setModalAvatarVisible(true)}>
-                            <Avatar
-                                rounded
-                                source={{
-                                    uri: currentUser.avatar,
-                                }}
-                                size={80}
-                                avatarStyle={{
-                                    borderWidth: 1,
-                                    borderColor: AVATAR_BORDER,
-                                }}
-                            />
-
-                            <Icon
-                                name="camera"
-                                size={20}
-                                color="black"
-                                style={{
-                                    position: 'absolute',
-                                    bottom: 0,
-                                    right: 5,
-                                }}
-                            />
-                        </TouchableOpacity>
-
-                        <View
-                            style={{
-                                marginLeft: 10,
-                                flex: 1,
-                            }}>
-                            <Input
-                                placeholder="Full Name"
-                                containerStyle={styles.textContainer}
-                                defaultValue={currentUser.fullName}
-                                label="Full Name"
-                                labelStyle={styles.labelStyle}
-                                inputContainerStyle={styles.inputContainer}
-                                renderErrorMessage={false}
-                                editable={false}
-                            />
-                        </View>
-                    </View>
-
-                    <View>
-                        <Input
-                            placeholder="Phone Number"
-                            containerStyle={styles.textContainer}
-                            defaultValue={currentUser.phoneNumber}
-                            label="Phone Number"
-                            labelStyle={styles.labelStyle}
-                            inputContainerStyle={styles.inputContainer}
-                            keyboardType={'phone-pad'}
-                            renderErrorMessage={
-                                !REGEX_PHONE_NUMBER.test(phoneNumber)
-                            }
-                            errorMessage="This field must filled in and have valid phone number."
-                            errorStyle={{
-                                display: !REGEX_PHONE_NUMBER.test(phoneNumber)
-                                    ? 'flex'
-                                    : 'none',
-                            }}
-                            onChangeText={text => setPhoneNumber(text)}
-                            rightIcon={
-                                phoneNumber === currentUser.phoneNumber ? (
-                                    <Icon name="pen" size={20} color="black" />
-                                ) : (
-                                    <TouchableOpacity
-                                        onPress={handleChangePhoneNumberClick}
-                                        style={{
-                                            ...globalStyles.button,
-                                            width: 60,
-                                            height: 35,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            marginBottom: 20,
-                                        }}>
-                                        <Text style={styles.textButton}>
-                                            SAVE
-                                        </Text>
-                                    </TouchableOpacity>
-                                )
-                            }
-                        />
-                    </View>
-
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate(
-                                'ChangeAddress',
-                                currentUser.address,
-                            )
-                        }>
-                        <Input
-                            containerStyle={styles.textContainer}
-                            defaultValue={
-                                currentUser.address?.city == ''
-                                    ? ''
-                                    : `${street},\n${ward},\n${district},\n${city}.`
-                            }
-                            label="Address"
-                            labelStyle={styles.labelStyle}
-                            inputContainerStyle={styles.inputContainer}
-                            multiline={true}
-                            renderErrorMessage={false}
-                            editable={false}
-                            rightIcon={
-                                <Icon name="pen" size={20} color="black" />
-                            }
-                        />
-                    </TouchableOpacity>
-
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalGenderVisible}>
-                        <SafeAreaView
-                            style={{
-                                flex: 1,
-                            }}>
-                            <View style={styles.modalView}>
-                                <View style={{flexDirection: 'row'}}>
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            fontSize: 18,
-                                            marginLeft: -10,
-                                        }}>
-                                        Choose your gender.
-                                    </Text>
-
-                                    <View style={{flex: 1}} />
-
-                                    <TouchableOpacity
-                                        onPress={() =>
-                                            setModalGenderVisible(false)
-                                        }>
-                                        <Ion
-                                            name="close-circle-outline"
-                                            size={30}
-                                            color="black"
-                                        />
-                                    </TouchableOpacity>
-                                </View>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        changeGender('Male')
-                                        setModalGenderVisible(false)
-                                    }}
-                                    style={{
-                                        ...styles.touchModalView,
-                                        flexDirection: 'row',
-                                    }}>
-                                    {currentUser.gender == 'Male' ? (
-                                        <Icon
-                                            name="check-square"
-                                            size={20}
-                                            color="black"
-                                        />
-                                    ) : (
-                                        <Icon
-                                            name="square"
-                                            size={20}
-                                            color="black"
-                                        />
-                                    )}
-
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
-                                        }}>
-                                        Male
-                                    </Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        changeGender('Female')
-                                        setModalGenderVisible(false)
-                                    }}
-                                    style={{
-                                        ...styles.touchModalView,
-                                        flexDirection: 'row',
-                                    }}>
-                                    {currentUser.gender == 'Female' ? (
-                                        <Icon
-                                            name="check-square"
-                                            size={20}
-                                            color="black"
-                                        />
-                                    ) : (
-                                        <Icon
-                                            name="square"
-                                            size={20}
-                                            color="black"
-                                        />
-                                    )}
-                                    <Text
-                                        style={{
-                                            ...styles.labelStyle,
-                                            marginLeft: 10,
-                                            fontSize: 16,
-                                        }}>
-                                        Female
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </SafeAreaView>
-                    </Modal>
-
-                    <TouchableOpacity
-                        onPress={() => {
-                            setModalGenderVisible(true)
-                            updateGender()
-                        }}>
-                        <Input
-                            containerStyle={styles.textContainer}
-                            label="Gender"
-                            defaultValue={currentUser.gender}
-                            labelStyle={styles.labelStyle}
-                            inputContainerStyle={styles.inputContainer}
-                            renderErrorMessage={false}
-                            editable={false}
-                            rightIcon={
-                                <Icon name="pen" size={20} color="black" />
-                            }
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => {
-                            currentUser.fromGoogle
-                                ? Alert.alert(
-                                      'Cannot change password',
-                                      'Because you are signing in with Google account.',
-                                  )
-                                : navigation.navigate('ChangePassword')
-                        }}>
-                        <Input
-                            containerStyle={styles.textContainer}
-                            label="Change Password"
-                            labelStyle={styles.labelStyle}
-                            defaultValue={'********'}
-                            inputContainerStyle={styles.inputContainer}
-                            renderErrorMessage={false}
-                            editable={false}
-                            rightIcon={
-                                <Icon name="pen" size={20} color="black" />
-                            }
-                        />
-                    </TouchableOpacity>
-
-                    <Toast position="bottom" bottomOffset={70} />
-                </KeyboardAvoidingView>
-            </TouchableWithoutFeedback>
-        </SafeAreaView>
-    )
-}
-
-export default ChangeInfoScreen
+export default memo(ChangeInfoScreen);
 
 const styles = StyleSheet.create({
-    labelStyle: {
-        color: 'black',
-        fontWeight: 'normal',
-    },
+  labelStyle: {
+    color: Colors.black,
+    fontWeight: 'bold',
+    marginVertical: 5,
+  },
+  textButton: {
+    color: 'white',
+    fontSize: 16,
+  },
 
-    textButton: {
-        color: 'white',
-        fontSize: 16,
-    },
-
-    inputContainer: {
-        ...globalStyles.input,
-        width: '100%',
-        marginTop: 0,
-        borderBottomWidth: 0,
-        paddingVertical: 5,
-    },
-    textContainer: {
-        marginTop: 10,
-        paddingHorizontal: 0,
-    },
-    modalView: {
-        backgroundColor: 'white',
-        position: 'absolute',
-        justifyContent: 'center',
-        bottom: 0,
-        width: '100%',
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
-        paddingHorizontal: 30,
-        paddingVertical: 10,
-    },
-    touchModalView: {
-        alignItems: 'center',
-    },
-})
+  inputContainer: {
+    ...globalStyles.input,
+    width: '100%',
+    marginTop: 0,
+    borderBottomWidth: 0,
+    paddingVertical: 5,
+  },
+  textContainer: {
+    marginTop: 10,
+    paddingHorizontal: 0,
+  },
+  modalView: {
+    backgroundColor: 'white',
+    position: 'absolute',
+    justifyContent: 'center',
+    bottom: 0,
+    width: '100%',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+  },
+  touchModalView: {
+    alignItems: 'center',
+  },
+});

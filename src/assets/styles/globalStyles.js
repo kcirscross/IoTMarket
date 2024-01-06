@@ -32,6 +32,11 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 'center',
     height: 50,
     marginTop: 10,
+    shadowColor: PRIMARY_COLOR,
+    shadowOffset: { width: -2, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
   },
   textButton: {
     fontWeight: 'bold',

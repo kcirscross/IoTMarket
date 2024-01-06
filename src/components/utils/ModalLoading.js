@@ -1,41 +1,37 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { memo } from 'react';
-import { ActivityIndicator, Modal, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { PRIMARY_COLOR } from '../constants';
 import { AppText } from '../GlobalComponents';
+import Modal from 'react-native-modal';
+import { Colors, Layout } from '@/assets/styles';
 
 const ModalLoading = ({ visible }) => {
   return (
     <Modal
-      animationType="fade"
-      visible={visible}
-      transparent={true}
-      style={styles.modalStyle}
+      isVisible={visible}
+      style={styles.modal}
+      animationIn="fadeIn"
+      animationOut="fadeOut"
+      backdropTransitionOutTiming={0}
+      hideModalContentWhileAnimating
     >
       <View
-        style={{
-          position: 'absolute',
-          top: '40%',
-          alignSelf: 'center',
-          backgroundColor: 'white',
-          width: 200,
-          height: 200,
-          borderRadius: 10,
-          alignItems: 'center',
-        }}
+        style={[
+          Layout.center,
+          Layout.selfCenter,
+          Layout.regularBorderRadius,
+          { width: 200, height: 200, backgroundColor: Colors.white },
+        ]}
       >
-        <ActivityIndicator
-          style={{ marginTop: '40%' }}
-          size={'large'}
-          color={PRIMARY_COLOR}
-        />
+        <ActivityIndicator size={'large'} color={PRIMARY_COLOR} />
         <AppText
           style={{
             color: PRIMARY_COLOR,
             fontWeight: '700',
-            fontSize: 18,
+            fontSize: 20,
             alignSelf: 'center',
-            marginVertical: 10,
+            marginTop: 20,
           }}
         >
           Loading...
@@ -48,6 +44,7 @@ const ModalLoading = ({ visible }) => {
 export default memo(ModalLoading);
 
 const styles = StyleSheet.create({
+  modal: { margin: 0 },
   modalStyle: {
     alignSelf: 'center',
     width: 100,

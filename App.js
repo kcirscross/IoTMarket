@@ -7,6 +7,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
 import { API_URL } from './src/components/constants';
 import BottomNavBar from './src/components/utils/BottomNavBar';
@@ -195,6 +196,8 @@ export default function App() {
             <Stack.Screen name="AllReview" component={AllReviewScreen} />
           </Stack.Navigator>
         </NavigationContainer>
+
+        <Toast position="bottom" bottomOffset={70} />
       </GestureHandlerRootView>
     </Provider>
   );

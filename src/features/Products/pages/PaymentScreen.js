@@ -1,18 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Layout, globalStyles } from '@/assets/styles';
+import { Colors, Fonts, Gutters, Layout, globalStyles } from '@/assets/styles';
+import { AppText } from '@/components/GlobalComponents';
 import { useIsFocused } from '@react-navigation/native';
 import React, { memo, useEffect, useLayoutEffect, useState } from 'react';
 import {
   Alert,
   Image,
-  Modal,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Card, Divider } from 'react-native-elements';
+import { Card } from 'react-native-elements';
 import Toast from 'react-native-toast-message';
 import Ion from 'react-native-vector-icons/Ionicons';
 import Material from 'react-native-vector-icons/MaterialIcons';
@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux';
 import ModalLoading from '~/components/utils/ModalLoading';
 import { PRIMARY_COLOR } from '../../../components/constants';
 import { postAPI } from '../../../components/utils/base_API';
+import ModalDeliveryMethod from '../components/ModalDeliveryMethod';
 
 const PaymentScreen = ({ navigation, route }) => {
   const currentUser = useSelector(state => state.user);
@@ -30,6 +31,7 @@ const PaymentScreen = ({ navigation, route }) => {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [deliveryMethod, setDeliveryMethod] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const isFocus = useIsFocused();
 
   useLayoutEffect(() => {
@@ -54,9 +56,13 @@ const PaymentScreen = ({ navigation, route }) => {
         data: [{ productId: product._id, quantity: quantity }],
       })
         .then(res => {
-          if (res.status === 200) {
+          if (res && res?.status === 200) {
             setDeliveryFee(res.data.totalShippingFee);
             setModalLoading(false);
+          } else {
+            Alert.alert('Error', 'Please update your phone number and address');
+            setModalLoading(false);
+            setIsError(true);
           }
         })
         .catch(err => console.log('Get Delivery Fee: ', err));
@@ -120,13 +126,12 @@ const PaymentScreen = ({ navigation, route }) => {
     }
   };
 
+  const handleCloseModalDeliveryMethod = () => {
+    setModalDeliveryVisible(false);
+  };
+
   return !modalLoading ? (
-    <SafeAreaView
-      style={{
-        ...globalStyles.container,
-        opacity: modalDeliveryVisible + modalLoading ? 0.3 : 1,
-      }}
-    >
+    <SafeAreaView style={globalStyles.container}>
       <Card
         containerStyle={{
           ...globalStyles.cardContainer,
@@ -136,20 +141,16 @@ const PaymentScreen = ({ navigation, route }) => {
         <TouchableOpacity onPress={() => navigation.navigate('ChangeInfo')}>
           <View style={Layout.rowHCenter}>
             <Ion name="location-outline" color={PRIMARY_COLOR} size={30} />
-            <Text style={styles.titleStyle}>Address</Text>
+            <AppText style={styles.titleStyle}>Address</AppText>
           </View>
 
           <View style={[Layout.rowHCenter, { marginLeft: 10 }]}>
-            <Text
-              style={{
-                color: 'black',
-              }}
-            >{`${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street},\n${currentUser.address.ward}, ${currentUser.address.district},\n${currentUser.address.city}.`}</Text>
+            <AppText>{`${currentUser.fullName}  |  ${currentUser.phoneNumber}\n${currentUser.address.street},\n${currentUser.address.ward}, ${currentUser.address.district},\n${currentUser.address.city}.`}</AppText>
             <View style={Layout.fill} />
             <Ion
               name="chevron-forward-outline"
               size={24}
-              color="black"
+              color={Colors.black}
               style={Layout.selfCenter}
             />
           </View>
@@ -164,10 +165,10 @@ const PaymentScreen = ({ navigation, route }) => {
       >
         <View style={Layout.rowHCenter}>
           <Ion name="cart-outline" size={30} color={PRIMARY_COLOR} />
-          <Text style={styles.titleStyle}>Product List</Text>
+          <AppText style={styles.titleStyle}>Product List</AppText>
         </View>
 
-        <View style={Layout.rowHCenter}>
+        <View style={[Layout.rowHCenter, Gutters.tinyTMargin]}>
           <Image
             source={{ uri: product.thumbnailImage }}
             style={{
@@ -186,12 +187,14 @@ const PaymentScreen = ({ navigation, route }) => {
               },
             ]}
           >
-            <Text style={{ color: 'black' }}>{product.productName}</Text>
+            <AppText>{product.productName}</AppText>
             <View style={Layout.fill} />
-            <View style={Layout.row}>
-              <Text>{Intl.NumberFormat('en-US').format(product.price)} đ</Text>
+            <View style={Layout.rowHCenter}>
+              <AppText>
+                {Intl.NumberFormat('en-US').format(product.price)} đ
+              </AppText>
               <View style={Layout.fill} />
-              <Text>x{quantity}</Text>
+              <AppText>x{quantity}</AppText>
             </View>
           </View>
         </View>
@@ -209,19 +212,19 @@ const PaymentScreen = ({ navigation, route }) => {
         >
           <View style={Layout.rowHCenter}>
             <Material name="local-shipping" size={26} color={PRIMARY_COLOR} />
-            <Text style={styles.titleStyle}>Delivery Method</Text>
+            <AppText style={styles.titleStyle}>Delivery Method</AppText>
           </View>
 
-          <View style={Layout.row}>
+          <View style={Layout.rowHCenter}>
             <View>
-              <Text style={{ color: 'black', fontWeight: '500' }}>
+              <AppText style={Fonts.textBold}>
                 {deliveryMethod ? 'COD' : 'Giao Hang Nhanh'}
-              </Text>
-              <Text style={{ color: 'black' }}>
+              </AppText>
+              <AppText>
                 {deliveryMethod
                   ? 'Delivery fee will up to you and seller.'
                   : `${Intl.NumberFormat('en-US').format(deliveryFee)} đ `}
-              </Text>
+              </AppText>
             </View>
 
             <View style={Layout.fill} />
@@ -229,7 +232,7 @@ const PaymentScreen = ({ navigation, route }) => {
             <Ion
               name="chevron-forward-outline"
               size={24}
-              color="black"
+              color={Colors.black}
               style={Layout.selfCenter}
             />
           </View>
@@ -244,73 +247,66 @@ const PaymentScreen = ({ navigation, route }) => {
       >
         <View style={Layout.rowHCenter}>
           <Ion name="reader-outline" size={30} color={PRIMARY_COLOR} />
-          <Text style={styles.titleStyle}>Order Detail</Text>
+          <AppText style={styles.titleStyle}>Order Detail</AppText>
         </View>
 
         <View
           style={[
-            Layout.row,
+            Layout.rowHCenter,
             {
               marginHorizontal: 5,
               marginTop: 5,
             },
           ]}
         >
-          <Text style={{ color: 'black' }}>Total price of products:</Text>
+          <AppText>Total price of products:</AppText>
 
           <View style={Layout.fill} />
 
-          <Text style={{ color: 'black' }}>
+          <AppText>
             {Intl.NumberFormat('en-US').format(product.price * quantity)} đ
-          </Text>
+          </AppText>
         </View>
 
         <View
           style={[
-            Layout.row,
+            Layout.rowHCenter,
             {
               marginHorizontal: 5,
             },
           ]}
         >
-          <Text style={{ color: 'black' }}>Total delivery fee:</Text>
+          <AppText>Total delivery fee:</AppText>
 
           <View style={Layout.fill} />
 
-          <Text style={{ color: 'black' }}>
+          <AppText>
             {!deliveryMethod
               ? Intl.NumberFormat('en-US').format(deliveryFee)
               : 0}{' '}
             đ
-          </Text>
+          </AppText>
         </View>
 
         <View
           style={[
-            Layout.row,
+            Layout.rowHCenter,
             {
               marginHorizontal: 5,
             },
           ]}
         >
-          <Text
-            style={{
-              color: 'black',
-              fontSize: 16,
-              fontWeight: '600',
-            }}
-          >
-            Total payment:
-          </Text>
+          <AppText style={Fonts.textBold}>Total payment:</AppText>
 
           <View style={Layout.fill} />
 
-          <Text
-            style={{
-              color: PRIMARY_COLOR,
-              fontSize: 16,
-              fontWeight: '600',
-            }}
+          <AppText
+            style={[
+              Fonts.textBold,
+              {
+                color: PRIMARY_COLOR,
+              },
+            ]}
           >
             {!deliveryMethod
               ? Intl.NumberFormat('en-US').format(
@@ -320,7 +316,7 @@ const PaymentScreen = ({ navigation, route }) => {
                   product.price * quantity,
                 )}{' '}
             đ
-          </Text>
+          </AppText>
         </View>
       </Card>
 
@@ -334,15 +330,7 @@ const PaymentScreen = ({ navigation, route }) => {
             marginRight: 10,
           }}
         >
-          <Text
-            style={{
-              color: 'black',
-              fontSize: 16,
-              fontWeight: '600',
-            }}
-          >
-            Total payment
-          </Text>
+          <AppText style={Fonts.textBold}>Total payment</AppText>
 
           <Text
             style={{
@@ -363,110 +351,31 @@ const PaymentScreen = ({ navigation, route }) => {
         </View>
 
         <TouchableOpacity
-          onPress={handlePaymentClick}
+          onPress={
+            isError
+              ? () => {
+                  Alert.alert(
+                    'Error',
+                    'Please update your phone number and address',
+                  );
+                }
+              : handlePaymentClick
+          }
           style={styles.orderStyle}
         >
-          <Text style={globalStyles.textButton}>CHECKOUT</Text>
+          <AppText style={globalStyles.textButton}>CHECKOUT</AppText>
         </TouchableOpacity>
       </View>
 
       <ModalLoading visible={modalLoading} />
 
-      <Toast bottomOffset={70} position="bottom" />
-
-      <Modal
-        transparent={true}
-        animationType="slide"
+      <ModalDeliveryMethod
         visible={modalDeliveryVisible}
-      >
-        <View style={styles.modalView}>
-          <View
-            style={[
-              Layout.row,
-              {
-                marginHorizontal: 5,
-                marginTop: 5,
-              },
-            ]}
-          >
-            <Text
-              style={{
-                color: 'black',
-                fontWeight: '600',
-                fontSize: 16,
-              }}
-            >
-              Choose delivery method
-            </Text>
-
-            <View style={Layout.fill} />
-
-            <TouchableOpacity onPress={() => setModalDeliveryVisible(false)}>
-              <Ion name="close-circle-outline" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => {
-              setDeliveryMethod(false);
-              setModalDeliveryVisible(false);
-            }}
-            style={[
-              Layout.rowHCenter,
-              {
-                marginHorizontal: 10,
-                marginBottom: 10,
-              },
-            ]}
-          >
-            <View>
-              <Text style={{ color: 'black' }}>Giao Hang Nhanh</Text>
-
-              <View style={Layout.rowHCenter}>
-                <Text style={{ color: 'black' }}>Delivery fee:</Text>
-                <Text style={{ color: 'black' }}>
-                  {` ${Intl.NumberFormat('en-US').format(deliveryFee)} đ`}
-                </Text>
-              </View>
-            </View>
-
-            <View style={Layout.fill} />
-
-            {!deliveryMethod && (
-              <Ion name="checkmark" color={PRIMARY_COLOR} size={24} />
-            )}
-          </TouchableOpacity>
-
-          <Divider color={PRIMARY_COLOR} width={3} />
-
-          <TouchableOpacity
-            onPress={() => {
-              setDeliveryMethod(true);
-              setModalDeliveryVisible(false);
-            }}
-            style={[
-              Layout.rowHCenter,
-              {
-                margin: 10,
-              },
-            ]}
-          >
-            <View>
-              <Text style={{ color: 'black' }}>COD</Text>
-
-              <Text style={{ color: 'black' }}>
-                Delivery fee will up to you and seller.
-              </Text>
-            </View>
-
-            <View style={Layout.fill} />
-
-            {deliveryMethod && (
-              <Ion name="checkmark" color={PRIMARY_COLOR} size={24} />
-            )}
-          </TouchableOpacity>
-        </View>
-      </Modal>
+        deliveryFee={deliveryFee}
+        deliveryMethod={deliveryMethod}
+        onDismiss={handleCloseModalDeliveryMethod}
+        onChange={setDeliveryMethod}
+      />
     </SafeAreaView>
   ) : (
     <View>
@@ -488,7 +397,7 @@ const styles = StyleSheet.create({
   },
   titleStyle: {
     color: PRIMARY_COLOR,
-    fontWeight: '600',
+    fontWeight: 'bold',
     fontSize: 18,
     marginLeft: 10,
   },

@@ -1,5 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Fonts, Gutters, Layout, globalStyles } from '@/assets/styles';
+import {
+  FontSize,
+  Fonts,
+  Gutters,
+  Layout,
+  globalStyles,
+} from '@/assets/styles';
 import { AppText } from '@/components/GlobalComponents';
 import React, { memo } from 'react';
 import {
@@ -41,7 +47,13 @@ const ProductItem = ({ data, navigation }) => {
             <AppText
               ellipsizeMode="tail"
               numberOfLines={2}
-              style={Fonts.titleSmall}
+              style={[
+                Fonts.titleSmall,
+                {
+                  fontSize: FontSize.regular,
+                  minHeight: FontSize.regular * 2.5,
+                },
+              ]}
             >
               {productName}
             </AppText>
@@ -65,8 +77,9 @@ const ProductItem = ({ data, navigation }) => {
 
               <AppText
                 style={{
-                  flex: 0.8,
+                  flex: 0.5,
                   textAlign: 'right',
+                  fontSize: FontSize.tiny,
                 }}
               >
                 Sold: {Intl.NumberFormat('en-US').format(soldCount)}

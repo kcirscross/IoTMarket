@@ -1,9 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Layout, globalStyles } from '@/assets/styles';
+import { Gutters, Layout, globalStyles } from '@/assets/styles';
+import { AppText } from '@/components/GlobalComponents';
 import { AlertForSignIn, SECONDARY_COLOR } from '@/components/constants';
 import React, { memo, useEffect, useState } from 'react';
-import { Image, Modal, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { View } from 'react-native-animatable';
+import Modal from 'react-native-modal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ion from 'react-native-vector-icons/Ionicons';
 import { useSelector } from 'react-redux';
 
@@ -14,6 +17,8 @@ const ModalChooseQuantity = ({
   product,
   onPress,
 }) => {
+  const { bottom } = useSafeAreaInsets();
+
   const [quantity, setQuantity] = useState(1);
 
   const currentUser = useSelector(state => state.user);
@@ -26,8 +31,14 @@ const ModalChooseQuantity = ({
   }, [quantity]);
 
   return (
-    <Modal transparent={true} visible={visible} animationType="slide">
-      <View style={styles.modalView}>
+    <Modal
+      style={styles.modal}
+      isVisible={visible}
+      backdropTransitionOutTiming={0}
+      hideModalContentWhileAnimating
+      onBackdropPress={() => setQuantity(0)}
+    >
+      <View style={[styles.modalView, { bottom: bottom }]}>
         <View style={styles.viewContainer}>
           <Image
             source={{ uri: product.thumbnailImage }}
@@ -37,9 +48,9 @@ const ModalChooseQuantity = ({
           />
 
           <View style={{ marginLeft: 10 }}>
-            <Text style={{ color: 'blue' }}>
+            <AppText style={{ color: 'blue' }}>
               {Intl.NumberFormat('en-US').format(product.price * quantity)} đ
-            </Text>
+            </AppText>
 
             <View style={styles.quantityStyle}>
               <TouchableOpacity
@@ -49,9 +60,9 @@ const ModalChooseQuantity = ({
                 <Ion name="remove" size={16} color="black" />
               </TouchableOpacity>
 
-              <Text style={{ color: 'black', marginHorizontal: 10 }}>
+              <AppText style={{ marginHorizontal: 10 }}>
                 {quantity.toString()}
-              </Text>
+              </AppText>
 
               <TouchableOpacity
                 disabled={quantity === product.numberInStock}
@@ -61,14 +72,13 @@ const ModalChooseQuantity = ({
                 <Ion name="add" size={16} color="black" />
               </TouchableOpacity>
             </View>
-            <Text
+            <AppText
               style={{
-                color: 'black',
                 marginTop: 30,
               }}
             >
               Stock: {product.numberInStock}
-            </Text>
+            </AppText>
           </View>
 
           <View style={Layout.fill} />
@@ -97,12 +107,11 @@ const ModalChooseQuantity = ({
           style={[
             globalStyles.button,
             Layout.selfCenter,
-            {
-              marginBottom: 20,
-            },
+            Gutters.regularTMargin,
+            Gutters.smallBMargin,
           ]}
         >
-          <Text style={globalStyles.textButton}>ORDER</Text>
+          <AppText style={globalStyles.textButton}>ORDER</AppText>
         </TouchableOpacity>
       </View>
     </Modal>
@@ -115,7 +124,6 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: 'white',
     position: 'absolute',
-    bottom: 0,
     paddingHorizontal: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
@@ -148,5 +156,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+  },
+  modal: {
+    margin: 0,
   },
 });

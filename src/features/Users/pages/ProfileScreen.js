@@ -1,9 +1,12 @@
+/* eslint-disable no-shadow */
+/* eslint-disable react-native/no-inline-styles */
+import { Colors, Fonts, Layout } from '@/assets/styles';
+import { AppText } from '@/components/GlobalComponents';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { memo, useEffect, useLayoutEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -126,6 +129,7 @@ const ProfileScreen = ({ navigation, route }) => {
       <ModalLoading visible={modalLoading} />
 
       <Toast position="bottom" bottomOffset={70} />
+
       <ScrollView showsVerticalScrollIndicator={false}>
         <Card
           containerStyle={{
@@ -133,12 +137,7 @@ const ProfileScreen = ({ navigation, route }) => {
             marginTop: 10,
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
+          <View style={Layout.rowHCenter}>
             <View>
               <Avatar
                 rounded
@@ -157,7 +156,7 @@ const ProfileScreen = ({ navigation, route }) => {
               <Badge
                 value=" "
                 status={
-                  currentUser.onlineStatus == 'Online' ? 'success' : 'warning'
+                  currentUser.onlineStatus === 'Online' ? 'success' : 'warning'
                 }
                 containerStyle={{
                   position: 'absolute',
@@ -168,76 +167,66 @@ const ProfileScreen = ({ navigation, route }) => {
             </View>
 
             <View>
-              <Text
-                style={{
-                  fontWeight: 'bold',
-                  color: 'black',
-                  marginLeft: 10,
-                  fontSize: 18,
-                }}
-              >
+              <AppText style={Fonts.titleSmall}>
                 {isCurrentStore ? storeInfo.displayName : currentUser.fullName}
-              </Text>
+              </AppText>
 
-              <Text
+              <AppText
                 style={{
-                  color: 'black',
                   marginLeft: 10,
                 }}
               >
-                {currentUser.onlineStatus == 'Online'
+                {currentUser.onlineStatus === 'Online'
                   ? 'Online'
                   : convertTime(Date.parse(currentUser.updatedAt))}
-              </Text>
+              </AppText>
 
               <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginLeft: 10,
-                }}
+                style={[
+                  Layout.rowHCenter,
+                  {
+                    marginLeft: 10,
+                  },
+                ]}
               >
                 <Ion name="star" color="#FA8128" size={16} />
-                <Text
+                <AppText
                   style={{
-                    color: 'black',
                     marginLeft: 5,
                   }}
                 >
                   {storeInfo.rating}/5{'     '}|
-                </Text>
+                </AppText>
 
-                <Text>{'     '}</Text>
+                <AppText>{'     '}</AppText>
                 <Ion name="person" color={PRIMARY_COLOR} size={16} />
-                <Text
+                <AppText
                   style={{
-                    color: 'black',
                     marginLeft: 5,
                   }}
                 >
                   {storeInfo.followers.length} Followers
-                </Text>
+                </AppText>
               </View>
             </View>
           </View>
 
           {isCurrentStore && (
             <View>
-              <Text
+              <AppText
                 style={{
-                  color: 'black',
                   marginLeft: 85,
                 }}
               >
-                Description: {storeInfo.description}
-              </Text>
+                {storeInfo.description}
+              </AppText>
             </View>
           )}
         </Card>
 
         <View
           style={{
-            borderTopColor: 'black',
+            borderTopColor: Colors.black,
             borderTopWidth: 1,
             borderBottomColor: SECONDARY_COLOR,
             borderBottomWidth: 1,
@@ -255,69 +244,73 @@ const ProfileScreen = ({ navigation, route }) => {
               title="popular"
               titleStyle={{
                 fontSize: 13,
-                color: index == 0 ? PRIMARY_COLOR : 'black',
+                color: index === 0 ? PRIMARY_COLOR : Colors.black,
               }}
               buttonStyle={{
                 padding: 0,
               }}
-              containerStyle={{
-                padding: 0,
-                margin: 0,
-                backgroundColor: 'white',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
+              containerStyle={[
+                Layout.center,
+                {
+                  padding: 0,
+                  margin: 0,
+                  backgroundColor: Colors.white,
+                },
+              ]}
             />
             <Tab.Item
               title="newest"
               titleStyle={{
                 fontSize: 13,
-                color: index == 1 ? PRIMARY_COLOR : 'black',
+                color: index === 1 ? PRIMARY_COLOR : Colors.black,
               }}
               buttonStyle={{
                 padding: 0,
               }}
-              containerStyle={{
-                padding: 0,
-                margin: 0,
-                backgroundColor: 'white',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
+              containerStyle={[
+                Layout.center,
+                {
+                  padding: 0,
+                  margin: 0,
+                  backgroundColor: Colors.white,
+                },
+              ]}
             />
             <Tab.Item
               title="best sale"
               titleStyle={{
                 fontSize: 13,
-                color: index == 2 ? PRIMARY_COLOR : 'black',
+                color: index === 2 ? PRIMARY_COLOR : Colors.black,
               }}
               buttonStyle={{
                 padding: 0,
               }}
-              containerStyle={{
-                padding: 0,
-                margin: 0,
-                backgroundColor: 'white',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
+              containerStyle={[
+                Layout.center,
+                {
+                  padding: 0,
+                  margin: 0,
+                  backgroundColor: Colors.white,
+                },
+              ]}
             />
             <Tab.Item
               title="price"
               titleStyle={{
                 fontSize: 13,
-                color: index == 3 ? PRIMARY_COLOR : 'black',
+                color: index === 3 ? PRIMARY_COLOR : 'black',
               }}
               buttonStyle={{
                 padding: 0,
               }}
-              containerStyle={{
-                padding: 0,
-                margin: 0,
-                backgroundColor: 'white',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
+              containerStyle={[
+                Layout.center,
+                {
+                  padding: 0,
+                  margin: 0,
+                  backgroundColor: Colors.white,
+                },
+              ]}
               onPressIn={() => {
                 setFilter(!filter);
               }}
@@ -327,13 +320,13 @@ const ProfileScreen = ({ navigation, route }) => {
                   <Ion
                     name="arrow-down-outline"
                     size={16}
-                    color={index == 3 ? PRIMARY_COLOR : 'black'}
+                    color={index === 3 ? PRIMARY_COLOR : Colors.black}
                   />
                 ) : (
                   <Ion
                     name="arrow-up-outline"
                     size={16}
-                    color={index == 3 ? PRIMARY_COLOR : 'black'}
+                    color={index === 3 ? PRIMARY_COLOR : Colors.black}
                   />
                 )
               }
@@ -458,17 +451,4 @@ const ProfileScreen = ({ navigation, route }) => {
   );
 };
 
-export default ProfileScreen;
-
-const styles = StyleSheet.create({
-  touchStyle: {
-    borderRadius: 10,
-    padding: 5,
-  },
-  touchFilter: {
-    borderWidth: 1,
-    borderColor: 'black',
-    width: '25%',
-    alignItems: 'center',
-  },
-});
+export default memo(ProfileScreen);

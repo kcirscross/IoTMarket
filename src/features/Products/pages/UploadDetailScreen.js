@@ -39,7 +39,7 @@ const UploadDetailScreen = ({ navigation, route }) => {
   const [productName, setProductName] = useState('');
   const [productDescription, setProductDescription] = useState('');
   const [productPrice, setProductPrice] = useState('');
-  const [productAmount, setProductAmount] = useState('');
+  const [productAmount, setProductAmount] = useState(1);
   const [heightBeforeBoxed, setHeightBeforeBoxed] = useState('');
   const [weightBeforeBoxed, setWeightBeforeBoxed] = useState('');
   const [widthBeforeBoxed, setWidthBeforeBoxed] = useState('');
@@ -606,6 +606,8 @@ const UploadDetailScreen = ({ navigation, route }) => {
     }
   };
 
+  console.log(productAmount);
+
   const handleUploadClick = () => {
     if (
       productName === '' ||
@@ -685,7 +687,6 @@ const UploadDetailScreen = ({ navigation, route }) => {
       }}
     >
       <KeyboardAwareScrollView
-        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           Layout.scroll,
           Gutters.smallVPadding,
@@ -893,13 +894,13 @@ const UploadDetailScreen = ({ navigation, route }) => {
         ) : (
           <TouchableOpacity
             onPress={handleUploadClick}
-            style={{
-              ...globalStyles.button,
-              alignSelf: 'center',
-              marginBottom: 20,
-            }}
+            style={[
+              globalStyles.button,
+              Layout.selfCenter,
+              Gutters.regularTMargin,
+            ]}
           >
-            <Text style={globalStyles.textButton}>Upload Product</Text>
+            <AppText style={globalStyles.textButton}>Upload Product</AppText>
           </TouchableOpacity>
         )}
         <Toast position="bottom" bottomOffset={80} />

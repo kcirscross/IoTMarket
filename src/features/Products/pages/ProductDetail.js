@@ -72,6 +72,7 @@ const ProductDetail = ({ navigation, route }) => {
   const [isOwner, setIsOwner] = useState(false);
   const [storeInfo, setStoreInfo] = useState([]);
   const [isStore, setIsStore] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [modalBuyVisible, setModalBuyVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [miniListReview, setMiniListReview] = useState([]);
@@ -416,7 +417,7 @@ const ProductDetail = ({ navigation, route }) => {
     <SafeAreaView
       style={{
         ...globalStyles.container,
-        opacity: modalLoading + modalBuyVisible ? 0.3 : 1,
+        opacity: modalLoading ? 0.3 : 1,
         paddingHorizontal: 0,
       }}
     >
@@ -895,8 +896,8 @@ const ProductDetail = ({ navigation, route }) => {
         {listProduct.length > 0 && (
           <View
             style={{
-              marginBottom: 60,
-              marginTop: 12,
+              paddingBottom: 60,
+              paddingTop: 12,
             }}
           >
             <AppText
@@ -910,7 +911,7 @@ const ProductDetail = ({ navigation, route }) => {
 
             <ScrollView
               horizontal
-              style={{ marginTop: 5 }}
+              contentContainerStyle={Layout.scroll}
               showsHorizontalScrollIndicator={false}
             >
               {listProduct.map((item, index) => (
