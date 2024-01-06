@@ -400,7 +400,7 @@ const ChangeInfoScreen = ({navigation}) => {
                         <Input
                             containerStyle={styles.textContainer}
                             defaultValue={
-                                currentUser.address.city == ''
+                                currentUser.address?.city == ''
                                     ? ''
                                     : `${street},\n${ward},\n${district},\n${city}.`
                             }
