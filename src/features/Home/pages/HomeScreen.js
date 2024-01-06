@@ -4,9 +4,7 @@ import { AppText } from '@/components/GlobalComponents';
 import { AlertForSignIn, PRIMARY_COLOR } from '@/components/constants';
 import { getAPI, postAPI } from '@/components/utils/base_API';
 import { ProductItem } from '@/features/Products/components';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useIsFocused } from '@react-navigation/native';
-import axios from 'axios';
 import React, {
   Fragment,
   memo,
@@ -85,22 +83,6 @@ const HomeScreen = ({ navigation }) => {
         })
         .catch(err => console.log('Get Recommend List: ', err));
   }, [listFavorite]);
-
-  const getRecommend = async () => {
-    const token = await AsyncStorage.getItem('token');
-    await axios({
-      method: 'post',
-      url: 'http://192.168.1.202:3000/api/v1/product/recommend',
-      headers: {
-        authorization: token !== undefined ? `Bearer ${token}` : '',
-      },
-      data: {
-        favorite: listFavorite[0]._id,
-      },
-    }).then(res => {
-      setListRecommend(res.data.product);
-    });
-  };
 
   const onRefresh = () => {
     getAPI({ url: 'product' }).then(
